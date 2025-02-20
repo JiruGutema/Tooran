@@ -1,12 +1,10 @@
-import 'dart:ui';
-
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
 
-import 'help_page.dart'; // Import Help page
+import 'help_page.dart';   // Import Help page
 import 'contact_page.dart'; // Import Contact page
-import 'home_page.dart'; // Import Home page
+import 'home_page.dart';    // Import Home page (if used elsewhere)
 
 void main() {
   runApp(ToDoApp());
@@ -17,19 +15,15 @@ class ToDoApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      initialRoute: '/', // Set the initial route to Home
+      initialRoute: '/',
       routes: {
-        '/': (context) => ToDoHomePage(), // Home page route
-        '/help': (context) => HelpPage(), // Help page route
-        '/contact': (context) => ContactPage(), // Contact page route
+        '/': (context) => ToDoHomePage(),
+        '/help': (context) => HelpPage(),
+        '/contact': (context) => ContactPage(),
       },
     );
   }
 }
-
-
-
-
 
 class ToDoHomePage extends StatefulWidget {
   @override
@@ -42,6 +36,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
   Map<String, TextEditingController> _taskControllers = {};
   Map<String, FocusNode> _taskFocusNodes = {};
   Map<String, bool> _showTaskInputs = {};
+  bool _showCategoryInput = false;
 
   @override
   void initState() {
@@ -49,7 +44,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     _loadData();
   }
 
-  // Load categories and tasks from shared preferences
+  // Load categories and tasks from SharedPreferences
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
     final categoriesData = prefs.getString('categories');
@@ -66,7 +61,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     }
   }
 
-  // Save categories and tasks to shared preferences
+  // Save categories and tasks to SharedPreferences
   Future<void> _saveData() async {
     final prefs = await SharedPreferences.getInstance();
     final categoriesData = json.encode(categories.map((key, value) {
@@ -83,9 +78,10 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
         _taskControllers[_categoryController.text] = TextEditingController();
         _taskFocusNodes[_categoryController.text] = FocusNode();
         _showTaskInputs[_categoryController.text] = false;
+        _showCategoryInput = false; // Hide input after adding category
       });
       _categoryController.clear();
-      _saveData(); // Save data after adding a category
+      _saveData();
     }
   }
 
@@ -99,7 +95,10 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
           title: Text('Edit Category'),
           content: TextField(
             controller: _categoryController,
-            decoration: InputDecoration(hintText: 'Category Name', border: OutlineInputBorder()),
+            decoration: InputDecoration(
+              hintText: 'Category Name',
+              border: OutlineInputBorder(),
+            ),
           ),
           actions: [
             TextButton(
@@ -108,13 +107,16 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                   final tasks = categories[oldCategory];
                   categories.remove(oldCategory);
                   categories[_categoryController.text] = tasks!;
-                  _taskControllers[_categoryController.text] = _taskControllers.remove(oldCategory)!;
-                  _taskFocusNodes[_categoryController.text] = _taskFocusNodes.remove(oldCategory)!;
-                  _showTaskInputs[_categoryController.text] = _showTaskInputs.remove(oldCategory)!;
+                  _taskControllers[_categoryController.text] =
+                      _taskControllers.remove(oldCategory)!;
+                  _taskFocusNodes[_categoryController.text] =
+                      _taskFocusNodes.remove(oldCategory)!;
+                  _showTaskInputs[_categoryController.text] =
+                      _showTaskInputs.remove(oldCategory)!;
                 });
                 _categoryController.clear();
                 Navigator.pop(context);
-                _saveData(); // Save data after editing category
+                _saveData();
               },
               child: Text('Save'),
             ),
@@ -132,18 +134,22 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
       _taskFocusNodes.remove(category);
       _showTaskInputs.remove(category);
     });
-    _saveData(); // Save data after deleting category
+    _saveData();
   }
 
   // Add a task to a category
   void _addTask(String category) {
+    _taskControllers.putIfAbsent(category, () => TextEditingController());
+    _taskFocusNodes.putIfAbsent(category, () => FocusNode());
+    _showTaskInputs.putIfAbsent(category, () => false);
+
     if (_taskControllers[category]!.text.isNotEmpty) {
       setState(() {
         categories[category]?.add(Task(name: _taskControllers[category]!.text));
         _taskControllers[category]!.clear();
         _showTaskInputs[category] = false;
       });
-      _saveData(); // Save data after adding a task
+      _saveData();
     }
   }
 
@@ -157,7 +163,10 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
           title: Text('Edit Task'),
           content: TextField(
             controller: _taskControllers[category],
-            decoration: InputDecoration(hintText: 'Task Name', border: OutlineInputBorder()),
+            decoration: InputDecoration(
+              hintText: 'Task Name',
+              border: OutlineInputBorder(),
+            ),
           ),
           actions: [
             TextButton(
@@ -167,7 +176,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                 });
                 _taskControllers[category]!.clear();
                 Navigator.pop(context);
-                _saveData(); // Save data after editing task
+                _saveData();
               },
               child: Text('Save'),
             ),
@@ -182,7 +191,77 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     setState(() {
       categories[category]?.remove(task);
     });
-    _saveData(); // Save data after deleting task
+    _saveData();
+  }
+
+  void _showCategoryOptions(String category) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      builder: (context) {
+        return Container(
+          color: Colors.teal,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.edit, color: Colors.white),
+                title: Text('Edit Category', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editCategory(category);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete, color: Colors.white),
+                title: Text('Delete Category', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deleteCategory(category);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _showTaskOptions(String category, Task task) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.zero,
+      ),
+      builder: (context) {
+        return Container(
+          color: Colors.teal,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.edit, color: Colors.white),
+                title: Text('Edit Task', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _editTask(category, task);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.delete, color: Colors.white),
+                title: Text('Delete Task', style: TextStyle(color: Colors.white)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _deleteTask(category, task);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 
   @override
@@ -197,73 +276,23 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     super.dispose();
   }
 
-  void _showCategoryOptions(String category) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.edit),
-              title: Text('Edit Category'),
-              onTap: () {
-                Navigator.pop(context);
-                _editCategory(category);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.delete),
-              title: Text('Delete Category'),
-              onTap: () {
-                Navigator.pop(context);
-                _deleteCategory(category);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showTaskOptions(String category, Task task) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: Icon(Icons.edit),
-              title: Text('Edit Task'),
-              onTap: () {
-                Navigator.pop(context);
-                _editTask(category, task);
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.delete),
-              title: Text('Delete Task'),
-              onTap: () {
-                Navigator.pop(context);
-                _deleteTask(category, task);
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
+    // Check if keyboard is active using MediaQuery
+    bool isKeyboardActive = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Scaffold(
-     appBar: AppBar(
+      appBar: AppBar(
         title: Text('Tooran'),
         titleTextStyle: TextStyle(color: Colors.white, fontSize: 24),
         centerTitle: true,
         backgroundColor: Colors.teal,
-        shape: Border(bottom: BorderSide(color: const Color.fromARGB(255, 231, 141, 5), width: 2)),
+        shape: Border(
+          bottom: BorderSide(
+            color: Color.fromARGB(255, 231, 141, 5),
+            width: 2,
+          ),
+        ),
         actions: [
           PopupMenuButton<String>(
             onSelected: (value) {
@@ -292,34 +321,37 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _categoryController,
-                    decoration: InputDecoration(
-                      hintText: 'Add Category',
-                      border: OutlineInputBorder(),
-                      fillColor: Colors.lightBlue[50],
-                      filled: true,
+            // Show input field only when _showCategoryInput is true
+            if (_showCategoryInput)
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _categoryController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter Category Name',
+                        border: OutlineInputBorder(),
+                        fillColor: Colors.lightBlue[50],
+                        filled: true,
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: _addCategory,
-                  color: Colors.teal,
-                ),
-              ],
-            ),
+                  IconButton(
+                    icon: Icon(Icons.check, color: Colors.green),
+                    onPressed: _addCategory,
+                  ),
+                ],
+              ),
             Expanded(
               child: ListView.builder(
                 itemCount: categories.keys.length,
                 itemBuilder: (context, index) {
                   String category = categories.keys.elementAt(index);
                   return Card(
-                    margin: EdgeInsets.symmetric(vertical: 8.0),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+                    margin: EdgeInsets.symmetric(vertical: 4.0),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.zero,
+                    ),
                     color: Colors.grey[100],
                     child: ExpansionTile(
                       title: InkWell(
@@ -328,18 +360,22 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                           category,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: const Color.fromRGBO(0, 150, 136, 1),
+                            color: Color.fromRGBO(0, 150, 136, 1),
                             fontSize: 20,
                           ),
                         ),
                       ),
                       children: [
                         Column(
+                          
                           children: [
+                            
                             ...categories[category]!.map((task) {
+                              
                               return InkWell(
                                 onLongPress: () => _showTaskOptions(category, task),
                                 child: Row(
+                                  
                                   children: [
                                     Checkbox(
                                       value: task.isCompleted,
@@ -347,14 +383,16 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                         setState(() {
                                           task.isCompleted = value!;
                                         });
-                                        _saveData(); // Save data after checking/unchecking task
+                                        _saveData();
                                       },
                                     ),
                                     Expanded(
                                       child: Text(
                                         task.name,
                                         style: TextStyle(
-                                          decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                                          decoration: task.isCompleted
+                                              ? TextDecoration.lineThrough
+                                              : null,
                                           fontSize: 18,
                                         ),
                                       ),
@@ -387,7 +425,11 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                       ),
                                     ),
                                   IconButton(
-                                    icon: Icon(_showTaskInputs[category] ?? false ? Icons.check : Icons.add),
+                                    icon: Icon(
+                                      _showTaskInputs[category] ?? false
+                                          ? Icons.check
+                                          : Icons.add,
+                                    ),
                                     onPressed: () {
                                       if (_showTaskInputs[category] ?? false) {
                                         _addTask(category);
@@ -412,6 +454,19 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
           ],
         ),
       ),
+      // Hide the FloatingActionButton when the keyboard is active
+      floatingActionButton: isKeyboardActive
+          ? null
+          : FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  _showCategoryInput = !_showCategoryInput;
+                });
+              },
+              tooltip: _showCategoryInput ? 'Close' : 'Add Category',
+              child: Icon(_showCategoryInput ? Icons.close : Icons.add),
+              backgroundColor: Colors.teal,
+            ),
     );
   }
 }

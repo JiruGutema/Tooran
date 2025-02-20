@@ -11,6 +11,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Tooran'),
+        titleTextStyle: TextStyle(color: Colors.white, fontSize: 24),
         centerTitle: true,
         backgroundColor: Colors.teal,
         shape: Border(bottom: BorderSide(color: Colors.black, width: 2)),

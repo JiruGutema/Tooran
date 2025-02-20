@@ -8,6 +8,7 @@ class HelpPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Help & Support'),
+        titleTextStyle: TextStyle(color: Colors.white, fontSize: 24),
         centerTitle: true,
         backgroundColor: Colors.teal,
         elevation: 10,

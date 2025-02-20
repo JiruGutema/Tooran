@@ -16,13 +16,13 @@ class ContactPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Contact Us'),
+        titleTextStyle: TextStyle(color: Colors.white, fontSize: 24),
         centerTitle: true,
         backgroundColor: Colors.teal,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text(
@@ -34,19 +34,21 @@ class ContactPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            GestureDetector(
-              child: const Text(
+            const Center(
+              child: Text(
                 "I'm Jiren! a 3rd Year Software Engineering Student at Addis Ababa University. Contact me through the following channel or just go to my Portfolio section",
                 style: TextStyle(
                   fontSize: 18,
                   color: Color.fromARGB(255, 94, 98, 102),
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 10),
             const Text(
               'Email: jethior1@gmail.com \n Telegram: @jethior',
               style: TextStyle(fontSize: 18, color: Colors.black87),
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
             Center(
@@ -55,11 +57,12 @@ class ContactPage extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.teal,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
                 ),
-                
                 child: const Text(
-                  
-                  'Send Message',
+                  'Go to Portflio',
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
