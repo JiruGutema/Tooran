@@ -45,10 +45,35 @@ class ContactPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            const Text(
-              'Email: jethior1@gmail.com \n Telegram: @jethior',
-              style: TextStyle(fontSize: 18, color: Colors.black87),
+            GestureDetector(
+              onTap: () async {
+              final Uri emailUri = Uri(
+                scheme: 'mailto',
+                path: 'jethior1@gmail.com',
+              );
+              if (!await launchUrl(emailUri)) {
+                throw 'Could not launch $emailUri';
+              }
+              },
+              child: const Text(
+              'Email: jethior1@gmail.com',
+              style: TextStyle(fontSize: 18, color: Colors.black87, decoration: TextDecoration.underline),
               textAlign: TextAlign.center,
+              ),
+            ),
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () async {
+              final Uri telegramUri = Uri.parse('https://t.me/jethior');
+              if (!await launchUrl(telegramUri, mode: LaunchMode.externalApplication)) {
+                throw 'Could not launch $telegramUri';
+              }
+              },
+              child: const Text(
+              'Telegram: https://t.me/jethior',
+              style: TextStyle(fontSize: 18, color: Colors.black87, decoration: TextDecoration.underline),
+              textAlign: TextAlign.center,
+              ),
             ),
             const SizedBox(height: 40),
             Center(

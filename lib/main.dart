@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'help_page.dart';   // Import Help page
-import 'contact_page.dart'; // Import Contact page
-import 'home_page.dart';    // Import Home page (if used elsewhere)
+import 'contact_page.dart';
+import 'home_page.dart';
 
 void main() {
   runApp(ToDoApp());
@@ -92,12 +92,18 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit Category'),
+          backgroundColor: Colors.teal,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          title: Text('Edit Category', style: TextStyle(color: Colors.white)),
           content: TextField(
             controller: _categoryController,
             decoration: InputDecoration(
               hintText: 'Category Name',
               border: OutlineInputBorder(),
+              filled: true,
+              fillColor: Colors.white,
             ),
           ),
           actions: [
@@ -118,7 +124,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                 Navigator.pop(context);
                 _saveData();
               },
-              child: Text('Save'),
+              child: Text('Save', style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -160,12 +166,18 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Edit Task'),
+          backgroundColor: Colors.teal,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(0),
+          ),
+          title: Text('Edit Task', style: TextStyle(color: Colors.white)),
           content: TextField(
             controller: _taskControllers[category],
             decoration: InputDecoration(
               hintText: 'Task Name',
               border: OutlineInputBorder(),
+              filled: true,
+              fillColor: Colors.white,
             ),
           ),
           actions: [
@@ -178,7 +190,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                 Navigator.pop(context);
                 _saveData();
               },
-              child: Text('Save'),
+              child: Text('Save', style: TextStyle(color: Colors.white)),
             ),
           ],
         );
@@ -197,26 +209,23 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
   void _showCategoryOptions(String category) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
       builder: (context) {
         return Container(
-          color: Colors.teal,
+          color: Colors.teal, // Set background color to teal
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
                 leading: Icon(Icons.edit, color: Colors.white),
-                title: Text('Edit Category', style: TextStyle(color: Colors.white)),
+                title: Text('Edit Category', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
                 onTap: () {
                   Navigator.pop(context);
                   _editCategory(category);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete, color: Colors.white),
-                title: Text('Delete Category', style: TextStyle(color: Colors.white)),
+                leading: Icon(Icons.delete, color: Colors.red),
+                title: Text('Delete Category', style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold, fontSize: 20)),
                 onTap: () {
                   Navigator.pop(context);
                   _deleteCategory(category);
@@ -232,26 +241,23 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
   void _showTaskOptions(String category, Task task) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.zero,
-      ),
       builder: (context) {
         return Container(
-          color: Colors.teal,
+          color: Colors.teal, // Set background color to teal
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
                 leading: Icon(Icons.edit, color: Colors.white),
-                title: Text('Edit Task', style: TextStyle(color: Colors.white)),
+                title: Text('Edit Task', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 20)),
                 onTap: () {
                   Navigator.pop(context);
                   _editTask(category, task);
                 },
               ),
               ListTile(
-                leading: Icon(Icons.delete, color: Colors.white),
-                title: Text('Delete Task', style: TextStyle(color: Colors.white)),
+                leading: Icon(Icons.delete, color: Colors.red),
+                title: Text('Delete Task', style: TextStyle(color: Colors.deepOrange, fontWeight: FontWeight.bold, fontSize: 20)),
                 onTap: () {
                   Navigator.pop(context);
                   _deleteTask(category, task);
@@ -277,184 +283,218 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    // Check if keyboard is active using MediaQuery
-    bool isKeyboardActive = MediaQuery.of(context).viewInsets.bottom > 0;
+  
+@override
+Widget build(BuildContext context) {
+  // Check if keyboard is active using MediaQuery
+  bool isKeyboardActive = MediaQuery.of(context).viewInsets.bottom > 0;
 
-    return Scaffold(
+  return GestureDetector(
+    behavior: HitTestBehavior.opaque, // Detect taps on empty spaces
+    onTap: () {
+      FocusScope.of(context).unfocus(); // Hide keyboard and remove focus
+      setState(() {
+        _showTaskInputs.updateAll((key, value) => false); // Hide all input fields
+      });
+    },
+    child: Scaffold(
       appBar: AppBar(
-        title: Text('Tooran'),
-        titleTextStyle: TextStyle(color: Colors.white, fontSize: 24),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+        Text(
+          'Tooran',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        Row(
+          children: [
+            IconButton(
+          icon: Icon(Icons.help_outline, color: Colors.white),
+          onPressed: () {
+            Navigator.pushNamed(context, '/help');
+          },
+            ),
+            IconButton(
+          icon: Icon(Icons.contact_page_rounded, color: Colors.white),
+          onPressed: () {
+            Navigator.pushNamed(context, '/contact');
+          },
+            ),
+          ],
+        ),
+          ],
+        ),
         centerTitle: true,
         backgroundColor: Colors.teal,
         shape: Border(
           bottom: BorderSide(
-            color: Color.fromARGB(255, 231, 141, 5),
-            width: 2,
+        color: Color.fromARGB(255, 5, 208, 231),
+        width: 2,
           ),
         ),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'help') {
-                Navigator.pushNamed(context, '/help');
-              } else if (value == 'contact') {
-                Navigator.pushNamed(context, '/contact');
-              }
-            },
-            itemBuilder: (BuildContext context) {
-              return [
-                PopupMenuItem<String>(
-                  value: 'help',
-                  child: Text('Help'),
-                ),
-                PopupMenuItem<String>(
-                  value: 'contact',
-                  child: Text('Contact Us'),
-                ),
-              ];
-            },
-          ),
-        ],
+       
+         
+        
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Show input field only when _showCategoryInput is true
-            if (_showCategoryInput)
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _categoryController,
-                      decoration: InputDecoration(
-                        hintText: 'Enter Category Name',
-                        border: OutlineInputBorder(),
-                        fillColor: Colors.lightBlue[50],
-                        filled: true,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.check, color: Colors.green),
-                    onPressed: _addCategory,
-                  ),
-                ],
-              ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: categories.keys.length,
-                itemBuilder: (context, index) {
-                  String category = categories.keys.elementAt(index);
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 4.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.zero,
-                    ),
-                    color: Colors.grey[100],
-                    child: ExpansionTile(
-                      title: InkWell(
-                        onLongPress: () => _showCategoryOptions(category),
-                        child: Text(
-                          category,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromRGBO(0, 150, 136, 1),
-                            fontSize: 20,
+      body: Center(
+        child: Container(
+          
+          constraints: BoxConstraints(maxWidth: 700),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                if (_showCategoryInput)
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _categoryController,
+                          decoration: InputDecoration(
+                            hintText: 'Enter Category Name',
+                            border: OutlineInputBorder(),
+                            fillColor: Colors.lightBlue[50],
+                            filled: true,
                           ),
                         ),
                       ),
-                      children: [
-                        Column(
-                          
+                      IconButton(
+                        icon: Icon(Icons.check, color: Colors.green),
+                        onPressed: _addCategory,
+                      ),
+                    ],
+                  ),
+                Expanded(
+                  
+                  
+                  child: ListView.builder(
+                    
+                    itemCount: categories.keys.length,
+                    
+                    itemBuilder: (context, index) {
+                      String category = categories.keys.elementAt(index);
+                      
+                      return Card(
+                        
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero,
+                        ),
+                        elevation: 2,
+                        color: Colors.white,      // Match the background color
+                      
+                        
+                        child: ExpansionTile(
+                          collapsedBackgroundColor: Colors.white, // Match background color
+                          title: InkWell(
+                            onLongPress: () => _showCategoryOptions(category),
+                            child: Text(
+                              category,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromRGBO(0, 150, 136, 1),
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
                           children: [
                             
-                            ...categories[category]!.map((task) {
+                            Column(
                               
-                              return InkWell(
-                                onLongPress: () => _showTaskOptions(category, task),
-                                child: Row(
-                                  
-                                  children: [
-                                    Checkbox(
-                                      value: task.isCompleted,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          task.isCompleted = value!;
-                                        });
-                                        _saveData();
-                                      },
-                                    ),
-                                    Expanded(
-                                      child: Text(
-                                        task.name,
-                                        style: TextStyle(
-                                          decoration: task.isCompleted
-                                              ? TextDecoration.lineThrough
-                                              : null,
-                                          fontSize: 18,
+                              children: [
+                                
+                                ...categories[category]!.map((task) {
+                                  return InkWell(
+                                    onLongPress: () => _showTaskOptions(category, task),
+                                    child: Row(
+                                      
+                                      children: [
+                                        
+                                        Checkbox(
+                                          value: task.isCompleted,
+                                          activeColor: Colors.teal,
+                                          onChanged: (value) {
+                                            setState(() {
+                                              task.isCompleted = value!;
+                                            });
+                                            _saveData();
+                                          },
                                         ),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      icon: Icon(Icons.delete, color: Colors.red),
-                                      onPressed: () {
-                                        _deleteTask(category, task);
-                                      },
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                children: [
-                                  if (_showTaskInputs[category] ?? false)
-                                    Expanded(
-                                      child: TextField(
-                                        controller: _taskControllers[category],
-                                        focusNode: _taskFocusNodes[category],
-                                        decoration: InputDecoration(
-                                          hintText: 'Add Task',
-                                          border: OutlineInputBorder(),
-                                          fillColor: Colors.lightBlue[50],
-                                          filled: true,
+                                        Expanded(
+                                          
+                                          child: Text(
+                                            
+                                            task.name,
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.w500,
+                                              color: task.isCompleted ? Colors.grey[500] : Colors.black,
+                                                                                          ),
+                                          ),
                                         ),
+                                        IconButton(
+                                          icon: Icon(Icons.delete, color: Colors.red),
+                                          onPressed: () {
+                                            _deleteTask(category, task);
+                                          },
+                                        ),
+                                      ],
+                                    ),
+                                  );
+                                }).toList(),
+                                Padding(
+                                  padding: const EdgeInsets.all(4.0),
+                                  child: Row(
+                                    children: [
+                                      if (_showTaskInputs[category] ?? false)
+                                        Expanded(
+                                          child: TextField(
+                                            controller: _taskControllers[category],
+                                            focusNode: _taskFocusNodes[category],
+                                            decoration: InputDecoration(
+                                              hintText: 'Add Task',
+                                              border: OutlineInputBorder(),
+                                              fillColor: Colors.lightBlue[50],
+                                              filled: true,
+                                            ),
+                                          ),
+                                        ),
+                                      IconButton(
+                                        icon: Icon(
+                                          _showTaskInputs[category] ?? false
+                                              ? Icons.check
+                                              : Icons.add,
+                                        ),
+                                        onPressed: () {
+                                          if (_showTaskInputs[category] ?? false) {
+                                            _addTask(category);
+                                          } else {
+                                            setState(() {
+                                              _showTaskInputs[category] = true;
+                                            });
+                                            _taskFocusNodes[category]?.requestFocus(); // Auto-focus
+                                          }
+                                        },
                                       ),
-                                    ),
-                                  IconButton(
-                                    icon: Icon(
-                                      _showTaskInputs[category] ?? false
-                                          ? Icons.check
-                                          : Icons.add,
-                                    ),
-                                    onPressed: () {
-                                      if (_showTaskInputs[category] ?? false) {
-                                        _addTask(category);
-                                      } else {
-                                        setState(() {
-                                          _showTaskInputs[category] = true;
-                                        });
-                                      }
-                                    },
+                                    ],
                                   ),
-                                ],
-                              ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                      );
+                    },
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ),
-      // Hide the FloatingActionButton when the keyboard is active
       floatingActionButton: isKeyboardActive
           ? null
           : FloatingActionButton(
@@ -467,8 +507,10 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
               child: Icon(_showCategoryInput ? Icons.close : Icons.add),
               backgroundColor: Colors.teal,
             ),
-    );
-  }
+    ),
+  );
+}
+
 }
 
 class Task {
