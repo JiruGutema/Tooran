@@ -1,16 +1,25 @@
-# tooran
+# Tooran
 
-A new Flutter project.
+Tooran is a Flutter-based To-Do list application that lets you manage your tasks using categories. The app supports drag-and-drop reordering for both categories and tasks, making it easy to organize your workflow. Data persistence is handled via `shared_preferences`, ensuring your tasks and categories are saved between app sessions.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- **Category Management**
+  - Create, edit, and delete categories.
+  - Drag-and-drop reordering of categories.
 
-A few resources to get you started if this is your first Flutter project:
+- **Task Management**
+  - Add tasks within each category.
+  - Mark tasks as complete or incomplete.
+  - Edit and delete tasks.
+  - Drag-and-drop reordering of tasks within each category.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Data Persistence**
+  - Uses the `shared_preferences` package to save and load your categories and tasks.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **User Interface**
+  - Responsive and intuitive design using Flutter's widgets like `ExpansionTile` and `ReorderableListView`.
+
+## Contributing
+
+Contributions are welcome! If you have any ideas for improvements or bug fixes, please open an issue or submit a pull request.
