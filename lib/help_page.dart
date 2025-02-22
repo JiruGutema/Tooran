@@ -8,7 +8,7 @@ class HelpPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Help & Instructions'),
-        titleTextStyle: TextStyle(
+        titleTextStyle: const TextStyle(
           color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24,
         ),
         centerTitle: true,
@@ -26,7 +26,7 @@ class HelpPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTitle('Getting Started'),
-              _buildSection(
+             _buildSection(
                 icon: Icons.info_outline,
                 title: 'App Overview',
                 content:
@@ -48,67 +48,66 @@ class HelpPage extends StatelessWidget {
                 title: 'Adding a Category',
                 content:
                     '1. Tap the (+) button at the bottom of the app to create a new category.\n'
-                    '2. Enter the category name in the input field at the top and press (✔) to save.'
+                    '2. Enter the category name and tap (✔) to save it.',
               ),
               _buildSection(
                 icon: Icons.task_alt,
                 title: 'Adding a Task',
                 content:
-                    '1. Tap on an existing category to expand it.\n'
+                    '1. Expand a category by tapping it.\n'
                     '2. Tap the (+) button inside the category to add a new task.\n'
-                    '3. Enter the task name and press (✔) to save.',
+                    '3. Enter the task name and tap (✔) to save it.',
               ),
               _buildSection(
                 icon: Icons.check_circle_outline,
                 title: 'Marking a Task as Completed',
                 content:
                     '• Tap the checkbox next to a task to mark it as completed.\n'
-                    '• Completed tasks will appear with a faded grey color effect.\n'
-                    '• You can delete the task afterwards or change its name to other tasks.'
+                    '• Completed tasks appear with a faded grey color.',
               ),
               _buildSection(
                 icon: Icons.delete_outline,
                 title: 'Deleting a Task or Category',
                 content:
-                    '• Long-press a category name to delete it.\n'
-                    '• Use the trash button on the task to remove it from a category\n'
-                    '• You can also long-press a task to remove it from a category.',
+                    '• To delete a task, swipe it to the right. A Snackbar will appear with an Undo button (available for 4 seconds) to restore the task if needed.\n'
+                    '• To delete a category, long-press the category name to access edit and delete options.',
+              ),
+              _buildSection(
+                icon: Icons.drag_handle,
+                title: 'Reordering Items',
+                content:
+                    '• Use the longpress on tasks and longpress the expansion button categories to reorder them as desired.\n'
+                    '• Simply press and hold the container, then drag the item to its new position.',
               ),
               _buildSection(
                 icon: Icons.tips_and_updates,
                 title: 'Tips',
                 content:
-                    '• Do not open mulitple text fields at same time.\n'
-                    '• If you open, try to close the one which is opened first.\n'
-
+                    '• Avoid opening multiple text fields at once to keep the interface clear.\n'
+                    '• Close an open input field before starting another.',
               ),
               _buildSection(
                 icon: Icons.system_update,
-                title: 'To be Updated',
+                title: 'Upcoming Updates',
                 content:
-                    '•  The following are the features I\'m working on it right now\n\n'
-                    '-> Add Widgets\n'
-                    '-> Add Notification\n'
-                    '-> Add Time based catagory\n'
-
+                    '• Widgets Integration\n'
+                    '• Notification Support\n'
+                    '• Time-Based Categorization\n',
               ),
-                _buildSection(
+              _buildSection(
                 icon: Icons.help_outline,
                 title: 'Need Assistance?',
                 content:
-                  'For help, inquiries, or suggestions, please feel free to reach out.\n\n\n'
-                  '📧 Contact: \n\n'
-                  'jethior1@gmail.com or \n'
-                  'jirudagutema@gmail.com',
-                ),
+                    'For help, inquiries, or suggestions, please reach out:\n\n'
+                    'Email: \n\njethior1@gmail.com\njirudagutema@gmail.com',
+              ),
               const SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.teal,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 30, vertical: 14),
+                    padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(2),
                     ),
@@ -140,11 +139,7 @@ class HelpPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSection({
-    required IconData icon,
-    required String title,
-    required String content,
-  }) {
+  Widget _buildSection({required IconData icon, required String title, required String content}) {
     return Card(
       margin: const EdgeInsets.symmetric(vertical: 8),
       elevation: 1,
