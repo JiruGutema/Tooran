@@ -18,9 +18,10 @@ class ContactPage extends StatelessWidget {
         title: const Text('Contact Us'),
         titleTextStyle: TextStyle(color: Colors.white, fontSize: 24),
         centerTitle: true,
-        backgroundColor: Colors.teal,
+        backgroundColor: Color.fromARGB(255, 57, 86, 109),
       ),
-      body: Padding(
+      body: Container(
+        color: Color.fromARGB(255, 75, 108, 138),
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -30,7 +31,7 @@ class ContactPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.teal,
+                color: Color.fromARGB(255, 255, 255, 255),
               ),
             ),
             const SizedBox(height: 20),
@@ -39,7 +40,7 @@ class ContactPage extends StatelessWidget {
                 "I'm Jiren! a 3rd Year Software Engineering Student at Addis Ababa University. Contact me through the following channel or just go to my Portfolio section",
                 style: TextStyle(
                   fontSize: 18,
-                  color: Color.fromARGB(255, 94, 98, 102),
+                  color: Color.fromARGB(255, 255, 255, 255),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -57,7 +58,7 @@ class ContactPage extends StatelessWidget {
               },
               child: const Text(
               'Email: jethior1@gmail.com',
-              style: TextStyle(fontSize: 18, color: Colors.black87, decoration: TextDecoration.underline),
+              style: TextStyle(fontSize: 18, color:  Color.fromARGB(221, 74, 3, 240), decoration: TextDecoration.underline),
               textAlign: TextAlign.center,
               ),
             ),
@@ -71,7 +72,7 @@ class ContactPage extends StatelessWidget {
               },
               child: const Text(
               'Telegram: https://t.me/jethior',
-              style: TextStyle(fontSize: 18, color: Colors.black87, decoration: TextDecoration.underline),
+              style: TextStyle(fontSize: 18, color: Color.fromARGB(221, 74, 3, 240), decoration: TextDecoration.underline),
               textAlign: TextAlign.center,
               ),
             ),
@@ -80,7 +81,7 @@ class ContactPage extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: _launchURL,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.teal,
+                  backgroundColor: Color.fromARGB(255, 57, 86, 109),
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,

@@ -34,6 +34,7 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   shared_preferences: ^2.0.15
+  flutter_native_splash: ^2.3.2
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -46,6 +47,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
     
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -95,3 +97,9 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_native_splash:
+  color: "#4B6C8A"
+  image: assets/logo.jpg
+  android_12:
+    image: assets/logo.jpg
+    icon_background_color: "#FFFFFF"

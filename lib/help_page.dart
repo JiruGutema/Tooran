@@ -12,27 +12,28 @@ class HelpPage extends StatelessWidget {
           color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24,
         ),
         centerTitle: true,
-        backgroundColor: Colors.teal,
+        backgroundColor:Color.fromARGB(255, 57, 86, 109),
         elevation: 2,
         shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
         ),
       ),
       body: Container(
-        color: Colors.white,
+        color: Color.fromARGB(255, 75, 108, 138),
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTitle('Getting Started'),
-             _buildSection(
-                icon: Icons.info_outline,
-                title: 'App Overview',
-                content:
-                    'Tooran allows you to manage tasks within categories. Create categories, add tasks, and manage them efficiently with features like task completion and deletion. \n\n'
-                    'Tooran offers an easy-to-use interface and intuitive functionality to enhance your productivity. The biggest update yet to come',
-              ),
+ 
+            _buildSection(
+              icon: Icons.info_outline,
+              title: 'App Overview',
+              content:
+                  'Tooran allows you to manage tasks within categories. Create categories, add tasks, and manage them efficiently with features like task completion and deletion. \n\n'
+                  'Tooran offers an easy-to-use interface and intuitive functionality to enhance your productivity. The biggest update yet to come',
+            ),
               _buildSection(
                 icon: Icons.star_border,
                 title: 'Unique Features',
@@ -56,7 +57,7 @@ class HelpPage extends StatelessWidget {
                 content:
                     '1. Expand a category by tapping it.\n'
                     '2. Tap the (+) button inside the category to add a new task.\n'
-                    '3. Enter the task name and tap (✔) to save it.',
+                    '3. Enter the task name and tap (✔) (it might not work for the first time) to save it.',
               ),
               _buildSection(
                 icon: Icons.check_circle_outline,
@@ -69,20 +70,22 @@ class HelpPage extends StatelessWidget {
                 icon: Icons.delete_outline,
                 title: 'Deleting a Task or Category',
                 content:
-                    '• To delete a task, swipe it to the right. A Snackbar will appear with an Undo button (available for 4 seconds) to restore the task if needed.\n'
+                    '• To delete a task, swipe it to the left. A Snackbar will appear with an Undo button (available for 4 seconds) to restore the task if needed.\n'
                     '• To delete a category, long-press the category name to access edit and delete options.',
               ),
               _buildSection(
                 icon: Icons.drag_handle,
                 title: 'Reordering Items',
                 content:
-                    '• Use the longpress on tasks and longpress the expansion button categories to reorder them as desired.\n'
+                    '• Use the longpress on tasks to reorder them as desired.\n'
+                    '• Use the longpress on the expansion button categories to reorder catagories as desired.\n'
                     '• Simply press and hold the container, then drag the item to its new position.',
               ),
               _buildSection(
                 icon: Icons.tips_and_updates,
                 title: 'Tips',
                 content:
+                    '• When you try to add the tasks for the first time. It might not add it to the cataory. try disabling the Textfield and reopening it.\n'
                     '• Avoid opening multiple text fields at once to keep the interface clear.\n'
                     '• Close an open input field before starting another.',
               ),
@@ -90,6 +93,7 @@ class HelpPage extends StatelessWidget {
                 icon: Icons.system_update,
                 title: 'Upcoming Updates',
                 content:
+                    '• Add detail on the touch for each tasks\n'
                     '• Widgets Integration\n'
                     '• Notification Support\n'
                     '• Time-Based Categorization\n',
@@ -106,7 +110,7 @@ class HelpPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.teal,
+                    backgroundColor:Color.fromARGB(255, 57, 86, 109),
                     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(2),
@@ -133,46 +137,47 @@ class HelpPage extends StatelessWidget {
         style: const TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.bold,
-          color: Colors.teal,
+          color:Color.fromARGB(255, 255, 255, 255),
         ),
       ),
     );
   }
 
-  Widget _buildSection({required IconData icon, required String title, required String content}) {
-    return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, size: 26, color: Colors.teal),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.teal,
-                    ),
+
+ Widget _buildSection({required IconData icon, required String title, required String content}) {
+  return Card(
+    margin: const EdgeInsets.symmetric(vertical: 8),
+    color: Color.fromARGB(255, 57, 86, 109),
+    elevation: 1,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+    child: Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 26, color: Colors.white), // Fixed icon color
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                   ),
                 ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              content,
-              style: const TextStyle(fontSize: 16, color: Colors.black87),
-            ),
-          ],
-        ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            content,
+            style: const TextStyle(fontSize: 16, color: Colors.white70),
+          ),
+        ],
       ),
-    );
-  }
-}
+    ),
+  );
+}}
