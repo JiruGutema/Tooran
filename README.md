@@ -6,19 +6,19 @@ Tooran is a Flutter-based To-Do list application that lets you manage your tasks
 
 - **Category Management**
   - Create, edit, and delete categories.
-  - ![Category Management](image-6.png)
+  - ![Category Management](README/image-6.png)
   - Drag-and-drop reordering of categories.
 
 - **Task Management**
   - Add tasks within each category.
-  - ![Add tasks](image-2.png)
+  - ![Add tasks](README/image-2.png)
   - Mark tasks as complete or incomplete.
-  - ![Mark tasks](image-1.png)
+  - ![Mark tasks](README/image-1.png)
   - Edit and delete tasks.
-  - ![Edit tasks](image-3.png)
-  - ![Delete tasks](image-4.png)
+  - ![Edit tasks](README/image-3.png)
+  - ![Delete tasks](README/image-4.png)
   - Drag-and-drop reordering of tasks within each category.
-  - ![Reorder tasks](image-5.png)
+  - ![Reorder tasks](README/image-5.png)
 
 - **Data Persistence**
   - Uses the `shared_preferences` package to save and load your categories and tasks.
