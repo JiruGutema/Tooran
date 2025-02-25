@@ -48,32 +48,40 @@ class ContactPage extends StatelessWidget {
             const SizedBox(height: 10),
             GestureDetector(
               onTap: () async {
-              final Uri emailUri = Uri(
-                scheme: 'mailto',
-                path: 'jethior1@gmail.com',
-              );
-              if (!await launchUrl(emailUri)) {
-                throw 'Could not launch $emailUri';
-              }
+                final Uri emailUri = Uri(
+                  scheme: 'mailto',
+                  path: 'jethior1@gmail.com',
+                );
+                if (!await launchUrl(emailUri)) {
+                  throw 'Could not launch $emailUri';
+                }
               },
               child: const Text(
-              'Email: jethior1@gmail.com',
-              style: TextStyle(fontSize: 18, color:  Color.fromARGB(221, 74, 3, 240), decoration: TextDecoration.underline),
-              textAlign: TextAlign.center,
+                'Email: jethior1@gmail.com',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Color.fromARGB(221, 74, 3, 240),
+                  decoration: TextDecoration.underline,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 10),
             GestureDetector(
               onTap: () async {
-              final Uri telegramUri = Uri.parse('https://t.me/jethior');
-              if (!await launchUrl(telegramUri, mode: LaunchMode.externalApplication)) {
-                throw 'Could not launch $telegramUri';
-              }
+                final Uri telegramUri = Uri.parse('https://t.me/jethior');
+                if (!await launchUrl(telegramUri, mode: LaunchMode.externalApplication)) {
+                  throw 'Could not launch $telegramUri';
+                }
               },
               child: const Text(
-              'Telegram: https://t.me/jethior',
-              style: TextStyle(fontSize: 18, color: Color.fromARGB(221, 74, 3, 240), decoration: TextDecoration.underline),
-              textAlign: TextAlign.center,
+                'Telegram: https://t.me/jethior',
+                style: TextStyle(
+                  fontSize: 18,
+                  color: Color.fromARGB(221, 74, 3, 240),
+                  decoration: TextDecoration.underline,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 40),
@@ -88,10 +96,19 @@ class ContactPage extends StatelessWidget {
                   ),
                 ),
                 child: const Text(
-                  'Go to Portflio',
+                  'Go to Portfolio',
                   style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'App Version: 1.4.0',
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
             ),
           ],
         ),
