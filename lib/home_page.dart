@@ -66,62 +66,40 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
   }
 
   // Edit an existing category
-  void _editCategory(String oldCategory) {
-    _categoryController.text = oldCategory;
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Color.fromARGB(255, 57, 86, 109),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(0),
-          ),
-          title: Text('Edit Category', style: TextStyle(color: Colors.white)),
-          content: TextField(
-            controller: _categoryController,
-            decoration: InputDecoration(
-              hintText: 'Category Name',
-              border: OutlineInputBorder(),
-              filled: true,
-              fillColor: Colors.white,
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                setState(() {
-                  final tasks = categories[oldCategory];
-                  categories.remove(oldCategory);
-                  categories[_categoryController.text] = tasks!;
-                  _taskControllers[_categoryController.text] =
-                      _taskControllers.remove(oldCategory)!;
-                  _taskFocusNodes[_categoryController.text] =
-                      _taskFocusNodes.remove(oldCategory)!;
-                  _showTaskInputs[_categoryController.text] =
-                      _showTaskInputs.remove(oldCategory)!;
-                });
-                _categoryController.clear();
-                Navigator.pop(context);
-                _saveData();
-              },
-              child: Text('Save', style: TextStyle(color: Colors.white)),
-            ),
-          ],
-        );
-      },
-    );
-  }
+void _editCategory(String oldCategoryName) {
+  TextEditingController _editController = TextEditingController(text: oldCategoryName);
 
-  // Delete a category
-  void _deleteCategory(String category) {
-    setState(() {
-      categories.remove(category);
-      _taskControllers.remove(category);
-      _taskFocusNodes.remove(category);
-      _showTaskInputs.remove(category);
-    });
-    _saveData();
-  }
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text("Edit Category"),
+        content: TextField(
+          controller: _editController,
+          decoration: InputDecoration(hintText: "Enter new category name"),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              setState(() {
+                if (_editController.text.isNotEmpty && _editController.text != oldCategoryName) {
+                  categories[_editController.text] = categories.remove(oldCategoryName)!;
+                }
+              });
+              _saveData();
+              Navigator.pop(context);
+            },
+            child: Text("Save"),
+          ),
+        ],
+      );
+    },
+  );
+}
 
   // Add a task to a category
   void _addTask(String category) {
@@ -149,13 +127,11 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     TextEditingController controller = TextEditingController(text: task.name);
     showDialog(
       context: context,
-
       builder: (context) => AlertDialog(
         backgroundColor: Color.fromARGB(255, 57, 86, 109),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(color: Colors.white)
-        ),
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(color: Colors.white)),
         title: Text("Edit Task",
             style: TextStyle(
                 fontWeight: FontWeight.bold,
@@ -190,7 +166,9 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
             onPressed: () => Navigator.pop(context),
             child: Text("Cancel",
                 style: TextStyle(
-                    color: Colors.redAccent, fontWeight: FontWeight.bold, fontSize: 20)),
+                    color: Colors.redAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20)),
           ),
           TextButton(
             onPressed: () {
@@ -204,7 +182,8 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
               style: TextStyle(
                 fontSize: 20,
               ),
-              child: Text("Save",
+              child: Text(
+                "Save",
                 style: TextStyle(
                   color: Color.fromARGB(255, 255, 255, 255),
                   fontWeight: FontWeight.bold,
@@ -216,47 +195,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
       ),
     );
   }
-  void _showCategoryOptions(String category) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          color:
-              Color.fromARGB(255, 57, 86, 109), // Set background color to teal
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ListTile(
-                leading: Icon(Icons.edit, color: Colors.white),
-                title: Text('Edit Category',
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20)),
-                onTap: () {
-                  Navigator.pop(context);
-                  _editCategory(category);
-                },
-              ),
-              ListTile(
-                leading: Icon(Icons.delete, color: Colors.red),
-                title: Text('Delete Category',
-                    style: TextStyle(
-                        color: Colors.deepOrange,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20)),
-                onTap: () {
-                  Navigator.pop(context);
-                  _deleteCategory(category);
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
 
   @override
   void dispose() {
@@ -272,16 +210,15 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // Check if keyboard is active using MediaQuery
     bool isKeyboardActive = MediaQuery.of(context).viewInsets.bottom > 0;
 
     return GestureDetector(
-      behavior: HitTestBehavior.opaque, // Detect taps on empty spaces
+      behavior: HitTestBehavior.opaque, 
       onTap: () {
-        FocusScope.of(context).unfocus(); // Hide keyboard and remove focus
+        FocusScope.of(context).unfocus(); 
         setState(() {
           _showTaskInputs
-              .updateAll((key, value) => false); // Hide all input fields
+              .updateAll((key, value) => false); 
         });
       },
       child: Scaffold(
@@ -334,106 +271,191 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                             child: Container(
                               margin: EdgeInsets.all(8.0),
                               child: TextField(
-                                
                                 controller: _categoryController,
-                                   style: TextStyle(color: Colors.white),
+                                style: TextStyle(color: Colors.white),
                                 decoration: InputDecoration(
                                   hintText: 'Enter Category Name',
-                                  hintStyle: TextStyle(color: const Color.fromARGB(255, 204, 204, 204)),
+                                  hintStyle: TextStyle(
+                                      color: const Color.fromARGB(
+                                          255, 204, 204, 204)),
                                   border: OutlineInputBorder(),
                                   enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
-                                        color: Color.fromARGB(255, 255, 255, 255),
+                                        color:
+                                            Color.fromARGB(255, 255, 255, 255),
                                         width: 1),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
-                                        color: Color.fromARGB(255, 255, 255, 255),
+                                        color:
+                                            Color.fromARGB(255, 255, 255, 255),
                                         width: 1),
                                   ),
-                                  fillColor:    Color.fromARGB(255, 57, 86, 109),
+                                  fillColor: Color.fromARGB(255, 57, 86, 109),
                                   filled: true,
-                                
                                 ),
                               ),
                             ),
                           ),
                           IconButton(
-                            icon: Icon(Icons.check, color: const Color.fromARGB(255, 255, 255, 255)),
+                            icon: Icon(Icons.check,
+                                color:
+                                    const Color.fromARGB(255, 255, 255, 255)),
                             onPressed: _addCategory,
-
                           ),
                         ],
                       ),
                     Expanded(
                       child: ReorderableListView(
-                        onReorder: (oldIndex, newIndex) {
-                          setState(() {
-                            if (newIndex > oldIndex) {
-                              newIndex--; // Fix index shift issue
-                            }
-                            final categoryKeys = categories.keys.toList();
-                            final movedCategory =
-                                categoryKeys.removeAt(oldIndex);
-                            categoryKeys.insert(newIndex, movedCategory);
+  onReorder: (oldIndex, newIndex) {
+    setState(() {
+      if (newIndex > oldIndex) newIndex--; // Fix index shift issue
+      final categoryKeys = categories.keys.toList();
+      final movedCategory = categoryKeys.removeAt(oldIndex);
+      categoryKeys.insert(newIndex, movedCategory);
 
-                            final newCategories = <String, List<Task>>{};
-                            for (var key in categoryKeys) {
-                              newCategories[key] = categories[key]!;
-                            }
-                            categories = newCategories;
-                          });
-                          _saveData();
-                        },
-                        children: [
-                          for (String category in categories.keys)
-                            Card(
-                              key: ValueKey(
-                                  category), // Key is needed for reordering
-                              shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4)),
-                              elevation: 2,
+      final newCategories = <String, List<Task>>{};
+      for (var key in categoryKeys) {
+        newCategories[key] = categories[key]!;
+      }
+      categories = newCategories;
+    });
+    _saveData();
+  },
+  children: [
+    for (String category in categories.keys)
+      Dismissible(
+        key: ValueKey(category),
+        background: Container(
+          color: Colors.blue,
+          alignment: Alignment.centerLeft,
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Icon(Icons.edit, color: Colors.white),
+        ),
+        secondaryBackground: Container(
+          color: Colors.red,
+          alignment: Alignment.centerRight,
+          padding: EdgeInsets.symmetric(horizontal: 20),
+          child: Icon(Icons.delete, color: Colors.white),
+        ),
+        confirmDismiss: (direction) async {
+          if (direction == DismissDirection.startToEnd) {
+            // Swipe Right (Edit)
+            _editCategory(category);
+            return false; // Prevent dismissal
+          } else if (direction == DismissDirection.endToStart) {
+            // Swipe Left (Delete)
+            String deletedCategory = category;
+            List<Task> deletedTasks = categories[category]!;
 
-                              color:   Color.fromARGB(255, 57, 86, 109),
-                              child: ExpansionTile(
-                              iconColor: const Color.fromARGB(255, 255, 255, 255),
-                              collapsedShape: RoundedRectangleBorder(
-                               
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              shape: RoundedRectangleBorder(
-                                
-                                side: BorderSide(
-                                  
-                                color: Color.fromARGB(255, 255, 255, 255),
-                                width: 1,
-                                ),
-                                
-                                
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              collapsedBackgroundColor: Color.fromARGB(255, 57, 86, 109),
-                              collapsedIconColor: Colors.white,
+            setState(() {
+              categories.remove(category);
+            });
+            _saveData();
 
-                                title: Row(
-                                  children: [
-                                    Expanded(
-                                      child: InkWell(
-                                        onLongPress: () =>
-                                            _showCategoryOptions(category),
-                                        child: Text(
-                                          category,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: Color.fromARGB(255, 255, 255, 255),
-                                            fontSize: 20,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
+            // Show Undo Snackbar
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: Color.fromARGB(255, 57, 86, 109),
+                content: Text(
+                  "Category deleted",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                action: SnackBarAction(
+                  textColor: Colors.yellow,
+                  label: "UNDO",
+                  onPressed: () {
+                    setState(() {
+                      categories[deletedCategory] = deletedTasks;
+                    });
+                    _saveData();
+                  },
+                ),
+              ),
+            );
+            return true; // Confirm deletion
+          }
+          return false;
+        },
+        child: Card(
+          key: ValueKey(category),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+          elevation: 2,
+          color: Color.fromARGB(255, 57, 86, 109),
+          child: ExpansionTile(
+            iconColor: Colors.white,
+            collapsedShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            shape: RoundedRectangleBorder(
+              side: BorderSide(
+                color: Colors.white,
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            collapsedBackgroundColor: Color.fromARGB(255, 57, 86, 109),
+            collapsedIconColor: Colors.white,
+            title: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: InkWell(
+                        child: Text(
+                          category,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4),
+                if (categories[category]!.isNotEmpty)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      LinearProgressIndicator(
+                        value: categories[category]!.where((task) => task.isCompleted).length /
+                            categories[category]!.length,
+                        backgroundColor: Colors.white.withOpacity(0.3),
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          categories[category]!.isEmpty
+                              ? Colors.deepOrangeAccent
+                              : (categories[category]!.where((task) => task.isCompleted).length /
+                                          categories[category]!.length <
+                                      0.5)
+                                  ? Colors.deepOrangeAccent
+                                  : (categories[category]!.where((task) => task.isCompleted).length /
+                                              categories[category]!.length <
+                                          0.75)
+                                      ? Colors.yellow
+                                      : Colors.green,
+                        ),
+                        minHeight: 6,
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        '${categories[category]!.where((task) => task.isCompleted).length} / ${categories[category]!.length} tasks completed',
+                        style: TextStyle(fontSize: 14, color: Colors.white70),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+                                    
+                                    
                                 children: [
+                                  // Task List Section
                                   ReorderableListView(
                                     shrinkWrap: true,
                                     physics: NeverScrollableScrollPhysics(),
@@ -450,10 +472,10 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                     children: [
                                       for (Task task in categories[category]!)
                                         Dismissible(
-                                          
                                           key: ValueKey(task),
                                           background: Container(
-                                            color:  Color.fromARGB(255, 75, 108, 138),
+                                            color: Color.fromARGB(
+                                                255, 75, 108, 138),
                                             alignment: Alignment.centerLeft,
                                             padding: EdgeInsets.symmetric(
                                                 horizontal: 20),
@@ -517,35 +539,36 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                           child: Padding(
                                             padding: EdgeInsets.symmetric(
                                                 vertical: 2, horizontal: 10),
-                                             
                                             child: Row(
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 SizedBox(
-                                                  
                                                   height: 30,
-                                                    child: Transform.scale(
+                                                  child: Transform.scale(
                                                     scale: 1,
                                                     child: Checkbox(
                                                       checkColor: Colors.white,
                                                       materialTapTargetSize:
-                                                        MaterialTapTargetSize
-                                                          .shrinkWrap,
+                                                          MaterialTapTargetSize
+                                                              .shrinkWrap,
                                                       visualDensity:
-                                                        VisualDensity.compact,
+                                                          VisualDensity.compact,
                                                       value: task.isCompleted,
                                                       activeColor:
-                                                        Color.fromARGB(255, 41, 143, 10),
+                                                          Color.fromARGB(
+                                                              255, 41, 143, 10),
                                                       side: BorderSide(
-                                                      color: const Color.fromARGB(255, 255, 255, 255),
-                                                      width: 2,
+                                                        color: const Color
+                                                            .fromARGB(
+                                                            255, 255, 255, 255),
+                                                        width: 2,
                                                       ),
                                                       onChanged: (value) {
-                                                      setState(() {
-                                                        task.isCompleted =
-                                                          value!;
-                                                      });
+                                                        setState(() {
+                                                          task.isCompleted =
+                                                              value!;
+                                                        });
                                                         _saveData();
                                                       },
                                                     ),
@@ -553,16 +576,17 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                 ),
                                                 SizedBox(width: 10),
                                                 Expanded(
-                                                  
                                                   child: Text(
-                                                  
                                                     task.name,
                                                     softWrap: true,
                                                     overflow:
                                                         TextOverflow.visible,
                                                     style: TextStyle(
                                                       fontSize: 20,
-                                                      fontWeight: task.isCompleted ? FontWeight.w300 : FontWeight.w500,
+                                                      fontWeight:
+                                                          task.isCompleted
+                                                              ? FontWeight.w300
+                                                              : FontWeight.w500,
                                                       color: task.isCompleted
                                                           ? Colors.grey[500]
                                                           : Colors.white,
@@ -575,43 +599,60 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                         ),
                                     ],
                                   ),
+                                  // Add Task Button placed at the end of the task list
                                   Padding(
-                                    padding: const EdgeInsets.all(0.0),
+                                    padding: const EdgeInsets.all(8.0),
                                     child: Row(
                                       children: [
                                         if (_showTaskInputs[category] ?? false)
-                                            Expanded(
+                                          Expanded(
                                             child: Container(
                                               margin: EdgeInsets.all(8.0),
                                               child: TextField(
-                                              controller: _taskControllers[category],
-                                              focusNode: _taskFocusNodes[category],
-                                              style: TextStyle(color: Colors.white), // Set text color to white
-                                              decoration: InputDecoration(
-                                                hintText: 'Add Task',
-                                                hintStyle: TextStyle(color: const Color.fromARGB(255, 219, 219, 219)),
-                                                border: OutlineInputBorder(),
-                                                focusedBorder: OutlineInputBorder(
-                                                borderSide: BorderSide(
+                                                controller: _taskControllers[category],
+                                                focusNode: _taskFocusNodes[category],
+                                                autofocus: true,
+                                                style: TextStyle(
                                                   color: Colors.white,
-                                                  width: 1,
                                                 ),
+                                                decoration: InputDecoration(
+                                                  hintText: 'Add Task',
+                                                  hintStyle: TextStyle(
+                                                    color: const Color.fromARGB(
+                                                        255, 219, 219, 219),
+                                                  ),
+                                                  border: OutlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                      color: Colors.white,
+                                                      width: 1,
+                                                    ),
+                                                  ),
+                                                  enabledBorder: OutlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                      color: Colors.white,
+                                                      width: 1,
+                                                    ),
+                                                  ),
+                                                  focusedBorder: OutlineInputBorder(
+                                                    borderSide: BorderSide(
+                                                      color: Colors.white,
+                                                      width: 1,
+                                                    ),
+                                                  ),
+                                                  fillColor: Color.fromARGB(
+                                                      255, 57, 86, 109),
+                                                  filled: true,
                                                 ),
-                                                fillColor: Color.fromARGB(255, 57, 86, 109),
-                                                filled: true,
-                                              ),
                                               ),
                                             ),
-                                            ),
-                                          
+                                          ),
                                           
                                         IconButton(
-                                          
                                           icon: Icon(
                                             _showTaskInputs[category] ?? false
                                                 ? Icons.check
                                                 : Icons.add,
-                                                color: Colors.white
+                                            color: Colors.white,
                                           ),
                                           onPressed: () {
                                             if (_showTaskInputs[category] ??
@@ -633,7 +674,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                 ],
                               ),
                             ),
-                        ],
+                      )],
                       ),
                     ),
                   ],
@@ -645,18 +686,18 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
         floatingActionButton: isKeyboardActive
             ? null
             : FloatingActionButton(
-          onPressed: () {
-            setState(() {
-              _showCategoryInput = !_showCategoryInput;
-            });
-          },
-          tooltip: _showCategoryInput ? 'Close' : 'Add Category',
-          backgroundColor:  Color.fromARGB(255, 57, 86, 109),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
-          
-          child: Icon(_showCategoryInput ? Icons.close : Icons.add, color: Colors.white),
+                onPressed: () {
+                  setState(() {
+                    _showCategoryInput = !_showCategoryInput;
+                  });
+                },
+                tooltip: _showCategoryInput ? 'Close' : 'Add Category',
+                backgroundColor: Color.fromARGB(255, 57, 86, 109),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Icon(_showCategoryInput ? Icons.close : Icons.add,
+                    color: Colors.white),
               ),
       ),
     );
