@@ -67,33 +67,76 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
 
   // Edit an existing category
 void _editCategory(String oldCategoryName) {
-  TextEditingController _editController = TextEditingController(text: oldCategoryName);
+  TextEditingController editController = TextEditingController(text: oldCategoryName);
 
   showDialog(
     context: context,
     builder: (context) {
       return AlertDialog(
-        title: Text("Edit Category"),
+        backgroundColor: Color.fromARGB(255, 57, 86, 109),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+            side: BorderSide(color: Colors.white)),
+        title: Text(
+          "Edit Category",
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+            color: Colors.white,
+          ),
+        ),
         content: TextField(
-          controller: _editController,
-          decoration: InputDecoration(hintText: "Enter new category name"),
+          controller: editController,
+          style: TextStyle(fontSize: 18, color: const Color.fromARGB(255, 0, 0, 0)),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            hintText: "Enter new category name",
+            hintStyle: TextStyle(color: const Color.fromARGB(255, 255, 255, 255)),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(2),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(2),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(2),
+              borderSide: BorderSide(color: Colors.white, width: 2),
+            ),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text("Cancel"),
+            child: Text(
+              "Cancel",
+              style: TextStyle(
+                color: Colors.redAccent,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
           ),
           TextButton(
             onPressed: () {
               setState(() {
-                if (_editController.text.isNotEmpty && _editController.text != oldCategoryName) {
-                  categories[_editController.text] = categories.remove(oldCategoryName)!;
+                if (editController.text.isNotEmpty && editController.text != oldCategoryName) {
+                  categories[editController.text] = categories.remove(oldCategoryName)!;
                 }
               });
               _saveData();
               Navigator.pop(context);
             },
-            child: Text("Save"),
+            child: Text(
+              "Save",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
           ),
         ],
       );
@@ -207,11 +250,9 @@ void _editCategory(String oldCategoryName) {
     });
     super.dispose();
   }
-
   @override
   Widget build(BuildContext context) {
     bool isKeyboardActive = MediaQuery.of(context).viewInsets.bottom > 0;
-
     return GestureDetector(
       behavior: HitTestBehavior.opaque, 
       onTap: () {
@@ -327,13 +368,13 @@ void _editCategory(String oldCategoryName) {
       Dismissible(
         key: ValueKey(category),
         background: Container(
-          color: Colors.blue,
+          color: const Color.fromARGB(255, 17, 79, 130),
           alignment: Alignment.centerLeft,
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Icon(Icons.edit, color: Colors.white),
         ),
         secondaryBackground: Container(
-          color: Colors.red,
+          color: const Color.fromARGB(255, 244, 18, 2),
           alignment: Alignment.centerRight,
           padding: EdgeInsets.symmetric(horizontal: 20),
           child: Icon(Icons.delete, color: Colors.white),
@@ -426,7 +467,8 @@ void _editCategory(String oldCategoryName) {
                       LinearProgressIndicator(
                         value: categories[category]!.where((task) => task.isCompleted).length /
                             categories[category]!.length,
-                        backgroundColor: Colors.white.withOpacity(0.3),
+                        // ignore: deprecated_member_use
+                        backgroundColor: Colors.grey,
                         valueColor: AlwaysStoppedAnimation<Color>(
                           categories[category]!.isEmpty
                               ? Colors.deepOrangeAccent
@@ -474,8 +516,7 @@ void _editCategory(String oldCategoryName) {
                                         Dismissible(
                                           key: ValueKey(task),
                                           background: Container(
-                                            color: Color.fromARGB(
-                                                255, 75, 108, 138),
+                                            color: Color.fromARGB(255, 17, 79, 130),
                                             alignment: Alignment.centerLeft,
                                             padding: EdgeInsets.symmetric(
                                                 horizontal: 20),
