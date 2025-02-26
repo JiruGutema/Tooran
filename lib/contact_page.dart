@@ -103,7 +103,7 @@ class ContactPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
             const Text(
-              'App Version: 1.4.0',
+              'App Version: 1.5.0',
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,

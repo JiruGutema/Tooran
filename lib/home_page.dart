@@ -239,6 +239,10 @@ void _editCategory(String oldCategoryName) {
     );
   }
 
+String who(String name){
+    return "This is Jiren Speaking";
+}
+
   @override
   void dispose() {
     _categoryController.dispose();
@@ -250,6 +254,7 @@ void _editCategory(String oldCategoryName) {
     });
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     bool isKeyboardActive = MediaQuery.of(context).viewInsets.bottom > 0;

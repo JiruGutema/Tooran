@@ -71,7 +71,8 @@ class HelpPage extends StatelessWidget {
                 title: 'Deleting a Task or Category',
                 content:
                     '• To delete a task, swipe it to the left. A Snackbar will appear with an Undo button (available for 4 seconds) to restore the task if needed.\n'
-                    '• To delete a category, long-press the category name to access edit and delete options.',
+                    '• To delete a catagory, swipe to the left. if you did it by mistake, you can undo it within 4 sec.'
+                    '• To Edit  a task, swipe to the right. if you did it by mistake, you can undo it within 4 sec again.',
               ),
               _buildSection(
                 icon: Icons.drag_handle,
@@ -100,7 +101,7 @@ class HelpPage extends StatelessWidget {
               ),
               _buildSection(
                 icon: Icons.help_outline,
-                title: 'Need Assistance?',
+                title: 'Need Assistance or Suggestion?',
                 content:
                     'For help, inquiries, or suggestions, please reach out:\n\n'
                     'Email: \n\njethior1@gmail.com\njirudagutema@gmail.com',
