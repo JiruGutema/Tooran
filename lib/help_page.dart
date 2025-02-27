@@ -7,19 +7,25 @@ class HelpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Help & Instructions'),
-        titleTextStyle: const TextStyle(
-          color: Colors.white, fontWeight: FontWeight.bold, fontSize: 24,
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Tooran',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
         ),
         centerTitle: true,
-        backgroundColor:Color.fromARGB(255, 57, 86, 109),
-        elevation: 2,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(0)),
-        ),
+        backgroundColor: const Color.fromRGBO(33,44,57,1), 
       ),
       body: Container(
-        color: Color.fromARGB(255, 75, 108, 138),
+        color: Color.fromRGBO(23, 33, 43,1),
+   
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
@@ -111,7 +117,7 @@ class HelpPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:Color.fromARGB(255, 57, 86, 109),
+                    backgroundColor:Color.fromRGBO(34, 46, 59, 1),
                     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(2),
@@ -148,7 +154,7 @@ class HelpPage extends StatelessWidget {
  Widget _buildSection({required IconData icon, required String title, required String content}) {
   return Card(
     margin: const EdgeInsets.symmetric(vertical: 8),
-    color: Color.fromARGB(255, 57, 86, 109),
+    color: Color.fromRGBO(33,44,57,1),
     elevation: 1,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
     child: Padding(

@@ -18,10 +18,10 @@ class ContactPage extends StatelessWidget {
         title: const Text('Contact Us'),
         titleTextStyle: TextStyle(color: Colors.white, fontSize: 24),
         centerTitle: true,
-        backgroundColor: Color.fromARGB(255, 57, 86, 109),
+        backgroundColor: Color.fromRGBO(33,44,57,1),
       ),
       body: Container(
-        color: Color.fromARGB(255, 75, 108, 138),
+        color: Color.fromRGBO(23, 33, 43,1),
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -60,7 +60,7 @@ class ContactPage extends StatelessWidget {
                 'Email: jethior1@gmail.com',
                 style: TextStyle(
                   fontSize: 18,
-                  color: Color.fromARGB(221, 74, 3, 240),
+                  color: Color.fromARGB(221, 5, 148, 249),
                   decoration: TextDecoration.underline,
                 ),
                 textAlign: TextAlign.center,
@@ -78,7 +78,7 @@ class ContactPage extends StatelessWidget {
                 'Telegram: https://t.me/jethior',
                 style: TextStyle(
                   fontSize: 18,
-                  color: Color.fromARGB(221, 74, 3, 240),
+                  color: Color.fromARGB(221, 5, 148, 249),
                   decoration: TextDecoration.underline,
                 ),
                 textAlign: TextAlign.center,
