@@ -69,8 +69,9 @@ class HelpPage extends StatelessWidget {
                 icon: Icons.check_circle_outline,
                 title: 'Marking a Task as Completed',
                 content:
-                    '• Tap the checkbox next to a task to mark it as completed.\n'
-                    '• Completed tasks appear with a faded grey color.',
+                  '• Tap the checkbox next to a task to mark it as completed.\n'
+                  '• Completed tasks appear with a faded grey color.\n'
+                  '• There is a progress bar showing your progress at the top of each category.',
               ),
               _buildSection(
                 icon: Icons.delete_outline,
