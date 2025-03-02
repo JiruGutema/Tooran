@@ -15,19 +15,20 @@ class ContactPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Contact Us'),
+        title: const Text('Developer'),
         titleTextStyle: TextStyle(color: Colors.white, fontSize: 24),
         centerTitle: true,
         backgroundColor: Color.fromRGBO(33,44,57,1),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Container(
         color: Color.fromRGBO(23, 33, 43,1),
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'About Developer:',
+              'Developer',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
@@ -35,15 +36,13 @@ class ContactPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 20),
-            const Center(
-              child: Text(
-                "I'm Jiren! a 3rd Year Software Engineering Student at Addis Ababa University. Contact me through the following channel or just go to my Portfolio section",
-                style: TextStyle(
-                  fontSize: 18,
-                  color: Color.fromARGB(255, 255, 255, 255),
-                ),
-                textAlign: TextAlign.center,
+            const Text(
+              "I'm Jiren! a 3rd Year Software Engineering Student at Addis Ababa University. Contact me through the following channels or just go to my Portfolio section",
+              style: TextStyle(
+                fontSize: 18,
+                color: Color.fromARGB(255, 255, 255, 255),
               ),
+              textAlign: TextAlign.left,
             ),
             const SizedBox(height: 10),
             GestureDetector(
@@ -57,13 +56,13 @@ class ContactPage extends StatelessWidget {
                 }
               },
               child: const Text(
-                'Email: jethior1@gmail.com',
+                'Email: Jiru Gutema',
                 style: TextStyle(
                   fontSize: 18,
                   color: Color.fromARGB(221, 5, 148, 249),
                   decoration: TextDecoration.underline,
                 ),
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
               ),
             ),
             const SizedBox(height: 10),
@@ -75,41 +74,33 @@ class ContactPage extends StatelessWidget {
                 }
               },
               child: const Text(
-                'Telegram: https://t.me/jethior',
+                'Telegram: Jiru Gutema',
                 style: TextStyle(
                   fontSize: 18,
                   color: Color.fromARGB(221, 5, 148, 249),
                   decoration: TextDecoration.underline,
                 ),
-                textAlign: TextAlign.center,
+                textAlign: TextAlign.left,
               ),
             ),
             const SizedBox(height: 40),
             Center(
               child: ElevatedButton(
-                onPressed: _launchURL,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 57, 86, 109),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
-                  ),
-                ),
-                child: const Text(
-                  'Go to Portfolio',
-                  style: TextStyle(fontSize: 18, color: Colors.white),
+              onPressed: _launchURL,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color.fromARGB(255, 57, 86, 109),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.zero,
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'App Version: 1.5.0',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.white,
+              child: const Text(
+                'Go to Portfolio',
+                style: TextStyle(fontSize: 18, color: Colors.white),
               ),
-              textAlign: TextAlign.center,
-            ),
+            ),)
+           
+            
           ],
         ),
       ),

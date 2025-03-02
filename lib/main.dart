@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'help_page.dart'; // Import Help page
 import 'contact_page.dart';
 import 'home_page.dart';
+import 'about.dart';
 
 void main() {
   runApp(ToDoApp());
@@ -20,7 +21,7 @@ class ToDoApp extends StatelessWidget {
         '/': (context) => ToDoHomePage(),
         '/help': (context) => HelpPage(),
         '/contact': (context) => ContactPage(),
-        // '/fliptime':(context) => FlipClock(),
+        '/about':(context) => About(),
       },
     );
   }

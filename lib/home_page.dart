@@ -295,9 +295,9 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                 case 'Contact':
                   Navigator.pushNamed(context, '/contact');
                   break;
-                // case 'Dark Mode':
-                //   // Implement dark mode toggle logic here
-                //   break;
+                case 'About':
+                  Navigator.pushNamed(context, '/about');
+                  break;
                 
                 }
               },
@@ -306,23 +306,23 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                 value: 'Help',
                 child: ListTile(
                   leading: Icon(Icons.help_outline, color: Color.fromARGB(255, 218, 218, 218)),
-                  title: Text('Help', style: TextStyle(color: Colors.white)),
+                  title: Text('Help', style: TextStyle(color: Colors.white, fontSize: 20)),
                 ),
                 ),
                 const PopupMenuItem<String>(
                 value: 'Contact',
                 child: ListTile(
                   leading: Icon(Icons.contact_page_rounded, color: Colors.white),
-                  title: Text('Contact', style: TextStyle(color: Colors.white)),
+                  title: Text('Developer', style: TextStyle(color: Colors.white, fontSize: 20)),
                 ),
                 ),
-                // const PopupMenuItem<String>(
-                // value: 'Dark Mode',
-                // child: ListTile(
-                //   leading: Icon(Icons.dark_mode, color: Colors.white),
-                //   title: Text('Dark Mode', style: TextStyle(color: Colors.white)),
-                // ),
-                // ),
+                const PopupMenuItem<String>(
+                value: 'About',
+                child: ListTile(
+                  leading: Icon(Icons.info, color: Colors.white),
+                  title: Text('About             ', style: TextStyle(color: Colors.white,fontSize: 20)),
+                ),
+                ),
                 
               ],
               icon: Icon(Icons.menu, color: Colors.white),
@@ -332,6 +332,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
           
           centerTitle: true,
           backgroundColor: const Color.fromRGBO(33,44,57,1), 
+          iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: Container(
           color: Color.fromRGBO(23, 33, 43,1),

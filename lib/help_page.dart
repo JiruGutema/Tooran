@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
 
+  Future<void> _launchURL() async {
+    final Uri url = Uri.parse('https://tooran-documentation.vercel.app');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw 'Could not launch $url';
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +28,8 @@ class HelpPage extends StatelessWidget {
           ],
         ),
         centerTitle: true,
-        backgroundColor: const Color.fromRGBO(33,44,57,1), 
+        backgroundColor: const Color.fromRGBO(33,44,57,1),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Container(
         color: Color.fromRGBO(23, 33, 43,1),
@@ -116,7 +124,7 @@ class HelpPage extends StatelessWidget {
               const SizedBox(height: 20),
               Center(
                 child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
+                  onPressed: _launchURL,
                   style: ElevatedButton.styleFrom(
                     backgroundColor:Color.fromRGBO(34, 46, 59, 1),
                     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
@@ -125,7 +133,7 @@ class HelpPage extends StatelessWidget {
                     ),
                   ),
                   child: const Text(
-                    'Back to Home',
+                    'Check for Updates',
                     style: TextStyle(fontSize: 18, color: Colors.white),
                   ),
                 ),
