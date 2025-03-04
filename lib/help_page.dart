@@ -28,11 +28,11 @@ class HelpPage extends StatelessWidget {
           ],
         ),
         centerTitle: true,
-        backgroundColor: const Color.fromRGBO(33,44,57,1),
+        backgroundColor:  Colors.teal,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Container(
-        color: Color.fromRGBO(23, 33, 43,1),
+        color: Colors.white,
    
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
@@ -126,7 +126,7 @@ class HelpPage extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: _launchURL,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:Color.fromRGBO(34, 46, 59, 1),
+                    backgroundColor:Colors.teal,
                     padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(2),
@@ -163,7 +163,7 @@ class HelpPage extends StatelessWidget {
  Widget _buildSection({required IconData icon, required String title, required String content}) {
   return Card(
     margin: const EdgeInsets.symmetric(vertical: 8),
-    color: Color.fromRGBO(33,44,57,1),
+    color: Colors.teal,
     elevation: 1,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
     child: Padding(

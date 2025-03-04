@@ -18,11 +18,11 @@ class ContactPage extends StatelessWidget {
         title: const Text('Developer'),
         titleTextStyle: TextStyle(color: Colors.white, fontSize: 24),
         centerTitle: true,
-        backgroundColor: Color.fromRGBO(33,44,57,1),
+        backgroundColor: Colors.teal,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Container(
-        color: Color.fromRGBO(23, 33, 43,1),
+        color: Colors.white,
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -32,7 +32,7 @@ class ContactPage extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 255, 255, 255),
+                color: Colors.black,
               ),
             ),
             const SizedBox(height: 20),
@@ -40,7 +40,7 @@ class ContactPage extends StatelessWidget {
               "I'm Jiren! a 3rd Year Software Engineering Student at Addis Ababa University. Contact me through the following channels or just go to my Portfolio section",
               style: TextStyle(
                 fontSize: 18,
-                color: Color.fromARGB(255, 255, 255, 255),
+                color: Colors.black,
               ),
               textAlign: TextAlign.left,
             ),
@@ -88,7 +88,7 @@ class ContactPage extends StatelessWidget {
               child: ElevatedButton(
               onPressed: _launchURL,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 57, 86, 109),
+                backgroundColor: Colors.teal,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.zero,

@@ -18,11 +18,11 @@ class About extends StatelessWidget {
         title: const Text('About'),
         titleTextStyle: const TextStyle(color: Colors.white, fontSize: 24),
         centerTitle: true,
-        backgroundColor: const Color.fromRGBO(33, 44, 57, 1),
+        backgroundColor:  Colors.teal,
         iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Container(
-        color: const Color.fromRGBO(23, 33, 43, 1),
+        color:  Colors.white,
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -40,7 +40,7 @@ class About extends StatelessWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 20,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                 ],
@@ -55,7 +55,7 @@ class About extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16,
                   
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -63,7 +63,7 @@ class About extends StatelessWidget {
                     "App Version: 1.5.0",
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                   ),
                   const SizedBox(height: 10),
@@ -71,7 +71,7 @@ class About extends StatelessWidget {
                     "Last Update: Feb 28, 2025",
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.white,
+                      color: Colors.black,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -83,7 +83,7 @@ class About extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: _launchURL,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 57, 86, 109),
+                  backgroundColor:  Colors.teal,
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,

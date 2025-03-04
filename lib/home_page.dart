@@ -73,16 +73,16 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Color.fromRGBO(33,44,57,1),
+          backgroundColor: Colors.teal,
           shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
-              side: BorderSide(color: Colors.white)),
+              side: BorderSide(color: Colors.black)),
           title: Text(
             "Edit Category",
             style: TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 20,
-              color: Colors.white,
+              color: Colors.black,
             ),
           ),
           content: TextField(
@@ -91,7 +91,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                 fontSize: 18, color: const Color.fromARGB(255, 0, 0, 0)),
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.white,
+              fillColor: Colors.black,
               hintText: "Enter new category name",
               hintStyle:
                   TextStyle(color: const Color.fromARGB(255, 255, 255, 255)),
@@ -104,7 +104,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(2),
-                borderSide: BorderSide(color: Colors.white, width: 2),
+                borderSide: BorderSide(color: Colors.black, width: 2),
               ),
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -137,7 +137,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
               child: Text(
                 "Save",
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black,
                   fontWeight: FontWeight.bold,
                   fontSize: 20,
                 ),
@@ -176,15 +176,15 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Color.fromRGBO(33,44,57,1),
+        backgroundColor: Colors.teal,
         shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: Colors.white)),
+            side: BorderSide(color: Colors.black)),
         title: Text("Edit Task",
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
-                color: Color.fromRGBO(33,44,57,1))),
+                color: Colors.teal)),
         content: TextField(
           controller: controller,
           autofocus: true,
@@ -204,7 +204,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(2),
               borderSide:
-                  BorderSide(color: Color.fromRGBO(33,44,57,1), width: 2),
+                  BorderSide(color: Colors.teal, width: 2),
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
@@ -285,7 +285,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
               ),
               ),
               PopupMenuButton<String>(
-              color: Color.fromRGBO(33, 44, 57, 1),
+              color: Colors.teal,
               elevation: 4.0,
               onSelected: (String result) {
                 switch (result) {
@@ -331,11 +331,11 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
             ),
           
           centerTitle: true,
-          backgroundColor: const Color.fromRGBO(33,44,57,1), 
+          backgroundColor: Colors.teal,
           iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: Container(
-          color: Color.fromRGBO(23, 33, 43,1),
+          color: Colors.white,
           // color: Color.fromARGB(255, 75, 108, 138),
           child: Center(
             child: Container(
@@ -356,22 +356,21 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                 decoration: InputDecoration(
                                   hintText: 'Enter Category Name',
                                   hintStyle: TextStyle(
-                                      color: const Color.fromARGB(
-                                          255, 204, 204, 204)),
+                                      color: const Color.fromARGB(255, 168, 165, 165)),
                                   border: OutlineInputBorder(),
                                   enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                         color:
-                                            Color.fromARGB(255, 255, 255, 255),
+                                            Colors.teal,
                                         width: 1),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                         color:
-                                            Color.fromARGB(255, 255, 255, 255),
+                                            Color.fromARGB(255, 5, 116, 150),
                                         width: 1),
                                   ),
-                                  fillColor: Color.fromRGBO(33,44,57,1),
+                                  fillColor: Colors.teal,
                                   filled: true,
                                 ),
                               ),
@@ -380,7 +379,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                           IconButton(
                             icon: Icon(Icons.check,
                                 color:
-                                    const Color.fromARGB(255, 255, 255, 255)),
+                                    Colors.teal),
                             onPressed: _addCategory,
                           ),
                         ],
@@ -402,20 +401,20 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                             }
                             categories = newCategories;
                           });
-                          _saveData();
+                          _saveData(); 
                         },
                         children: [
                           for (String category in categories.keys)
                             Dismissible(
                               key: ValueKey(category),
                               background: Container(
-                                color: const Color.fromARGB(255, 18, 59, 92),
+                                color: const Color.fromARGB(255, 26, 105, 170),
                                 alignment: Alignment.centerLeft,
                                 padding: EdgeInsets.symmetric(horizontal: 20),
                                 child: Icon(Icons.edit, color: Colors.white),
                               ),
                               secondaryBackground: Container(
-                                color: const Color.fromARGB(255, 119, 36, 30),
+                                color: const Color.fromARGB(255, 204, 42, 30),
                                 alignment: Alignment.centerRight,
                                 padding: EdgeInsets.symmetric(horizontal: 20),
                                 child: Icon(Icons.delete, color: Colors.white),
@@ -441,7 +440,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       backgroundColor:
-                                          Color.fromRGBO(33,44,57,1),
+                                          Colors.teal,
                                       content: Text(
                                         "Category deleted",
                                         style: TextStyle(
@@ -471,22 +470,22 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(4)),
                                 elevation: 2,
-                                color: Color.fromRGBO(33,44,57,1),
+                                color: const Color.fromARGB(255, 243, 243, 242),
                                 child: ExpansionTile(
-                                  iconColor: Colors.white,
+                                  iconColor: Colors.teal,
                                   collapsedShape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   shape: RoundedRectangleBorder(
                                     side: BorderSide(
-                                      color: const Color.fromARGB(255, 6, 98, 114),
+                                      color: Colors.teal,
                                       width: 1,
                                     ),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   collapsedBackgroundColor:
-                                      Color.fromRGBO(33,44,57,1),
-                                  collapsedIconColor: Colors.white,
+                                      const Color.fromARGB(255, 243, 243, 240),
+                                  collapsedIconColor: Colors.teal,
                                   title: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
@@ -499,7 +498,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                 category,
                                                 style: TextStyle(
                                                   fontWeight: FontWeight.bold,
-                                                  color: Colors.white,
+                                                  color: Colors.teal,
                                                   fontSize: 20,
                                                 ),
                                               ),
@@ -520,7 +519,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                       .length /
                                                   categories[category]!.length,
                                               // ignore: deprecated_member_use
-                                              backgroundColor: const Color.fromARGB(255, 186, 185, 185),
+                                              backgroundColor: const Color.fromARGB(255, 190, 190, 190),
                                               valueColor:
                                                   AlwaysStoppedAnimation<Color>(
                                                 categories[category]!.isEmpty
@@ -545,7 +544,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                                             category]!
                                                                         .length <
                                                                 0.75)
-                                                            ? Colors.yellow
+                                                            ? const Color.fromARGB(255, 245, 222, 14)
                                                             : Colors.green,
                                               ),
                                               minHeight: 6,
@@ -592,7 +591,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                   color: Colors.white),
                                             ),
                                             secondaryBackground: Container(
-                                              color: Color.fromARGB(255, 122, 36, 30),
+                                              color: Color.fromARGB(255, 182, 34, 23),
                                               alignment: Alignment.centerRight,
                                               padding: EdgeInsets.symmetric(
                                                   horizontal: 20),
@@ -622,7 +621,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                     content: Text(
                                                       "Task deleted",
                                                       style: TextStyle(
-                                                        color: Colors.white,
+                                                        color: Colors.black,
                                                         fontWeight:
                                                             FontWeight.bold,
                                                       ),
@@ -666,12 +665,9 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                                 .compact,
                                                         value: task.isCompleted,
                                                         activeColor:
-                                                            Color.fromARGB(255,
-                                                                41, 143, 10),
+                                                            Colors.teal,
                                                         side: BorderSide(
-                                                          color: const Color
-                                                              .fromARGB(255,
-                                                              255, 255, 255),
+                                                          color: Colors.black,
                                                           width: 2,
                                                         ),
                                                         onChanged: (value) {
@@ -699,7 +695,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                             : FontWeight.w500,
                                                         color: task.isCompleted
                                                             ? Colors.grey[500]
-                                                            : Colors.white,
+                                                            : Colors.black,
                                                       ),
                                                     ),
                                                   ),
@@ -732,11 +728,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                     hintText: 'Add Task',
                                                     hintStyle: TextStyle(
                                                       color:
-                                                          const Color.fromARGB(
-                                                              255,
-                                                              219,
-                                                              219,
-                                                              219),
+                                                          const Color.fromARGB(255, 177, 166, 166),
                                                     ),
                                                     border: OutlineInputBorder(
                                                       borderSide: BorderSide(
@@ -758,8 +750,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                         width: 1,
                                                       ),
                                                     ),
-                                                    fillColor: Color.fromARGB(
-                                                        255, 57, 86, 109),
+                                                    fillColor: Colors.teal,
                                                     filled: true,
                                                   ),
                                                 ),
@@ -770,7 +761,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                               _showTaskInputs[category] ?? false
                                                   ? Icons.check
                                                   : Icons.add,
-                                              color: Colors.white,
+                                              color: Colors.teal,
                                             ),
                                             onPressed: () {
                                               if (_showTaskInputs[category] ??
@@ -811,7 +802,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                   });
                 },
                 tooltip: _showCategoryInput ? 'Close' : 'Add Category',
-                backgroundColor: Color.fromRGBO(33,44,57,1),
+                backgroundColor: Colors.teal,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4),
                 ),
