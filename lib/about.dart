@@ -60,7 +60,7 @@ class About extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    "App Version: 1.5.0.1",
+                    "App Version: 1.5.0.2",
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white,
@@ -68,7 +68,7 @@ class About extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    "Last Update: March 4, 2025",
+                    "Last Update: March 28, 2025",
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white,
