@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
 class ToDoHomePage extends StatefulWidget {
   const ToDoHomePage({super.key});
 
@@ -73,10 +74,11 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          backgroundColor: Color.fromRGBO(33,44,57,1),
+          backgroundColor: Color.fromRGBO(33, 44, 57, 1),
           shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-              side: BorderSide(color: Colors.white)),
+              borderRadius: BorderRadius.circular(4),
+              side: BorderSide(
+                  color: const Color.fromARGB(255, 53, 204, 209), width: 0.5)),
           title: Text(
             "Edit Category",
             style: TextStyle(
@@ -86,15 +88,15 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
             ),
           ),
           content: TextField(
+            cursorColor: Colors.white,
             controller: editController,
-            style: TextStyle(
-                fontSize: 18, color: const Color.fromARGB(255, 0, 0, 0)),
+            autofocus: true,
+            style: TextStyle(fontSize: 18, color: Colors.white),
             decoration: InputDecoration(
               filled: true,
-              fillColor: Colors.white,
-              hintText: "Enter new category name",
-              hintStyle:
-                  TextStyle(color: const Color.fromARGB(255, 255, 255, 255)),
+              fillColor: Color.fromRGBO(23, 33, 43, 1),
+              hintText: "Enter new task name",
+              hintStyle: TextStyle(color: Colors.grey[500]),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(2),
                 borderSide: BorderSide.none,
@@ -104,7 +106,8 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(2),
-                borderSide: BorderSide(color: Colors.white, width: 2),
+                borderSide:
+                    BorderSide(color: Color.fromRGBO(33, 44, 57, 1), width: 2),
               ),
               contentPadding:
                   EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -176,22 +179,24 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Color.fromRGBO(33,44,57,1),
+        backgroundColor: Color.fromRGBO(33, 44, 57, 1),
         shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: Colors.white)),
+            borderRadius: BorderRadius.circular(4),
+            side: BorderSide(
+                color: const Color.fromARGB(255, 53, 204, 209), width: 0.5)),
         title: Text("Edit Task",
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
-                color: Color.fromRGBO(33,44,57,1))),
+                color: Color.fromRGBO(33, 44, 57, 1))),
         content: TextField(
+          cursorColor: Colors.white,
           controller: controller,
           autofocus: true,
-          style: TextStyle(fontSize: 18, color: Colors.black87),
+          style: TextStyle(fontSize: 18, color: Colors.white),
           decoration: InputDecoration(
             filled: true,
-            fillColor: Colors.grey[200],
+            fillColor: Color.fromRGBO(23, 33, 43, 1),
             hintText: "Enter new task name",
             hintStyle: TextStyle(color: Colors.grey[500]),
             border: OutlineInputBorder(
@@ -204,7 +209,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(2),
               borderSide:
-                  BorderSide(color: Color.fromRGBO(33,44,57,1), width: 2),
+                  BorderSide(color: Color.fromRGBO(33, 44, 57, 1), width: 2),
             ),
             contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           ),
@@ -273,69 +278,77 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
       },
       child: Scaffold(
         appBar: AppBar(
-            title: Row(
+          title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-              'Tooran',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+                'Tooran',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               PopupMenuButton<String>(
-              color: Color.fromRGBO(33, 44, 57, 1),
-              elevation: 4.0,
-              onSelected: (String result) {
-                switch (result) {
-                case 'Help':
-                  Navigator.pushNamed(context, '/help');
-                  break;
-                case 'Contact':
-                  Navigator.pushNamed(context, '/contact');
-                  break;
-                case 'About':
-                  Navigator.pushNamed(context, '/about');
-                  break;
-                
-                }
-              },
-              itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                const PopupMenuItem<String>(
-                value: 'Help',
-                child: ListTile(
-                  leading: Icon(Icons.help_outline, color: Color.fromARGB(255, 218, 218, 218)),
-                  title: Text('Help', style: TextStyle(color: Colors.white, fontSize: 20)),
+                color: Color.fromRGBO(33, 44, 57, 1),
+                elevation: 8.0,
+                onSelected: (String result) {
+                  switch (result) {
+                    case 'Help':
+                      Navigator.pushNamed(context, '/help');
+                      break;
+                    case 'Contact':
+                      Navigator.pushNamed(context, '/contact');
+                      break;
+                    case 'About':
+                      Navigator.pushNamed(context, '/about');
+                      break;
+                  }
+                },
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                  const PopupMenuItem<String>(
+                    value: 'Help',
+                    child: ListTile(
+                      leading: Icon(Icons.help_outline,
+                          color: Color.fromARGB(255, 218, 218, 218)),
+                      title: Text('Help',
+                          style: TextStyle(color: Colors.white, fontSize: 20)),
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'Contact',
+                    child: ListTile(
+                      leading:
+                          Icon(Icons.contact_page_rounded, color: Colors.white),
+                      title: Text('Developer',
+                          style: TextStyle(color: Colors.white, fontSize: 20)),
+                    ),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'About',
+                    child: ListTile(
+                      leading: Icon(Icons.info, color: Colors.white),
+                      title: Text('About             ',
+                          style: TextStyle(color: Colors.white, fontSize: 20)),
+                    ),
+                  ),
+                ],
+                icon: Icon(Icons.menu, color: Colors.white),
+                shadowColor: const Color.fromRGBO(23, 33, 43, 1),
+                // add top shadow
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(Radius.circular(4)),
                 ),
-                ),
-                const PopupMenuItem<String>(
-                value: 'Contact',
-                child: ListTile(
-                  leading: Icon(Icons.contact_page_rounded, color: Colors.white),
-                  title: Text('Developer', style: TextStyle(color: Colors.white, fontSize: 20)),
-                ),
-                ),
-                const PopupMenuItem<String>(
-                value: 'About',
-                child: ListTile(
-                  leading: Icon(Icons.info, color: Colors.white),
-                  title: Text('About             ', style: TextStyle(color: Colors.white,fontSize: 20)),
-                ),
-                ),
-                
-              ],
-              icon: Icon(Icons.menu, color: Colors.white),
+                offset: Offset(0, 50),
               ),
             ],
-            ),
-          
+          ),
           centerTitle: true,
-          backgroundColor: const Color.fromRGBO(33,44,57,1), 
+          backgroundColor: const Color.fromRGBO(33, 44, 57, 1),
           iconTheme: const IconThemeData(color: Colors.white),
         ),
         body: Container(
-          color: Color.fromRGBO(23, 33, 43,1),
+          color: Color.fromRGBO(23, 33, 43, 1),
           // color: Color.fromARGB(255, 75, 108, 138),
           child: Center(
             child: Container(
@@ -351,13 +364,14 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                             child: Container(
                               margin: EdgeInsets.all(8.0),
                               child: TextField(
+                                cursorColor: Colors.white,
                                 controller: _categoryController,
                                 style: TextStyle(color: Colors.white),
                                 decoration: InputDecoration(
                                   hintText: 'Enter Category Name',
                                   hintStyle: TextStyle(
                                       color: const Color.fromARGB(
-                                          255, 204, 204, 204)),
+                                          255, 61, 59, 59)),
                                   border: OutlineInputBorder(),
                                   enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
@@ -371,7 +385,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                             Color.fromARGB(255, 255, 255, 255),
                                         width: 1),
                                   ),
-                                  fillColor: Color.fromRGBO(33,44,57,1),
+                                  fillColor: Color.fromRGBO(33, 44, 57, 1),
                                   filled: true,
                                 ),
                               ),
@@ -441,7 +455,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       backgroundColor:
-                                          Color.fromRGBO(33,44,57,1),
+                                          Color.fromRGBO(33, 44, 57, 1),
                                       content: Text(
                                         "Category deleted",
                                         style: TextStyle(
@@ -471,7 +485,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                 shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(4)),
                                 elevation: 2,
-                                color: Color.fromRGBO(33,44,57,1),
+                                color: Color.fromRGBO(33, 44, 57, 1),
                                 child: ExpansionTile(
                                   iconColor: Colors.white,
                                   collapsedShape: RoundedRectangleBorder(
@@ -479,13 +493,14 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                   ),
                                   shape: RoundedRectangleBorder(
                                     side: BorderSide(
-                                      color: const Color.fromARGB(255, 6, 98, 114),
+                                      color:
+                                          const Color.fromARGB(255, 6, 98, 114),
                                       width: 1,
                                     ),
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                   collapsedBackgroundColor:
-                                      Color.fromRGBO(33,44,57,1),
+                                      Color.fromRGBO(33, 44, 57, 1),
                                   collapsedIconColor: Colors.white,
                                   title: Column(
                                     crossAxisAlignment:
@@ -520,33 +535,28 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                       .length /
                                                   categories[category]!.length,
                                               // ignore: deprecated_member_use
-                                              backgroundColor: const Color.fromARGB(255, 186, 185, 185),
+                                              backgroundColor:
+                                                  const Color.fromARGB(
+                                                      255, 186, 185, 185),
                                               valueColor:
                                                   AlwaysStoppedAnimation<Color>(
                                                 categories[category]!.isEmpty
-                                                    ? Colors.deepOrangeAccent
-                                                    : (categories[category]!
-                                                                    .where((task) =>
-                                                                        task
-                                                                            .isCompleted)
-                                                                    .length /
-                                                                categories[
-                                                                        category]!
-                                                                    .length <
-                                                            0.5)
-                                                        ? Colors
-                                                            .deepOrangeAccent
-                                                        : (categories[category]!
-                                                                        .where((task) =>
-                                                                            task
-                                                                                .isCompleted)
-                                                                        .length /
-                                                                    categories[
-                                                                            category]!
-                                                                        .length <
-                                                                0.75)
-                                                            ? Colors.yellow
-                                                            : Colors.green,
+                                                    ? Colors
+                                                        .grey // Neutral for empty categories
+                                                    : Color.lerp(
+                                                        const Color(
+                                                            0xFFA5D6A7), // Soft green (10% done)
+                                                        const Color(
+                                                            0xFF2E7D32), // Rich forest green (100% done)
+                                                        categories[category]!
+                                                                .where((task) =>
+                                                                    task
+                                                                        .isCompleted)
+                                                                .length /
+                                                            categories[
+                                                                    category]!
+                                                                .length,
+                                                      )!,
                                               ),
                                               minHeight: 6,
                                               borderRadius: BorderRadius.all(
@@ -584,7 +594,8 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                           Dismissible(
                                             key: ValueKey(task),
                                             background: Container(
-                                              color: Color.fromARGB(255, 29, 78, 117),
+                                              color: Color.fromARGB(
+                                                  255, 29, 78, 117),
                                               alignment: Alignment.centerLeft,
                                               padding: EdgeInsets.symmetric(
                                                   horizontal: 20),
@@ -592,7 +603,8 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                   color: Colors.white),
                                             ),
                                             secondaryBackground: Container(
-                                              color: Color.fromARGB(255, 122, 36, 30),
+                                              color: Color.fromARGB(
+                                                  255, 122, 36, 30),
                                               alignment: Alignment.centerRight,
                                               padding: EdgeInsets.symmetric(
                                                   horizontal: 20),
@@ -720,6 +732,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                               child: Container(
                                                 margin: EdgeInsets.all(8.0),
                                                 child: TextField(
+                                                  cursorColor: Colors.white,
                                                   controller: _taskControllers[
                                                       category],
                                                   focusNode:
@@ -811,7 +824,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                   });
                 },
                 tooltip: _showCategoryInput ? 'Close' : 'Add Category',
-                backgroundColor: Color.fromRGBO(33,44,57,1),
+                backgroundColor: Color.fromRGBO(33, 44, 57, 1),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4),
                 ),
