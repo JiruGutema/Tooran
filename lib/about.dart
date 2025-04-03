@@ -54,13 +54,12 @@ class About extends StatelessWidget {
                     "Developed by Jiren",
                     style: TextStyle(
                       fontSize: 16,
-                  
                       color: Colors.white,
                     ),
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    "App Version: 1.5.0.2",
+                    "App Version: 1.5.0.3",
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white,
@@ -68,7 +67,7 @@ class About extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    "Last Update: March 28, 2025",
+                    "Last Update: April 2, 2025",
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white,
@@ -84,7 +83,8 @@ class About extends StatelessWidget {
                 onPressed: _launchURL,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromARGB(255, 57, 86, 109),
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.zero,
                   ),
@@ -95,7 +95,6 @@ class About extends StatelessWidget {
                 ),
               ),
             ),
-            
           ],
         ),
       ),
