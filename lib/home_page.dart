@@ -152,26 +152,29 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     );
   }
 
-  // Add a task to a category
+// Modify your _addTask method like this:
   void _addTask(String category) {
+    // 1. Ensure controllers exist (moved from widget build)
     if (!_taskControllers.containsKey(category)) {
       _taskControllers[category] = TextEditingController();
-    }
-    if (!_taskFocusNodes.containsKey(category)) {
       _taskFocusNodes[category] = FocusNode();
-    }
-    if (!_showTaskInputs.containsKey(category)) {
       _showTaskInputs[category] = false;
     }
 
-    if (_taskControllers[category]!.text.isNotEmpty) {
-      setState(() {
-        categories[category]?.add(Task(name: _taskControllers[category]!.text));
-        _taskControllers[category]!.clear();
-        _showTaskInputs[category] = false;
-      });
-      _saveData();
-    }
+    // 2. Force text synchronization
+    final text = _taskControllers[category]!.text.trim();
+    if (text.isEmpty) return;
+
+    // 3. Update state
+    setState(() {
+      categories[category]?.add(Task(name: text));
+      _taskControllers[category]!.clear();
+      _showTaskInputs[category] = false;
+    });
+
+    // 4. Persist and unfocus
+    _saveData();
+    FocusScope.of(context).unfocus();
   }
 
   void _editTask(String category, Task task) {
@@ -292,6 +295,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
               PopupMenuButton<String>(
                 color: Color.fromRGBO(33, 44, 57, 1),
                 elevation: 8.0,
+
                 onSelected: (String result) {
                   switch (result) {
                     case 'Help':
@@ -305,6 +309,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                       break;
                   }
                 },
+
                 itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
                   const PopupMenuItem<String>(
                     value: 'Help',
@@ -336,8 +341,13 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                 icon: Icon(Icons.menu, color: Colors.white),
                 shadowColor: const Color.fromRGBO(23, 33, 43, 1),
                 // add top shadow
-                shape: const RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(4)),
+
+                shape: RoundedRectangleBorder(
+                  side: BorderSide(
+                    color: const Color.fromARGB(255, 8, 159, 197),
+                    width: 0.5, // Border width
+                  ),
+                  borderRadius: BorderRadius.circular(4.0), // Rounded corners
                 ),
                 offset: Offset(0, 50),
               ),
@@ -371,7 +381,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                   hintText: 'Enter Category Name',
                                   hintStyle: TextStyle(
                                       color: const Color.fromARGB(
-                                          255, 61, 59, 59)),
+                                          255, 190, 186, 186)),
                                   border: OutlineInputBorder(),
                                   enabledBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
@@ -403,8 +413,9 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                       child: ReorderableListView(
                         onReorder: (oldIndex, newIndex) {
                           setState(() {
-                            if (newIndex > oldIndex)
+                            if (newIndex > oldIndex) {
                               newIndex--; // Fix index shift issue
+                            }
                             final categoryKeys = categories.keys.toList();
                             final movedCategory =
                                 categoryKeys.removeAt(oldIndex);
@@ -734,13 +745,12 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                 child: TextField(
                                                   cursorColor: Colors.white,
                                                   controller: _taskControllers[
-                                                      category],
-                                                  focusNode:
-                                                      _taskFocusNodes[category],
+                                                      category]!,
+                                                  focusNode: _taskFocusNodes[
+                                                      category]!,
                                                   autofocus: true,
                                                   style: TextStyle(
-                                                    color: Colors.white,
-                                                  ),
+                                                      color: Colors.white),
                                                   decoration: InputDecoration(
                                                     hintText: 'Add Task',
                                                     hintStyle: TextStyle(
@@ -753,28 +763,34 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                     ),
                                                     border: OutlineInputBorder(
                                                       borderSide: BorderSide(
-                                                        color: Colors.white,
-                                                        width: 1,
-                                                      ),
+                                                          color: Colors.white,
+                                                          width: 1),
                                                     ),
                                                     enabledBorder:
                                                         OutlineInputBorder(
                                                       borderSide: BorderSide(
-                                                        color: Colors.white,
-                                                        width: 1,
-                                                      ),
+                                                          color: Colors.white,
+                                                          width: 1),
                                                     ),
                                                     focusedBorder:
                                                         OutlineInputBorder(
                                                       borderSide: BorderSide(
-                                                        color: Colors.white,
-                                                        width: 1,
-                                                      ),
+                                                          color: Colors.white,
+                                                          width: 1),
                                                     ),
                                                     fillColor: Color.fromARGB(
                                                         255, 57, 86, 109),
                                                     filled: true,
+                                                    contentPadding:
+                                                        EdgeInsets.symmetric(
+                                                      horizontal: 12,
+                                                      vertical: 14,
+                                                    ),
                                                   ),
+                                                  onSubmitted: (_) =>
+                                                      _addTask(category),
+                                                  textInputAction:
+                                                      TextInputAction.done,
                                                 ),
                                               ),
                                             ),
@@ -788,20 +804,32 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                             onPressed: () {
                                               if (_showTaskInputs[category] ??
                                                   false) {
+                                                // Force text sync and save
+                                                _taskControllers[category]!
+                                                        .text =
+                                                    _taskControllers[category]!
+                                                        .text;
                                                 _addTask(category);
                                               } else {
                                                 setState(() {
+                                                  _taskControllers[category] ??=
+                                                      TextEditingController();
+                                                  _taskFocusNodes[category] ??=
+                                                      FocusNode();
                                                   _showTaskInputs[category] =
                                                       true;
                                                 });
-                                                _taskFocusNodes[category]
-                                                    ?.requestFocus();
+                                                WidgetsBinding.instance
+                                                    .addPostFrameCallback((_) {
+                                                  _taskFocusNodes[category]!
+                                                      .requestFocus();
+                                                });
                                               }
                                             },
                                           ),
                                         ],
                                       ),
-                                    ),
+                                    )
                                   ],
                                 ),
                               ),

@@ -20,9 +20,9 @@ migrate_working_dir/
 .idea/
 .vscode
 
-
-
-# The .vscode folder contains launch configuration and tasks you configure in
+upload-keystore.jks
+key.properties
+/android/key.properties
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
 #.vscode/
