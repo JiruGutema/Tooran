@@ -13,10 +13,13 @@ class ToDoHomePage extends StatefulWidget {
 class _ToDoHomePageState extends State<ToDoHomePage> {
   Map<String, List<Task>> categories = {};
   final TextEditingController _categoryController = TextEditingController();
+
   final Map<String, TextEditingController> _taskControllers = {};
   final Map<String, FocusNode> _taskFocusNodes = {};
   final Map<String, bool> _showTaskInputs = {};
   bool _showCategoryInput = false;
+// Add to your state class variables:
+  final Map<String, TextEditingController> _descControllers = {};
 
   @override
   void initState() {
@@ -56,6 +59,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
       setState(() {
         categories[_categoryController.text] = [];
         _taskControllers[_categoryController.text] = TextEditingController();
+        _descControllers[_categoryController.text] = TextEditingController();
         _taskFocusNodes[_categoryController.text] = FocusNode();
         _showTaskInputs[_categoryController.text] = false;
         _showCategoryInput = false; // Hide input after adding category
@@ -152,33 +156,44 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     );
   }
 
-// Modify your _addTask method like this:
+// Update your _addTask method:
   void _addTask(String category) {
-    // 1. Ensure controllers exist (moved from widget build)
     if (!_taskControllers.containsKey(category)) {
       _taskControllers[category] = TextEditingController();
+      _descControllers[category] = TextEditingController();
       _taskFocusNodes[category] = FocusNode();
       _showTaskInputs[category] = false;
     }
 
-    // 2. Force text synchronization
-    final text = _taskControllers[category]!.text.trim();
-    if (text.isEmpty) return;
+    final name = _taskControllers[category]!.text.trim();
+    if (name.isEmpty) return;
 
-    // 3. Update state
     setState(() {
-      categories[category]?.add(Task(name: text));
+      categories[category]?.add(Task(
+        name: name,
+        // description can be null
+
+        description: _descControllers[category]?.text ?? 'No Description',
+      ));
       _taskControllers[category]!.clear();
+      if (_descControllers[category] != null) {
+        _descControllers[category]!.clear();
+      }
+      _taskFocusNodes[category]!.unfocus();
+
       _showTaskInputs[category] = false;
     });
 
-    // 4. Persist and unfocus
     _saveData();
     FocusScope.of(context).unfocus();
   }
 
   void _editTask(String category, Task task) {
-    TextEditingController controller = TextEditingController(text: task.name);
+    TextEditingController nameController =
+        TextEditingController(text: task.name);
+    TextEditingController descController =
+        TextEditingController(text: task.description);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -191,30 +206,49 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
             style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
-                color: Color.fromRGBO(33, 44, 57, 1))),
-        content: TextField(
-          cursorColor: Colors.white,
-          controller: controller,
-          autofocus: true,
-          style: TextStyle(fontSize: 18, color: Colors.white),
-          decoration: InputDecoration(
-            filled: true,
-            fillColor: Color.fromRGBO(23, 33, 43, 1),
-            hintText: "Enter new task name",
-            hintStyle: TextStyle(color: Colors.grey[500]),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(2),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(2),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(2),
-              borderSide:
-                  BorderSide(color: Color.fromRGBO(33, 44, 57, 1), width: 2),
-            ),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                color: Colors.white)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                cursorColor: Colors.white,
+                controller: nameController,
+                autofocus: true,
+                style: TextStyle(fontSize: 18, color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Color.fromRGBO(23, 33, 43, 1),
+                  labelText: "Task Name",
+                  labelStyle: TextStyle(color: Colors.grey[500]),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(2),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
+              ),
+              SizedBox(height: 16),
+              TextField(
+                cursorColor: Colors.white,
+                controller: descController,
+                maxLines: 3,
+                style: TextStyle(fontSize: 18, color: Colors.white),
+                decoration: InputDecoration(
+                  filled: true,
+                  fillColor: Color.fromRGBO(23, 33, 43, 1),
+                  labelText: "Description",
+                  labelStyle: TextStyle(color: Colors.grey[500]),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(2),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
+              ),
+            ],
           ),
         ),
         actions: [
@@ -229,23 +263,17 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
           TextButton(
             onPressed: () {
               setState(() {
-                task.name = controller.text;
+                task.name = nameController.text;
+                task.description = descController.text;
               });
               _saveData();
               Navigator.pop(context);
             },
-            child: DefaultTextStyle(
-              style: TextStyle(
-                fontSize: 20,
-              ),
-              child: Text(
-                "Save",
+            child: Text("Save",
                 style: TextStyle(
-                  color: Color.fromARGB(255, 255, 255, 255),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 20)),
           ),
         ],
       ),
@@ -259,12 +287,10 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
   @override
   void dispose() {
     _categoryController.dispose();
-    _taskControllers.forEach((key, controller) {
-      controller.dispose();
-    });
-    _taskFocusNodes.forEach((key, focusNode) {
-      focusNode.dispose();
-    });
+    _taskControllers.forEach((key, controller) => controller.dispose());
+    _descControllers
+        .forEach((key, controller) => controller.dispose()); // Add this
+    _taskFocusNodes.forEach((key, focusNode) => focusNode.dispose());
     super.dispose();
   }
 
@@ -709,20 +735,74 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                   ),
                                                   SizedBox(width: 10),
                                                   Expanded(
-                                                    child: Text(
-                                                      task.name,
-                                                      softWrap: true,
-                                                      overflow:
-                                                          TextOverflow.visible,
-                                                      style: TextStyle(
-                                                        fontSize: 20,
-                                                        fontWeight: task
-                                                                .isCompleted
-                                                            ? FontWeight.w300
-                                                            : FontWeight.w500,
-                                                        color: task.isCompleted
-                                                            ? Colors.grey[500]
-                                                            : Colors.white,
+                                                    child: InkWell(
+                                                      onTap: () {
+                                                        if (task.description
+                                                            .isNotEmpty) {
+                                                          showDialog(
+                                                            context: context,
+                                                            builder:
+                                                                (context) =>
+                                                                    AlertDialog(
+                                                              backgroundColor:
+                                                                  Color
+                                                                      .fromRGBO(
+                                                                          23,
+                                                                          33,
+                                                                          43,
+                                                                          1),
+                                                              title: Text(
+                                                                  task.name,
+                                                                  style: TextStyle(
+                                                                      color: Colors
+                                                                          .cyanAccent)),
+                                                              shape: RoundedRectangleBorder(
+                                                                  borderRadius:
+                                                                      BorderRadius
+                                                                          .circular(
+                                                                              5)),
+                                                              content: Text(
+                                                                  task
+                                                                      .description,
+                                                                  style: TextStyle(
+                                                                      fontSize:
+                                                                          18,
+                                                                      color: Colors
+                                                                          .white)),
+                                                              actions: [
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.pop(
+                                                                          context),
+                                                                  child: Text(
+                                                                      "Close",
+                                                                      style: TextStyle(
+                                                                          fontSize:
+                                                                              20,
+                                                                          color:
+                                                                              Colors.red)),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          );
+                                                        }
+                                                      },
+                                                      child: Text(
+                                                        task.name,
+                                                        softWrap: true,
+                                                        overflow: TextOverflow
+                                                            .visible,
+                                                        style: TextStyle(
+                                                          fontSize: 20,
+                                                          fontWeight: task
+                                                                  .isCompleted
+                                                              ? FontWeight.w300
+                                                              : FontWeight.w500,
+                                                          color: task
+                                                                  .isCompleted
+                                                              ? Colors.grey[500]
+                                                              : Colors.white,
+                                                        ),
                                                       ),
                                                     ),
                                                   ),
@@ -741,56 +821,106 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                               false)
                                             Expanded(
                                               child: Container(
+                                                decoration: BoxDecoration(
+                                                  color: Color.fromRGBO(
+                                                      23, 33, 43, 1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(4),
+                                                ),
                                                 margin: EdgeInsets.all(8.0),
-                                                child: TextField(
-                                                  cursorColor: Colors.white,
-                                                  controller: _taskControllers[
-                                                      category]!,
-                                                  focusNode: _taskFocusNodes[
-                                                      category]!,
-                                                  autofocus: true,
-                                                  style: TextStyle(
-                                                      color: Colors.white),
-                                                  decoration: InputDecoration(
-                                                    hintText: 'Add Task',
-                                                    hintStyle: TextStyle(
-                                                      color:
-                                                          const Color.fromARGB(
-                                                              255,
-                                                              219,
-                                                              219,
-                                                              219),
+                                                // Replace your current TextField in the add task section with:
+                                                child: Column(
+                                                  children: [
+                                                    TextField(
+                                                      cursorColor: Colors.white,
+                                                      controller:
+                                                          _taskControllers[
+                                                              category]!,
+                                                      focusNode:
+                                                          _taskFocusNodes[
+                                                              category]!,
+                                                      autofocus: true,
+                                                      style: TextStyle(
+                                                          color: Colors.white),
+                                                      decoration:
+                                                          InputDecoration(
+                                                        hintText: 'Task Name',
+                                                        hintStyle: TextStyle(
+                                                            color: const Color
+                                                                .fromARGB(255,
+                                                                219, 219, 219)),
+                                                        border:
+                                                            OutlineInputBorder(
+                                                          borderSide:
+                                                              BorderSide(
+                                                                  width: 1),
+                                                        ),
+                                                        enabledBorder:
+                                                            OutlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    width: 1)),
+                                                        focusedBorder:
+                                                            OutlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    width: 1)),
+                                                        contentPadding:
+                                                            EdgeInsets
+                                                                .symmetric(
+                                                                    horizontal:
+                                                                        12,
+                                                                    vertical:
+                                                                        14),
+                                                      ),
                                                     ),
-                                                    border: OutlineInputBorder(
-                                                      borderSide: BorderSide(
-                                                          color: Colors.white,
-                                                          width: 1),
+                                                    SizedBox(height: 8),
+                                                    TextField(
+                                                      cursorColor: Colors.white,
+                                                      controller:
+                                                          _descControllers[
+                                                              category],
+                                                      style: TextStyle(
+                                                          color: Colors.white),
+                                                      decoration:
+                                                          InputDecoration(
+                                                        hintText:
+                                                            'Description (optional)',
+                                                        hintStyle: TextStyle(
+                                                            color: const Color
+                                                                .fromARGB(255,
+                                                                219, 219, 219)),
+                                                        border: OutlineInputBorder(
+                                                            borderSide:
+                                                                BorderSide(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    width: 1)),
+                                                        enabledBorder:
+                                                            OutlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    width: 1)),
+                                                        focusedBorder:
+                                                            OutlineInputBorder(
+                                                                borderSide: BorderSide(
+                                                                    color: Colors
+                                                                        .white,
+                                                                    width: 1)),
+                                                        contentPadding:
+                                                            EdgeInsets
+                                                                .symmetric(
+                                                                    horizontal:
+                                                                        12,
+                                                                    vertical:
+                                                                        14),
+                                                      ),
+                                                      maxLines: 2,
                                                     ),
-                                                    enabledBorder:
-                                                        OutlineInputBorder(
-                                                      borderSide: BorderSide(
-                                                          color: Colors.white,
-                                                          width: 1),
-                                                    ),
-                                                    focusedBorder:
-                                                        OutlineInputBorder(
-                                                      borderSide: BorderSide(
-                                                          color: Colors.white,
-                                                          width: 1),
-                                                    ),
-                                                    fillColor: Color.fromARGB(
-                                                        255, 57, 86, 109),
-                                                    filled: true,
-                                                    contentPadding:
-                                                        EdgeInsets.symmetric(
-                                                      horizontal: 12,
-                                                      vertical: 14,
-                                                    ),
-                                                  ),
-                                                  onSubmitted: (_) =>
-                                                      _addTask(category),
-                                                  textInputAction:
-                                                      TextInputAction.done,
+                                                  ],
                                                 ),
                                               ),
                                             ),
@@ -866,13 +996,15 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
 
 class Task {
   String name;
+  String description; // Add this line
   bool isCompleted;
 
-  Task({required this.name, this.isCompleted = false});
+  Task({required this.name, this.description = '', this.isCompleted = false});
 
   factory Task.fromJson(Map<String, dynamic> json) {
     return Task(
       name: json['name'],
+      description: json['description'] ?? '', // Add this line
       isCompleted: json['isCompleted'],
     );
   }
@@ -880,6 +1012,7 @@ class Task {
   Map<String, dynamic> toJson() {
     return {
       'name': name,
+      'description': description, // Add this line
       'isCompleted': isCompleted,
     };
   }
