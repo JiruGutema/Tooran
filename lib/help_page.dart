@@ -171,7 +171,7 @@ class HelpPage extends StatelessWidget {
           children: [
             Row(
               children: [
-                Icon(icon, size: 26, color: Colors.white), // Fixed icon color
+                Icon(icon, size: 26, color: Colors.white), 
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(

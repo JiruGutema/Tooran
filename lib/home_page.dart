@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tooran/history_page.dart';
+import 'package:tooran/model.dart';
 
 class ToDoHomePage extends StatefulWidget {
   const ToDoHomePage({super.key});
 
   @override
-  // ignore: library_private_types_in_public_api
   _ToDoHomePageState createState() => _ToDoHomePageState();
 }
 
@@ -18,33 +19,73 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
   final Map<String, FocusNode> _taskFocusNodes = {};
   final Map<String, bool> _showTaskInputs = {};
   bool _showCategoryInput = false;
-// Add to your state class variables:
   final Map<String, TextEditingController> _descControllers = {};
+
+  List<DeletedCategory> deletedCategories = [];
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  // Add this new method to save deleted categories
+  Future<void> _saveDeletedCategories() async {
+    final prefs = await SharedPreferences.getInstance();
+    final deletedData =
+        json.encode(deletedCategories.map((dc) => dc.toJson()).toList());
+    await prefs.setString('deletedCategories', deletedData);
+  }
+
+  // Add this new method to load deleted categories
+  Future<void> _loadDeletedCategories() async {
+    final prefs = await SharedPreferences.getInstance();
+    final deletedData = prefs.getString('deletedCategories');
+    if (deletedData != null) {
+      setState(() {
+        deletedCategories = (json.decode(deletedData) as List)
+            .map((item) => DeletedCategory.fromJson(item))
+            .toList();
+      });
+    }
+  }
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _loadDeletedCategories();
   }
 
-  // Load categories and tasks from SharedPreferences
   Future<void> _loadData() async {
     final prefs = await SharedPreferences.getInstance();
     final categoriesData = prefs.getString('categories');
+
     if (categoriesData != null) {
-      final Map<String, dynamic> categoriesMap = json.decode(categoriesData);
-      setState(() {
-        categories = categoriesMap.map((key, value) {
-          return MapEntry(
-            key,
-            (value as List).map((task) => Task.fromJson(task)).toList(),
-          );
+      try {
+        final decodedData = json.decode(categoriesData);
+        final Map<String, List<Task>> loadedCategories = {};
+
+        decodedData.forEach((categoryName, tasks) {
+          if (tasks is List) {
+            loadedCategories[categoryName] = tasks.map<Task>((taskData) {
+              if (taskData is Map<String, dynamic>) {
+                return Task.fromJson(taskData);
+              }
+              // Handle legacy format if needed
+              return Task(name: taskData.toString());
+            }).toList();
+          }
         });
-      });
+
+        setState(() {
+          categories = loadedCategories;
+        });
+      } catch (e) {
+        print('Error loading categories: $e');
+        // Initialize with empty map if loading fails
+        setState(() {
+          categories = {};
+        });
+      }
     }
   }
 
-  // Save categories and tasks to SharedPreferences
   Future<void> _saveData() async {
     final prefs = await SharedPreferences.getInstance();
     final categoriesData = json.encode(categories.map((key, value) {
@@ -53,7 +94,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     await prefs.setString('categories', categoriesData);
   }
 
-  // Add a new category
   void _addCategory() {
     if (_categoryController.text.isNotEmpty) {
       setState(() {
@@ -62,14 +102,13 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
         _descControllers[_categoryController.text] = TextEditingController();
         _taskFocusNodes[_categoryController.text] = FocusNode();
         _showTaskInputs[_categoryController.text] = false;
-        _showCategoryInput = false; // Hide input after adding category
+        _showCategoryInput = false;
       });
       _categoryController.clear();
       _saveData();
     }
   }
 
-  // Edit an existing category
   void _editCategory(String oldCategoryName) {
     TextEditingController editController =
         TextEditingController(text: oldCategoryName);
@@ -156,7 +195,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     );
   }
 
-// Update your _addTask method:
   void _addTask(String category) {
     if (!_taskControllers.containsKey(category)) {
       _taskControllers[category] = TextEditingController();
@@ -171,8 +209,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     setState(() {
       categories[category]?.add(Task(
         name: name,
-        // description can be null
-
         description: _descControllers[category]?.text ?? 'No Description',
       ));
       _taskControllers[category]!.clear();
@@ -318,64 +354,100 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              PopupMenuButton<String>(
-                color: Color.fromRGBO(33, 44, 57, 1),
-                elevation: 8.0,
-
-                onSelected: (String result) {
-                  switch (result) {
-                    case 'Help':
-                      Navigator.pushNamed(context, '/help');
-                      break;
-                    case 'Contact':
-                      Navigator.pushNamed(context, '/contact');
-                      break;
-                    case 'About':
-                      Navigator.pushNamed(context, '/about');
-                      break;
-                  }
-                },
-
-                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  const PopupMenuItem<String>(
-                    value: 'Help',
-                    child: ListTile(
-                      leading: Icon(Icons.help_outline,
-                          color: Color.fromARGB(255, 218, 218, 218)),
-                      title: Text('Help',
-                          style: TextStyle(color: Colors.white, fontSize: 20)),
-                    ),
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.history, color: Colors.white),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HistoryPage(
+                            deletedCategories: deletedCategories,
+                            onRestore: (categoryName) {
+                              setState(() {
+                                final toRestore = deletedCategories.firstWhere(
+                                    (dc) => dc.name == categoryName);
+                                categories[toRestore.name] = toRestore.tasks;
+                                deletedCategories.removeWhere(
+                                    (dc) => dc.name == categoryName);
+                              });
+                              _saveData();
+                              _saveDeletedCategories();
+                              Navigator.pop(context);
+                            },
+                            onPermanentDelete: (categoryName) {
+                              setState(() {
+                                deletedCategories.removeWhere(
+                                    (dc) => dc.name == categoryName);
+                              });
+                              _saveDeletedCategories();
+                            },
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                  const PopupMenuItem<String>(
-                    value: 'Contact',
-                    child: ListTile(
-                      leading:
-                          Icon(Icons.contact_page_rounded, color: Colors.white),
-                      title: Text('Developer',
-                          style: TextStyle(color: Colors.white, fontSize: 20)),
+                  PopupMenuButton<String>(
+                    color: Color.fromRGBO(33, 44, 57, 1),
+                    elevation: 8.0,
+                    onSelected: (String result) {
+                      switch (result) {
+                        case 'Help':
+                          Navigator.pushNamed(context, '/help');
+                          break;
+                        case 'Contact':
+                          Navigator.pushNamed(context, '/contact');
+                          break;
+                        case 'About':
+                          Navigator.pushNamed(context, '/about');
+                          break;
+                      }
+                    },
+                    itemBuilder: (BuildContext context) =>
+                        <PopupMenuEntry<String>>[
+                      const PopupMenuItem<String>(
+                        value: 'Help',
+                        child: ListTile(
+                          leading: Icon(Icons.help_outline,
+                              color: Color.fromARGB(255, 218, 218, 218)),
+                          title: Text('Help',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20)),
+                        ),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'Contact',
+                        child: ListTile(
+                          leading: Icon(Icons.contact_page_rounded,
+                              color: Colors.white),
+                          title: Text('Developer',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20)),
+                        ),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'About',
+                        child: ListTile(
+                          leading: Icon(Icons.info, color: Colors.white),
+                          title: Text('About             ',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 20)),
+                        ),
+                      ),
+                    ],
+                    icon: Icon(Icons.menu, color: Colors.white),
+                    shadowColor: const Color.fromRGBO(23, 33, 43, 1),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        color: const Color.fromARGB(255, 8, 159, 197),
+                        width: 0.5,
+                      ),
+                      borderRadius: BorderRadius.circular(4.0),
                     ),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: 'About',
-                    child: ListTile(
-                      leading: Icon(Icons.info, color: Colors.white),
-                      title: Text('About             ',
-                          style: TextStyle(color: Colors.white, fontSize: 20)),
-                    ),
+                    offset: Offset(0, 50),
                   ),
                 ],
-                icon: Icon(Icons.menu, color: Colors.white),
-                shadowColor: const Color.fromRGBO(23, 33, 43, 1),
-                // add top shadow
-
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(
-                    color: const Color.fromARGB(255, 8, 159, 197),
-                    width: 0.5, // Border width
-                  ),
-                  borderRadius: BorderRadius.circular(4.0), // Rounded corners
-                ),
-                offset: Offset(0, 50),
               ),
             ],
           ),
@@ -385,7 +457,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
         ),
         body: Container(
           color: Color.fromRGBO(23, 33, 43, 1),
-          // color: Color.fromARGB(255, 75, 108, 138),
           child: Center(
             child: Container(
               constraints: BoxConstraints(maxWidth: 700),
@@ -440,7 +511,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                         onReorder: (oldIndex, newIndex) {
                           setState(() {
                             if (newIndex > oldIndex) {
-                              newIndex--; // Fix index shift issue
+                              newIndex--;
                             }
                             final categoryKeys = categories.keys.toList();
                             final movedCategory =
@@ -473,22 +544,25 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                               ),
                               confirmDismiss: (direction) async {
                                 if (direction == DismissDirection.startToEnd) {
-                                  // Swipe Right (Edit)
                                   _editCategory(category);
-                                  return false; // Prevent dismissal
+                                  return false;
                                 } else if (direction ==
                                     DismissDirection.endToStart) {
-                                  // Swipe Left (Delete)
                                   String deletedCategory = category;
                                   List<Task> deletedTasks =
                                       categories[category]!;
 
                                   setState(() {
                                     categories.remove(category);
+                                    deletedCategories.add(DeletedCategory(
+                                      name: deletedCategory,
+                                      tasks: deletedTasks,
+                                      deletedAt: DateTime.now(),
+                                    ));
                                   });
                                   _saveData();
+                                  _saveDeletedCategories();
 
-                                  // Show Undo Snackbar
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       backgroundColor:
@@ -507,13 +581,17 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                           setState(() {
                                             categories[deletedCategory] =
                                                 deletedTasks;
+                                            deletedCategories.removeWhere(
+                                                (dc) =>
+                                                    dc.name == deletedCategory);
                                           });
                                           _saveData();
+                                          _saveDeletedCategories();
                                         },
                                       ),
                                     ),
                                   );
-                                  return true; // Confirm deletion
+                                  return true;
                                 }
                                 return false;
                               },
@@ -571,20 +649,16 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                           task.isCompleted)
                                                       .length /
                                                   categories[category]!.length,
-                                              // ignore: deprecated_member_use
                                               backgroundColor:
                                                   const Color.fromARGB(
                                                       255, 186, 185, 185),
                                               valueColor:
                                                   AlwaysStoppedAnimation<Color>(
                                                 categories[category]!.isEmpty
-                                                    ? Colors
-                                                        .grey // Neutral for empty categories
+                                                    ? Colors.grey
                                                     : Color.lerp(
-                                                        const Color(
-                                                            0xFFA5D6A7), // Soft green (10% done)
-                                                        const Color(
-                                                            0xFF2E7D32), // Rich forest green (100% done)
+                                                        const Color(0xFFA5D6A7),
+                                                        const Color(0xFF2E7D32),
                                                         categories[category]!
                                                                 .where((task) =>
                                                                     task
@@ -611,7 +685,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                     ],
                                   ),
                                   children: [
-                                    // Task List Section
                                     ReorderableListView(
                                       shrinkWrap: true,
                                       physics: NeverScrollableScrollPhysics(),
@@ -739,51 +812,97 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                       onTap: () {
                                                         if (task.description
                                                             .isNotEmpty) {
-                                                          showDialog(
+                                                          showGeneralDialog(
                                                             context: context,
-                                                            builder:
-                                                                (context) =>
+                                                            barrierDismissible:
+                                                                true,
+                                                            barrierLabel:
+                                                                "Dismiss",
+                                                            barrierColor: Colors
+                                                                .black
+                                                                .withOpacity(
+                                                                    0.5),
+                                                            transitionDuration:
+                                                                Duration(
+                                                                    milliseconds:
+                                                                        300),
+                                                            pageBuilder:
+                                                                (_, __, ___) {
+                                                              return Center(
+                                                                child:
                                                                     AlertDialog(
-                                                              backgroundColor:
-                                                                  Color
-                                                                      .fromRGBO(
+                                                                  backgroundColor:
+                                                                      Color.fromRGBO(
                                                                           23,
                                                                           33,
                                                                           43,
                                                                           1),
-                                                              title: Text(
-                                                                  task.name,
-                                                                  style: TextStyle(
-                                                                      color: Colors
-                                                                          .cyanAccent)),
-                                                              shape: RoundedRectangleBorder(
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              5)),
-                                                              content: Text(
-                                                                  task
-                                                                      .description,
-                                                                  style: TextStyle(
-                                                                      fontSize:
-                                                                          18,
-                                                                      color: Colors
-                                                                          .white)),
-                                                              actions: [
-                                                                TextButton(
-                                                                  onPressed: () =>
-                                                                      Navigator.pop(
-                                                                          context),
-                                                                  child: Text(
-                                                                      "Close",
-                                                                      style: TextStyle(
-                                                                          fontSize:
-                                                                              20,
-                                                                          color:
-                                                                              Colors.red)),
+                                                                  title: Text(
+                                                                    task.name,
+                                                                    style: TextStyle(
+                                                                        color: Colors
+                                                                            .cyanAccent),
+                                                                  ),
+                                                                  shape:
+                                                                      RoundedRectangleBorder(
+                                                                    borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(5),
+                                                                  ),
+                                                                  content:
+                                                                      SizedBox(
+                                                                    height: MediaQuery.of(context)
+                                                                            .size
+                                                                            .height *
+                                                                        0.15,
+                                                                    child:
+                                                                        SingleChildScrollView(
+                                                                      child:
+                                                                          Text(
+                                                                        task.description,
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                18,
+                                                                            color:
+                                                                                Colors.white),
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                  actions: [
+                                                                    TextButton(
+                                                                      onPressed:
+                                                                          () =>
+                                                                              Navigator.pop(context),
+                                                                      child:
+                                                                          Text(
+                                                                        "Close",
+                                                                        style: TextStyle(
+                                                                            fontSize:
+                                                                                20,
+                                                                            color:
+                                                                                Colors.red),
+                                                                      ),
+                                                                    ),
+                                                                  ],
                                                                 ),
-                                                              ],
-                                                            ),
+                                                              );
+                                                            },
+                                                            transitionBuilder:
+                                                                (_, anim, __,
+                                                                    child) {
+                                                              return FadeTransition(
+                                                                opacity: anim,
+                                                                child:
+                                                                    ScaleTransition(
+                                                                  scale: CurvedAnimation(
+                                                                      parent:
+                                                                          anim,
+                                                                      curve: Curves
+                                                                          .easeOutBack),
+                                                                  child: child,
+                                                                ),
+                                                              );
+                                                            },
                                                           );
                                                         }
                                                       },
@@ -812,7 +931,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                           ),
                                       ],
                                     ),
-                                    // Add Task Button placed at the end of the task list
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
                                       child: Row(
@@ -828,7 +946,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                                       BorderRadius.circular(4),
                                                 ),
                                                 margin: EdgeInsets.all(8.0),
-                                                // Replace your current TextField in the add task section with:
                                                 child: Column(
                                                   children: [
                                                     TextField(
@@ -991,29 +1108,5 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
               ),
       ),
     );
-  }
-}
-
-class Task {
-  String name;
-  String description; // Add this line
-  bool isCompleted;
-
-  Task({required this.name, this.description = '', this.isCompleted = false});
-
-  factory Task.fromJson(Map<String, dynamic> json) {
-    return Task(
-      name: json['name'],
-      description: json['description'] ?? '', // Add this line
-      isCompleted: json['isCompleted'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'description': description, // Add this line
-      'isCompleted': isCompleted,
-    };
   }
 }

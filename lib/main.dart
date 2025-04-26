@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'help_page.dart'; // Import Help page
+import 'help_page.dart';
 import 'contact_page.dart';
 import 'home_page.dart';
 import 'about.dart';

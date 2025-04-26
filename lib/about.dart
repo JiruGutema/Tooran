@@ -31,7 +31,7 @@ class About extends StatelessWidget {
               child: Column(
                 children: [
                   Image.asset(
-                    'assets/logo.png', // Make sure to add your logo image in the assets folder and update pubspec.yaml
+                    'assets/logo.png',
                     height: 80,
                   ),
                   const SizedBox(height: 10),
@@ -59,7 +59,7 @@ class About extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    "App Version: 1.5.2.0",
+                    "App Version: 1.6.0",
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white,
@@ -67,7 +67,7 @@ class About extends StatelessWidget {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    "Last Update: April 23, 2025",
+                    "Last Update: April 26, 2025",
                     style: TextStyle(
                       fontSize: 16,
                       color: Colors.white,
