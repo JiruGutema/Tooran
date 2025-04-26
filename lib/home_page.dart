@@ -24,7 +24,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
   List<DeletedCategory> deletedCategories = [];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  // Add this new method to save deleted categories
   Future<void> _saveDeletedCategories() async {
     final prefs = await SharedPreferences.getInstance();
     final deletedData =
@@ -32,7 +31,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     await prefs.setString('deletedCategories', deletedData);
   }
 
-  // Add this new method to load deleted categories
   Future<void> _loadDeletedCategories() async {
     final prefs = await SharedPreferences.getInstance();
     final deletedData = prefs.getString('deletedCategories');
@@ -67,7 +65,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
               if (taskData is Map<String, dynamic>) {
                 return Task.fromJson(taskData);
               }
-              // Handle legacy format if needed
               return Task(name: taskData.toString());
             }).toList();
           }
@@ -78,7 +75,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
         });
       } catch (e) {
         print('Error loading categories: $e');
-        // Initialize with empty map if loading fails
         setState(() {
           categories = {};
         });
@@ -325,7 +321,7 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     _categoryController.dispose();
     _taskControllers.forEach((key, controller) => controller.dispose());
     _descControllers
-        .forEach((key, controller) => controller.dispose()); // Add this
+        .forEach((key, controller) => controller.dispose()); 
     _taskFocusNodes.forEach((key, focusNode) => focusNode.dispose());
     super.dispose();
   }
@@ -1051,7 +1047,6 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
                                             onPressed: () {
                                               if (_showTaskInputs[category] ??
                                                   false) {
-                                                // Force text sync and save
                                                 _taskControllers[category]!
                                                         .text =
                                                     _taskControllers[category]!
