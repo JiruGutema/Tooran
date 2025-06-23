@@ -202,10 +202,14 @@ class _ToDoHomePageState extends State<ToDoHomePage> {
     final name = _taskControllers[category]!.text.trim();
     if (name.isEmpty) return;
 
+    // Ensure description controller exists and get its text
+    final description = _descControllers.containsKey(category) && _descControllers[category] != null
+        ? _descControllers[category]!.text 
+        : '';
     setState(() {
       categories[category]?.add(Task(
         name: name,
-        description: _descControllers[category]?.text ?? 'No Description',
+        description: description,
       ));
       _taskControllers[category]!.clear();
       if (_descControllers[category] != null) {
