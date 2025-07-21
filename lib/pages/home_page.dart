@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/theme_provider.dart';
 import '../models/category.dart';
 import '../models/deleted_category.dart';
@@ -17,8 +18,9 @@ class _HomePageState extends State<HomePage> {
   final DataService _dataService = DataService();
   final TextEditingController _categoryController = TextEditingController();
   final TextEditingController _taskNameController = TextEditingController();
-  final TextEditingController _taskDescriptionController = TextEditingController();
-  
+  final TextEditingController _taskDescriptionController =
+      TextEditingController();
+
   List<Category> _categories = [];
   bool _isLoading = true;
 
@@ -109,7 +111,8 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Check for duplicate names
-    if (_categories.any((cat) => cat.name.toLowerCase() == name.toLowerCase())) {
+    if (_categories
+        .any((cat) => cat.name.toLowerCase() == name.toLowerCase())) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Category name already exists')),
       );
@@ -128,7 +131,7 @@ class _HomePageState extends State<HomePage> {
     _saveData();
     _categoryController.clear();
     Navigator.pop(context);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Category "$name" added')),
     );
@@ -136,7 +139,7 @@ class _HomePageState extends State<HomePage> {
 
   void _showEditCategoryDialog(Category category) {
     _categoryController.text = category.name;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -179,8 +182,8 @@ class _HomePageState extends State<HomePage> {
     }
 
     // Check for duplicate names (excluding current category)
-    if (_categories.any((cat) => 
-        cat.id != category.id && 
+    if (_categories.any((cat) =>
+        cat.id != category.id &&
         cat.name.toLowerCase() == name.toLowerCase())) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Category name already exists')),
@@ -198,7 +201,7 @@ class _HomePageState extends State<HomePage> {
     _saveData();
     _categoryController.clear();
     Navigator.pop(context);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Category renamed to "$name"')),
     );
@@ -248,9 +251,10 @@ class _HomePageState extends State<HomePage> {
     try {
       // Create deleted category for history
       final deletedCategory = DeletedCategory.fromCategory(category);
-      
+
       // Load existing deleted categories and add this one
-      final deletedCategories = await _dataService.loadDeletedCategoriesWithRecovery();
+      final deletedCategories =
+          await _dataService.loadDeletedCategoriesWithRecovery();
       deletedCategories.add(deletedCategory);
       await _dataService.saveDeletedCategories(deletedCategories);
 
@@ -264,7 +268,7 @@ class _HomePageState extends State<HomePage> {
       });
 
       await _saveData();
-      
+
       if (mounted) {
         Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -290,7 +294,8 @@ class _HomePageState extends State<HomePage> {
   Future<void> _undoDeleteCategory(DeletedCategory deletedCategory) async {
     try {
       // Remove from deleted categories
-      final deletedCategories = await _dataService.loadDeletedCategoriesWithRecovery();
+      final deletedCategories =
+          await _dataService.loadDeletedCategoriesWithRecovery();
       deletedCategories.removeWhere((dc) => dc.id == deletedCategory.id);
       await _dataService.saveDeletedCategories(deletedCategories);
 
@@ -303,10 +308,11 @@ class _HomePageState extends State<HomePage> {
       });
 
       await _saveData();
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Category "${restoredCategory.name}" restored')),
+          SnackBar(
+              content: Text('Category "${restoredCategory.name}" restored')),
         );
       }
     } catch (e) {
@@ -325,13 +331,13 @@ class _HomePageState extends State<HomePage> {
       }
       final category = _categories.removeAt(oldIndex);
       _categories.insert(newIndex, category);
-      
+
       // Update sort orders
       for (int i = 0; i < _categories.length; i++) {
         _categories[i] = _categories[i].copyWith(sortOrder: i);
       }
     });
-    
+
     _saveData();
   }
 
@@ -401,7 +407,8 @@ class _HomePageState extends State<HomePage> {
     );
 
     setState(() {
-      final categoryIndex = _categories.indexWhere((cat) => cat.id == category.id);
+      final categoryIndex =
+          _categories.indexWhere((cat) => cat.id == category.id);
       if (categoryIndex != -1) {
         _categories[categoryIndex].addTask(newTask);
       }
@@ -411,7 +418,7 @@ class _HomePageState extends State<HomePage> {
     _taskNameController.clear();
     _taskDescriptionController.clear();
     Navigator.pop(context);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Task "$name" added to ${category.name}')),
     );
@@ -420,7 +427,7 @@ class _HomePageState extends State<HomePage> {
   void _showEditTaskDialog(Category category, Task task) {
     _taskNameController.text = task.name;
     _taskDescriptionController.text = task.description;
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -485,7 +492,8 @@ class _HomePageState extends State<HomePage> {
     );
 
     setState(() {
-      final categoryIndex = _categories.indexWhere((cat) => cat.id == category.id);
+      final categoryIndex =
+          _categories.indexWhere((cat) => cat.id == category.id);
       if (categoryIndex != -1) {
         _categories[categoryIndex].updateTask(updatedTask);
       }
@@ -495,7 +503,7 @@ class _HomePageState extends State<HomePage> {
     _taskNameController.clear();
     _taskDescriptionController.clear();
     Navigator.pop(context);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Task "$name" updated')),
     );
@@ -527,7 +535,8 @@ class _HomePageState extends State<HomePage> {
 
   void _deleteTask(Category category, Task task) {
     setState(() {
-      final categoryIndex = _categories.indexWhere((cat) => cat.id == category.id);
+      final categoryIndex =
+          _categories.indexWhere((cat) => cat.id == category.id);
       if (categoryIndex != -1) {
         _categories[categoryIndex].removeTask(task);
       }
@@ -535,7 +544,7 @@ class _HomePageState extends State<HomePage> {
 
     _saveData();
     Navigator.pop(context);
-    
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Task "${task.name}" deleted')),
     );
@@ -548,7 +557,8 @@ class _HomePageState extends State<HomePage> {
     );
 
     setState(() {
-      final categoryIndex = _categories.indexWhere((cat) => cat.id == category.id);
+      final categoryIndex =
+          _categories.indexWhere((cat) => cat.id == category.id);
       if (categoryIndex != -1) {
         _categories[categoryIndex].updateTask(updatedTask);
       }
@@ -585,9 +595,10 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       );
-      
+
       // Check if category is now fully completed
-      final updatedCategory = _categories.firstWhere((cat) => cat.id == category.id);
+      final updatedCategory =
+          _categories.firstWhere((cat) => cat.id == category.id);
       if (updatedCategory.isCompleted) {
         Future.delayed(const Duration(milliseconds: 500), () {
           if (mounted) {
@@ -595,12 +606,6 @@ class _HomePageState extends State<HomePage> {
               SnackBar(
                 content: Row(
                   children: [
-                    const Icon(
-                      Icons.celebration,
-                      color: Colors.white,
-                      size: 24,
-                    ),
-                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         'Category "${category.name}" completed!',
@@ -681,12 +686,13 @@ class _HomePageState extends State<HomePage> {
 
   void _reorderTasks(Category category, int oldIndex, int newIndex) {
     setState(() {
-      final categoryIndex = _categories.indexWhere((cat) => cat.id == category.id);
+      final categoryIndex =
+          _categories.indexWhere((cat) => cat.id == category.id);
       if (categoryIndex != -1) {
         _categories[categoryIndex].reorderTasks(oldIndex, newIndex);
       }
     });
-    
+
     _saveData();
   }
 
@@ -714,20 +720,20 @@ class _HomePageState extends State<HomePage> {
             ),
             const SizedBox(height: 24),
             Text(
-              'Welcome to Task Manager!',
+              'Welcome to Tooran!',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: Colors.grey[700],
-                fontWeight: FontWeight.bold,
-              ),
+                    color: Colors.grey[700],
+                    fontWeight: FontWeight.bold,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 12),
             Text(
               'Organize your tasks into categories\nand stay productive',
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[600],
-                height: 1.5,
-              ),
+                    color: Colors.grey[600],
+                    height: 1.5,
+                  ),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -736,7 +742,8 @@ class _HomePageState extends State<HomePage> {
               icon: const Icon(Icons.add),
               label: const Text('Create Your First Category'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(25),
                 ),
@@ -746,8 +753,8 @@ class _HomePageState extends State<HomePage> {
             Text(
               'Or explore the app features in Help',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Colors.grey[500],
-              ),
+                    color: Colors.grey[500],
+                  ),
             ),
           ],
         ),
@@ -814,7 +821,7 @@ class _HomePageState extends State<HomePage> {
                     index: index,
                     child: Icon(
                       Icons.drag_handle,
-                      color: Colors.grey[600],
+                      color: Colors.transparent,
                     ),
                   ),
                 ],
@@ -838,7 +845,8 @@ class _HomePageState extends State<HomePage> {
                               value: category.progressPercentage,
                               backgroundColor: Colors.grey[300],
                               valueColor: AlwaysStoppedAnimation<Color>(
-                                themeProvider.getProgressColor(category.progressPercentage),
+                                themeProvider.getProgressColor(
+                                    category.progressPercentage),
                               ),
                             ),
                           ],
@@ -853,7 +861,8 @@ class _HomePageState extends State<HomePage> {
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: category.tasks.length,
-                    onReorder: (oldIndex, newIndex) => _reorderTasks(category, oldIndex, newIndex),
+                    onReorder: (oldIndex, newIndex) =>
+                        _reorderTasks(category, oldIndex, newIndex),
                     itemBuilder: (context, taskIndex) {
                       final task = category.tasks[taskIndex];
                       return Dismissible(
@@ -895,14 +904,16 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               Checkbox(
                                 value: task.isCompleted,
-                                onChanged: (value) => _toggleTaskCompletion(category, task),
+                                onChanged: (value) =>
+                                    _toggleTaskCompletion(category, task),
+                                visualDensity: VisualDensity.compact,
                               ),
                               ReorderableDragStartListener(
                                 index: taskIndex,
                                 child: Icon(
                                   Icons.drag_handle,
-                                  color: Colors.grey[600],
-                                  size: 20,
+                                  color: Colors.transparent,
+                                  size: 0,
                                 ),
                               ),
                             ],
@@ -911,36 +922,37 @@ class _HomePageState extends State<HomePage> {
                             builder: (context, themeProvider, child) {
                               return Text(
                                 task.name,
-                                style: themeProvider.getTaskTextStyle(task.isCompleted),
+                                style: themeProvider
+                                    .getTaskTextStyle(task.isCompleted),
                               );
                             },
                           ),
-                          subtitle: task.description.isNotEmpty
+                          /*    subtitle: task.description.isNotEmpty
                               ? Text(
                                   task.description,
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
                                 )
-                              : null,
+                              : null, */
                           onTap: () => _showTaskDetails(task),
                         ),
                       );
                     },
                   ),
-                
+
                 // Add task button
                 Padding(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(0),
                   child: TextButton.icon(
                     onPressed: () => _showAddTaskDialog(category),
                     icon: const Icon(Icons.add),
                     label: const Text('Add Task'),
                     style: TextButton.styleFrom(
-                      foregroundColor: Colors.blue,
+                      foregroundColor: const Color.fromARGB(255, 126, 153, 175),
                     ),
                   ),
                 ),
-                
+
                 // Empty state for tasks
                 if (category.tasks.isEmpty)
                   const Padding(
@@ -971,10 +983,10 @@ class _HomePageState extends State<HomePage> {
             Icon(
               Icons.task_alt,
               size: 28,
-              color: Colors.white,
+              color: const Color.fromARGB(255, 7, 152, 209),
             ),
             const SizedBox(width: 8),
-            const Text('Task Manager'),
+            const Text('Tooran'),
           ],
         ),
         actions: [
@@ -984,7 +996,9 @@ class _HomePageState extends State<HomePage> {
                 icon: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
                   child: Icon(
-                    themeProvider.isDarkMode ? Icons.light_mode : Icons.dark_mode,
+                    themeProvider.isDarkMode
+                        ? Icons.light_mode
+                        : Icons.dark_mode,
                     key: ValueKey(themeProvider.isDarkMode),
                   ),
                 ),
@@ -1010,6 +1024,9 @@ class _HomePageState extends State<HomePage> {
                 case 'about':
                   Navigator.pushNamed(context, '/about');
                   break;
+                case "update":
+                  launchUrl(Uri.parse("https://tooran.vercel.app"));
+                  break;
               }
             },
             itemBuilder: (context) => [
@@ -1018,6 +1035,7 @@ class _HomePageState extends State<HomePage> {
                 child: ListTile(
                   leading: Icon(Icons.history),
                   title: Text('History'),
+                  minLeadingWidth: 10,
                   contentPadding: EdgeInsets.zero,
                 ),
               ),
@@ -1043,6 +1061,14 @@ class _HomePageState extends State<HomePage> {
                 child: ListTile(
                   leading: Icon(Icons.info_outline),
                   title: Text('About'),
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'update',
+                child: ListTile(
+                  leading: Icon(Icons.update),
+                  title: Text('Check for Updates'),
                   contentPadding: EdgeInsets.zero,
                 ),
               ),

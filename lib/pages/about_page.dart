@@ -1,89 +1,247 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    
     return Scaffold(
       appBar: AppBar(
-        title: const Text('About'),
+        title: const Text('About Tooran'),
+        elevation: 0,
       ),
-      body: const Padding(
-        padding: EdgeInsets.all(16.0),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // App Header Section
             Center(
               child: Column(
                 children: [
-                  Icon(
-                    Icons.task_alt,
-                    size: 80,
-                    color: Colors.blue,
-                  ),
-                  SizedBox(height: 16),
+                  
+                  const SizedBox(height: 20),
                   Text(
-                    'Task Manager',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
+                    'Tooran',
+                    style: theme.textTheme.headlineLarge?.copyWith(
+                      fontWeight: FontWeight.w900,
+                      color: theme.primaryColor,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Version 1.0.0',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.grey,
+                  const SizedBox(height: 8),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.secondary.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Version 1.6.0',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: theme.colorScheme.secondary,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 32),
-            Text(
-              'About This App',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+            
+            const SizedBox(height: 40),
+            
+            // Mission Statement
+            _buildSection(
+              context,
+              'Our Mission',
+              'Tooran helps you to manage you tasks. We believe productivity should be simple, beautiful, and accessible to everyone.',
+              Icons.rocket_launch_rounded,
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Key Features
+            _buildSection(
+              context,
+              'Key Features',
+              null,
+              Icons.star_rounded,
+            ),
+            const SizedBox(height: 16),
+            
+            ..._buildFeatureList(context),
+            
+            const SizedBox(height: 32),
+            
+            // Developer Info
+            _buildSection(
+              context,
+              'Developer',
+              'Created with passion by Jiru Gutema, a dedicated software developer from Addis Ababa University, committed to building tools that make life more organized and productive.',
+              Icons.person_rounded,
+            ),
+            
+            const SizedBox(height: 32),
+            
+            // Copyright
+            Center(
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                
+                child: Column(
+                  children: [
+                    Text(
+                      '© 2025 Tooran',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'All rights reserved',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: theme.textTheme.bodySmall?.color?.withOpacity(0.7),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            SizedBox(height: 16),
-            Text(
-              'Task Manager is a simple and intuitive app designed to help you organize your tasks efficiently. Create categories, add tasks, track progress, and stay productive.',
-              style: TextStyle(fontSize: 16),
+            
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget _buildSection(BuildContext context, String title, String? description, IconData icon) {
+    final theme = Theme.of(context);
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(4),
+        
+              
             ),
-            SizedBox(height: 24),
+            const SizedBox(width: 12),
             Text(
-              'Features',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
+              title,
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
               ),
             ),
-            SizedBox(height: 8),
-            Text(
-              '• Category-based task organization\n'
-              '• Progress tracking with visual indicators\n'
-              '• Drag and drop reordering\n'
-              '• Dark and light theme support\n'
-              '• Automatic data persistence\n'
-              '• Task history and recovery',
-              style: TextStyle(fontSize: 16),
+          ],
+        ),
+        if (description != null) ...[
+          const SizedBox(height: 12),
+          Text(
+            description,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              height: 1.6,
             ),
-            SizedBox(height: 24),
-            Text(
-              'Built with Flutter',
-              style: TextStyle(
-                fontSize: 16,
-                fontStyle: FontStyle.italic,
-                color: Colors.grey,
+          ),
+        ],
+      ],
+    );
+  }
+  
+  List<Widget> _buildFeatureList(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    final features = [
+      {'title': 'Smart Categories', 'desc': 'Organize tasks with intelligent categorization'},
+      {'title': 'Progress Tracking', 'desc': 'Visual indicators and completion analytics'},
+      {'title': 'Drag & Drop', 'desc': 'Intuitive reordering for better organization'},
+      {'title': 'Adaptive Themes', 'desc': 'Beautiful dark and light mode support'},
+      {'title': 'Auto-Save', 'desc': 'Never lose your data with automatic persistence'},
+      {'title': 'Task Recovery', 'desc': 'Restore accidentally deleted items'},
+    ];
+    
+    return features.map((feature) => Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: theme.cardTheme.color,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(
+            color: theme.dividerColor.withOpacity(0.2),
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.secondary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              )
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    feature['title'] as String,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    feature['desc'] as String,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.textTheme.bodyMedium?.color?.withOpacity(0.8),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
       ),
+    )).toList();
+  }
+  
+  Widget _buildTechStack(BuildContext context) {
+    final theme = Theme.of(context);
+    
+    final technologies = [
+      {'name': 'Flutter', 'desc': 'Cross-platform UI framework'},
+      {'name': 'Dart', 'desc': 'Modern programming language'},
+      {'name': 'Material Design 3', 'desc': 'Latest design system'},
+      {'name': 'SharedPreferences', 'desc': 'Local data persistence'},
+    ];
+    
+    return Wrap(
+      spacing: 8,
+      runSpacing: 8,
+      children: technologies.map((tech) => Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: theme.primaryColor.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: theme.primaryColor.withOpacity(0.2),
+          ),
+        ),
+        child: Text(
+          tech['name'] as String,
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontWeight: FontWeight.w600,
+            color: theme.primaryColor,
+          ),
+        ),
+      )).toList(),
     );
   }
 }

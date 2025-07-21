@@ -128,7 +128,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(3),
           side: BorderSide(color: Colors.grey.shade100, width: 1),
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       ),
       
       expansionTileTheme: ExpansionTileThemeData(
@@ -144,14 +144,15 @@ class AppTheme {
         collapsedShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),
         ),
-        childrenPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       
       listTileTheme: ListTileThemeData(
         tileColor: Colors.transparent,
         textColor: lightText,
         iconColor: primaryPurple,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),
         ),
@@ -159,6 +160,8 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           fontSize: 15,
         ),
+        dense: true,
+        minVerticalPadding: 0,
       ),
       
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -231,7 +234,7 @@ class AppTheme {
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return primaryNeon;
+            return Colors.green;
           }
           return Colors.transparent;
         }),
@@ -365,7 +368,7 @@ class AppTheme {
             width: 1,
           ),
         ),
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       ),
       
       expansionTileTheme: ExpansionTileThemeData(
@@ -381,14 +384,15 @@ class AppTheme {
         collapsedShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),
         ),
-        childrenPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
       
       listTileTheme: ListTileThemeData(
         tileColor: Colors.transparent,
         textColor: darkText,
         iconColor: primaryNeon,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),
         ),
@@ -396,6 +400,8 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           fontSize: 15,
         ),
+        dense: true,
+        minVerticalPadding: 0,
       ),
       
       floatingActionButtonTheme: FloatingActionButtonThemeData(
@@ -472,7 +478,7 @@ class AppTheme {
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return primaryNeon;
+            return Colors.green;
           }
           return Colors.transparent;
         }),
