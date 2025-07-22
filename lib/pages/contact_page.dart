@@ -61,13 +61,11 @@ class ContactPage extends StatelessWidget {
             const SizedBox(height: 40),
 
             // Contact Methods
-            _buildSectionHeader(
-                context, 'Contact Information', Icons.contact_mail_rounded),
+            _buildSectionHeader(context, 'Contact Information'),
             const SizedBox(height: 16),
 
             _buildContactCard(
               context,
-              icon: Icons.email_rounded,
               title: 'Email Support',
               subtitle: 'jirudagutema@gmail.com',
               description: 'For general inquiries and support',
@@ -81,7 +79,6 @@ class ContactPage extends StatelessWidget {
 
             _buildContactCard(
               context,
-              icon: Icons.web_rounded,
               title: 'Official Website',
               subtitle: 'tooran.vercel.app',
               description: 'Visit our website for updates and news',
@@ -94,7 +91,6 @@ class ContactPage extends StatelessWidget {
 
             _buildContactCard(
               context,
-              icon: Icons.code_rounded,
               title: 'Source Code',
               subtitle: 'github.com/jirugutema/tooran',
               description: 'View source code and contribute',
@@ -106,8 +102,7 @@ class ContactPage extends StatelessWidget {
             const SizedBox(height: 40),
 
             // Developer Section
-            _buildSectionHeader(
-                context, 'About the Developer', Icons.person_rounded),
+            _buildSectionHeader(context, 'About the Developer'),
             const SizedBox(height: 16),
 
             Container(
@@ -124,16 +119,8 @@ class ContactPage extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      CircleAvatar(
-                        radius: 30,
-                        backgroundColor: theme.primaryColor.withOpacity(0.1),
-                        child: Icon(
-                          Icons.person_rounded,
-                          size: 30,
-                          color: theme.primaryColor,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
+                      // Removed CircleAvatar and Icon
+                      const SizedBox(width: 0),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -195,25 +182,12 @@ class ContactPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(
-      BuildContext context, String title, IconData icon) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     final theme = Theme.of(context);
 
     return Row(
       children: [
-        Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: theme.primaryColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            icon,
-            size: 20,
-            color: theme.primaryColor,
-          ),
-        ),
-        const SizedBox(width: 12),
+        // Removed Icon container
         Text(
           title,
           style: theme.textTheme.titleLarge?.copyWith(
@@ -226,7 +200,6 @@ class ContactPage extends StatelessWidget {
 
   Widget _buildContactCard(
     BuildContext context, {
-    required IconData icon,
     required String title,
     required String subtitle,
     required String description,
@@ -253,19 +226,8 @@ class ContactPage extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: theme.primaryColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Icon(
-                    icon,
-                    size: 24,
-                    color: theme.primaryColor,
-                  ),
-                ),
-                const SizedBox(width: 16),
+                // Removed Icon container
+                const SizedBox(width: 0),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -295,11 +257,8 @@ class ContactPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 16,
-                  color: theme.textTheme.bodySmall?.color?.withOpacity(0.5),
-                ),
+                // Removed arrow icon
+                const SizedBox(width: 0),
               ],
             ),
           ),
@@ -316,11 +275,8 @@ class ContactPage extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 12),
       child: Row(
         children: [
-          Text(
-            emoji,
-            style: const TextStyle(fontSize: 20),
-          ),
-          const SizedBox(width: 12),
+          // Removed emoji
+          const SizedBox(width: 0),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

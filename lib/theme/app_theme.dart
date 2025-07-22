@@ -3,15 +3,20 @@ import 'package:flutter/services.dart';
 
 class AppTheme {
   // Cool Modern Color Palette - Enhanced Cyberpunk inspired
-  static const Color primaryNeon = Color(0xFF00F5FF); // Cyan neon
-  static const Color primaryPurple = Color(0xFF8B5CF6); // Violet
-  static const Color primaryPink = Color(0xFFEC4899); // Hot pink
-  static const Color accentGreen = Color(0xFF10B981); // Emerald
-  static const Color accentOrange = Color(0xFFFF6B35); // Vibrant orange
-  static const Color electricBlue = Color(0xFF0066FF); // Electric blue
-  static const Color neonGreen = Color(0xFF39FF14); // Neon green
-  static const Color hotMagenta = Color(0xFFFF1493); // Hot magenta
-  
+  static const Color primaryNeon =
+      Color(0xFF06B6D4); // Cool cyan (modern & softer)
+  static const Color primaryPurple =
+      Color.fromARGB(255, 100, 101, 163); // Elegant indigo-violet
+  static const Color primaryPink =
+      Color(0xFFF472B6); // Soft hot pink (less harsh)
+  static const Color accentGreen = Color(0xFF34D399); // Fresh emerald-green
+  static const Color accentOrange = Color(0xFFF97316); // Warm modern orange
+  static const Color electricBlue = Color(0xFF3B82F6); // Vivid modern blue
+  static const Color neonGreen =
+      Color(0xFF22C55E); // Balanced green (less neon)
+  static const Color hotMagenta =
+      Color(0xFFE879F9); // Bright magenta with depth
+
   // Status colors
   static const Color success = Color(0xFF00FF88);
   static const Color warning = Color(0xFFFFD700);
@@ -19,29 +24,53 @@ class AppTheme {
   static const Color info = Color(0xFF00D4FF);
 
   // Light theme colors - Clean and modern
-  static const Color lightSurface = Color(0xFFFAFAFA);
-  static const Color lightBackground = Color(0xFFF5F7FA);
-  static const Color lightCard = Color(0xFFFFFFFF);
-  static const Color lightText = Color(0xFF1A1A1A);
-  static const Color lightTextSecondary = Color(0xFF6B7280);
+
+// Light theme colors - Clean and modern
+  static const Color lightSurface = Color(0xFFFAFAFB); // Soft white surface
+  static const Color lightBackground =
+      Color(0xFFF3F4F6); // Light gray background
+  static const Color lightCard = Color(0xFFFFFFFF); // Pure white card
+  static const Color lightText = Color(0xFF111827); // Deep neutral text
+  static const Color lightTextSecondary = Color(0xFF4B5563); // Muted gray text
+  static const Color lightBorder = Color(0xFFE5E7EB); // Subtle card borders
+  static const Color lightAccent = Color(0xFF3B82F6); // Modern blue accent
 
   // Dark theme colors - Deep space theme
-  static const Color darkSurface = Color(0xFF0A0A0F);
-  static const Color darkBackground = Color(0xFF111827);
-  static const Color darkCard = Color(0xFF1F2937);
-  static const Color darkCardGlass = Color(0x26FFFFFF); // Slightly higher opacity for glassmorphism
-  static const Color darkText = Color(0xFFFFFFFF);
-  static const Color darkTextSecondary = Color(0xFFD1D5DB);
+  static const Color darkSurface = Color(0xFF0D1117); // Near-black base
+  static const Color darkBackground =
+      Color(0xFF161B22); // Slightly lighter background
+  static const Color darkCard =
+      Color(0xFF1E2530); // Card containers with subtle contrast
+  static const Color darkCardGlass =
+      Color(0x33FFFFFF); // Translucent glassmorphism overlay
+  static const Color darkAccent =
+      Color(0xFF58A6FF); // Cool blue accent (GitHub-style)
+  static const Color darkAccentSecondary =
+      Color(0xFF3FB950); // Vibrant green accent
+  static const Color darkText = Color(0xFFFFFFFF); // Primary text
+  static const Color darkTextSecondary = Color(0xFF9CA3AF); // Muted gray text
+  static const Color darkBorder = Color(0xFF30363D); // Subtle borders/dividers
 
   // Cool gradient combinations with stops for smoother transitions
-  static const List<Color> neonGradient = [primaryNeon, primaryPurple];
+  static const List<Color> neonGradient = [
+    Color.fromARGB(255, 0, 200, 200),
+    primaryPurple
+  ];
   static const List<Color> sunsetGradient = [primaryPink, accentOrange];
   static const List<Color> forestGradient = [accentGreen, primaryPurple];
-  static const List<Color> spaceGradient = [Color(0xFF1A1A2E), Color(0xFF16213E), Color(0xFF0F3460)];
+  static const List<Color> spaceGradient = [
+    Color(0xFF1A1A2E),
+    Color(0xFF16213E),
+    Color(0xFF0F3460)
+  ];
   static const List<Color> electricGradient = [electricBlue, primaryNeon];
   static const List<Color> magentaGradient = [hotMagenta, primaryPink];
   static const List<Color> matrixGradient = [neonGreen, accentGreen];
-  static const List<Color> cyberpunkGradient = [primaryNeon, primaryPurple, primaryPink];
+  static const List<Color> cyberpunkGradient = [
+    primaryNeon,
+    primaryPurple,
+    primaryPink
+  ];
 
   // Light Theme - Clean and modern with subtle neon accents
   static ThemeData get lightTheme {
@@ -57,7 +86,7 @@ class AppTheme {
         background: lightBackground,
       ),
       scaffoldBackgroundColor: lightBackground,
-      
+
       // Modern typography without Google Fonts
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
@@ -104,7 +133,7 @@ class AppTheme {
           height: 1.4,
         ),
       ),
-      
+
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         foregroundColor: lightText,
@@ -119,7 +148,7 @@ class AppTheme {
         toolbarHeight: 80,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
-      
+
       cardTheme: CardTheme(
         color: lightCard,
         elevation: 0,
@@ -130,7 +159,7 @@ class AppTheme {
         ),
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       ),
-      
+
       expansionTileTheme: ExpansionTileThemeData(
         backgroundColor: lightCard,
         collapsedBackgroundColor: lightCard,
@@ -144,10 +173,11 @@ class AppTheme {
         collapsedShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),
         ),
-        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        childrenPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
-      
+
       listTileTheme: ListTileThemeData(
         tileColor: Colors.transparent,
         textColor: lightText,
@@ -163,7 +193,7 @@ class AppTheme {
         dense: true,
         minVerticalPadding: 0,
       ),
-      
+
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: primaryPurple,
         foregroundColor: Colors.white,
@@ -173,13 +203,13 @@ class AppTheme {
         ),
         iconSize: 26,
       ),
-      
+
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primaryNeon,
         linearTrackColor: Colors.grey[200],
         circularTrackColor: Colors.grey[200],
       ),
-      
+
       dialogTheme: DialogTheme(
         backgroundColor: lightCard,
         elevation: 24,
@@ -198,7 +228,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(3),
         ),
       ),
-      
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: Colors.grey[50],
@@ -212,7 +242,8 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(3),
-          borderSide: const BorderSide(color: primaryNeon, width: 2.5),
+          borderSide: const BorderSide(
+              color: Color.fromARGB(255, 40, 172, 10), width: 1.2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(3),
@@ -223,14 +254,15 @@ class AppTheme {
           fontWeight: FontWeight.w600,
         ),
         hintStyle: TextStyle(color: Colors.grey[400]),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       ),
-      
+
       iconTheme: const IconThemeData(
         color: primaryPurple,
         size: 24,
       ),
-      
+
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -239,12 +271,12 @@ class AppTheme {
           return Colors.transparent;
         }),
         checkColor: WidgetStateProperty.all(Colors.white),
-        side: const BorderSide(color: primaryNeon, width: 2),
+        side: const BorderSide(color: accentOrange, width: 2),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),
         ),
       ),
-      
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryPurple,
@@ -262,7 +294,7 @@ class AppTheme {
           ),
         ),
       ),
-      
+
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primaryPurple,
@@ -280,7 +312,7 @@ class AppTheme {
     );
   }
 
-  // Dark Theme - Cyberpunk/Space theme with neon accents
+  // Dark Theme - Cyberpunk/Space theme with neon accenthists
   static ThemeData get darkTheme {
     return ThemeData(
       brightness: Brightness.dark,
@@ -294,7 +326,7 @@ class AppTheme {
         background: darkBackground,
       ),
       scaffoldBackgroundColor: darkBackground,
-      
+
       // Futuristic typography
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
@@ -341,7 +373,7 @@ class AppTheme {
           height: 1.4,
         ),
       ),
-      
+
       appBarTheme: const AppBarTheme(
         backgroundColor: Colors.transparent,
         foregroundColor: darkText,
@@ -356,7 +388,7 @@ class AppTheme {
         toolbarHeight: 80,
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
-      
+
       cardTheme: CardTheme(
         color: darkCard,
         elevation: 0,
@@ -370,7 +402,7 @@ class AppTheme {
         ),
         margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
       ),
-      
+
       expansionTileTheme: ExpansionTileThemeData(
         backgroundColor: darkCard,
         collapsedBackgroundColor: darkCard,
@@ -384,10 +416,11 @@ class AppTheme {
         collapsedShape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(3),
         ),
-        childrenPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        childrenPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       ),
-      
+
       listTileTheme: ListTileThemeData(
         tileColor: Colors.transparent,
         textColor: darkText,
@@ -403,7 +436,7 @@ class AppTheme {
         dense: true,
         minVerticalPadding: 0,
       ),
-      
+
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: primaryNeon,
         foregroundColor: darkSurface,
@@ -413,13 +446,13 @@ class AppTheme {
         ),
         iconSize: 26,
       ),
-      
+
       progressIndicatorTheme: ProgressIndicatorThemeData(
         color: primaryNeon,
         linearTrackColor: Colors.grey[800],
         circularTrackColor: Colors.grey[800],
       ),
-      
+
       dialogTheme: DialogTheme(
         backgroundColor: darkCard,
         elevation: 24,
@@ -442,7 +475,7 @@ class AppTheme {
           ),
         ),
       ),
-      
+
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
         fillColor: darkBackground,
@@ -456,7 +489,8 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(3),
-          borderSide: const BorderSide(color: primaryNeon, width: 2.5),
+          borderSide: const BorderSide(
+              color: Color.fromARGB(255, 21, 172, 59), width: 1.2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(3),
@@ -467,14 +501,15 @@ class AppTheme {
           fontWeight: FontWeight.w600,
         ),
         hintStyle: TextStyle(color: Colors.grey[600]),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
       ),
-      
+
       iconTheme: const IconThemeData(
         color: primaryNeon,
         size: 24,
       ),
-      
+
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
@@ -488,7 +523,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(3),
         ),
       ),
-      
+
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: primaryNeon,
@@ -506,7 +541,7 @@ class AppTheme {
           ),
         ),
       ),
-      
+
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: primaryNeon,

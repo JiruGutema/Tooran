@@ -980,11 +980,6 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(
-              Icons.task_alt,
-              size: 28,
-              color: const Color.fromARGB(255, 7, 152, 209),
-            ),
             const SizedBox(width: 8),
             const Text('Tooran'),
           ],
@@ -1008,8 +1003,9 @@ class _HomePageState extends State<HomePage> {
             },
           ),
           PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert),
+            icon: const Icon(Icons.menu),
             tooltip: 'More options',
+            color: Theme.of(context).scaffoldBackgroundColor,
             onSelected: (value) {
               switch (value) {
                 case 'history':
@@ -1103,11 +1099,10 @@ class _HomePageState extends State<HomePage> {
       floatingActionButton: AnimatedScale(
         scale: _isLoading ? 0.0 : 1.0,
         duration: const Duration(milliseconds: 300),
-        child: FloatingActionButton.extended(
+        child: FloatingActionButton(
           onPressed: _isLoading ? null : _showAddCategoryDialog,
           tooltip: 'Add Category',
-          icon: const Icon(Icons.add),
-          label: const Text('Add Category'),
+          child: const Icon(Icons.add),
         ),
       ),
     );
