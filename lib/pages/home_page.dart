@@ -736,19 +736,6 @@ class _HomePageState extends State<HomePage> {
                   ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
-            ElevatedButton.icon(
-              onPressed: _showAddCategoryDialog,
-              icon: const Icon(Icons.add),
-              label: const Text('Create Your First Category'),
-              style: ElevatedButton.styleFrom(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(25),
-                ),
-              ),
-            ),
             const SizedBox(height: 16),
             Text(
               'Or explore the app features in Help',
