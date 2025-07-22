@@ -1,31 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/theme_provider.dart';
+import 'theme/app_theme.dart';
+import 'pages/home_page.dart';
+import 'pages/history_page.dart';
+import 'pages/help_page.dart';
+import 'pages/contact_page.dart';
+import 'pages/about_page.dart';
 
-import 'help_page.dart';
-import 'contact_page.dart';
-import 'home_page.dart';
-import 'about.dart';
-
-void main() {
-  runApp(ToDoApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(TaskManagerApp());
 }
 
-class ToDoApp extends StatelessWidget {
-  const ToDoApp({super.key});
+class TaskManagerApp extends StatelessWidget {
+  const TaskManagerApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      initialRoute: '/',
-      routes: {
-        '/': (context) => ToDoHomePage(),
-        '/help': (context) => HelpPage(),
-        '/contact': (context) => ContactPage(),
-        '/about':(context) => About(),
-      },
+    return ChangeNotifierProvider(
+      create: (context) => ThemeProvider()..loadThemePreference(),
+      child: Consumer<ThemeProvider>(
+        builder: (context, themeProvider, child) {
+          return MaterialApp(
+            title: 'Tooran',
+            debugShowCheckedModeBanner: false,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: themeProvider.themeMode,
+            initialRoute: '/',
+            routes: {
+              '/': (context) => HomePage(),
+              '/history': (context) => HistoryPage(),
+              '/help': (context) => HelpPage(),
+              '/contact': (context) => ContactPage(),
+              '/about': (context) => AboutPage(),
+            },
+          );
+        },
+      ),
     );
   }
 }
-
-
-

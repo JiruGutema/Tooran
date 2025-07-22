@@ -1,0 +1,2 @@
+/home/jiren/Desktop/Tooran/android/app/.cxx/Debug/2a54d6h2/x86_64/CMakeFiles/edit_cache.dir
+/home/jiren/Desktop/Tooran/android/app/.cxx/Debug/2a54d6h2/x86_64/CMakeFiles/rebuild_cache.dir
