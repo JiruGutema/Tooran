@@ -1,0 +1,2 @@
+/home/jiren/Desktop/Workspace/flutter/tooran/android/app/.cxx/Debug/3793p634/x86/CMakeFiles/edit_cache.dir
+/home/jiren/Desktop/Workspace/flutter/tooran/android/app/.cxx/Debug/3793p634/x86/CMakeFiles/rebuild_cache.dir

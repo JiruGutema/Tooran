@@ -1,0 +1,2 @@
+/home/jiren/dev/flutter/Tooran/android/app/.cxx/RelWithDebInfo/1lf2p2v4/x86_64/CMakeFiles/edit_cache.dir
+/home/jiren/dev/flutter/Tooran/android/app/.cxx/RelWithDebInfo/1lf2p2v4/x86_64/CMakeFiles/rebuild_cache.dir

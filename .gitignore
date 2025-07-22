@@ -20,9 +20,9 @@ migrate_working_dir/
 .idea/
 .vscode
 
-
-
-# The .vscode folder contains launch configuration and tasks you configure in
+upload-keystore.jks
+key.properties
+/android/key.properties
 # VS Code which you may wish to be included in version control, so this line
 # is commented out by default.
 #.vscode/
@@ -47,3 +47,68 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+
+# Flutter/Dart specific files
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+*.dart.js
+*.dart.js.map
+*.info.json
+*.symbol.json
+*.function.json
+*.node
+
+# Flutter dependency lock files
+flutter_gen/
+pubspec.lock
+
+# iOS-specific files
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework/
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+
+# Android-specific files
+android/.gradle/
+android/app/build/
+android/key.properties
+android/local.properties
+
+# Web-specific files
+web/.dart_tool/
+web/main.dart.js
+web/flutter_service_worker.js
+
+# Windows-specific files
+windows/CMakeLists.txt
+windows/flutter/ephemeral/
+
+# macOS-specific files
+macos/Flutter/ephemeral/
+macos/.symlinks/
+macos/Pods/
+
+# Linux-specific files
+linux/flutter/ephemeral/
+
+# IntelliJ / VS Code settings
+.idea/
+.vscode/
+
+# Logs and other OS-specific files
+*.log
+*.DS_Store
+*.swp
+*.swo
+*.swn
+Thumbs.db
+
+# Firebase related
+firebase_app_id_file.json
