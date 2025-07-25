@@ -805,6 +805,9 @@ class _HomePageState extends State<HomePage> {
           child: Card(
             margin: const EdgeInsets.symmetric(vertical: 4),
             child: ExpansionTile(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
               key: ValueKey('expansion_${category.id}'),
               title: Row(
                 children: [
