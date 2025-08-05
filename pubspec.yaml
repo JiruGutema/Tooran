@@ -47,6 +47,9 @@ dependencies:
   uuid: ^4.5.1
   provider: ^6.1.2
   google_fonts: ^6.2.1
+  flutter_local_notifications: ^17.2.3
+  timezone: ^0.9.4
+  permission_handler: ^11.3.1
 
 
 dev_dependencies:

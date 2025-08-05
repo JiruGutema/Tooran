@@ -31,7 +31,7 @@ class Category {
   bool get isCompleted => totalCount > 0 && completedCount == totalCount;
 
   factory Category.fromJson(Map<String, dynamic> json) {
-    return Category(
+    final category = Category(
       id: json['id'] ?? const Uuid().v4(),
       name: json['name'] ?? '',
       tasks: json['tasks'] != null
@@ -44,6 +44,8 @@ class Category {
           : DateTime.now(),
       sortOrder: json['sortOrder'] ?? 0,
     );
+    category._sortTasks();
+    return category;
   }
 
   Map<String, dynamic> toJson() {
@@ -74,6 +76,7 @@ class Category {
 
   void addTask(Task task) {
     tasks.add(task);
+    _sortTasks();
   }
 
   void removeTask(Task task) {
@@ -84,6 +87,7 @@ class Category {
     final index = tasks.indexWhere((t) => t.id == updatedTask.id);
     if (index != -1) {
       tasks[index] = updatedTask;
+      _sortTasks();
     }
   }
 
@@ -93,6 +97,42 @@ class Category {
     }
     final task = tasks.removeAt(oldIndex);
     tasks.insert(newIndex, task);
+  }
+
+  /// Sort tasks with upcoming deadlines appearing first
+  void _sortTasks() {
+    tasks.sort((a, b) {
+      // Completed tasks go to the bottom
+      if (a.isCompleted && !b.isCompleted) return 1;
+      if (!a.isCompleted && b.isCompleted) return -1;
+      
+      // Among incomplete tasks, prioritize by due date
+      if (!a.isCompleted && !b.isCompleted) {
+        final aDue = a.dueDateTime;
+        final bDue = b.dueDateTime;
+        
+        // Tasks with due dates come before tasks without due dates
+        if (aDue != null && bDue == null) return -1;
+        if (aDue == null && bDue != null) return 1;
+        
+        // Both have due dates - sort by due date (earliest first)
+        if (aDue != null && bDue != null) {
+          return aDue.compareTo(bDue);
+        }
+        
+        // Neither has due dates - sort by creation date (newest first)
+        return b.createdAt.compareTo(a.createdAt);
+      }
+      
+      // Among completed tasks, sort by completion date (most recent first)
+      if (a.isCompleted && b.isCompleted) {
+        final aCompleted = a.completedAt ?? a.createdAt;
+        final bCompleted = b.completedAt ?? b.createdAt;
+        return bCompleted.compareTo(aCompleted);
+      }
+      
+      return 0;
+    });
   }
 
   @override

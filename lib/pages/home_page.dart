@@ -6,6 +6,9 @@ import '../models/category.dart';
 import '../models/deleted_category.dart';
 import '../models/task.dart';
 import '../services/data_service.dart';
+import '../services/notification_service.dart';
+import '../widgets/due_date_input.dart';
+import '../widgets/due_date_display.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,6 +19,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final DataService _dataService = DataService();
+  final NotificationService _notificationService = NotificationService();
   final TextEditingController _categoryController = TextEditingController();
   final TextEditingController _taskNameController = TextEditingController();
   final TextEditingController _taskDescriptionController =
@@ -23,6 +27,10 @@ class _HomePageState extends State<HomePage> {
 
   List<Category> _categories = [];
   bool _isLoading = true;
+
+  // Due date state for task dialogs
+  DateTime? _selectedDueDate;
+  TimeOfDay? _selectedDueTime;
 
   @override
   void initState() {
@@ -249,6 +257,11 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _deleteCategory(Category category) async {
     try {
+      // Cancel notifications for all tasks in the category
+      for (final task in category.tasks) {
+        await _notificationService.cancelTaskNotifications(task.id);
+      }
+
       // Create deleted category for history
       final deletedCategory = DeletedCategory.fromCategory(category);
 
@@ -307,6 +320,13 @@ class _HomePageState extends State<HomePage> {
         _categories.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
       });
 
+      // Reschedule notifications for all tasks in the restored category
+      for (final task in restoredCategory.tasks) {
+        if (task.dueDateTime != null && !task.isCompleted) {
+          await _notificationService.scheduleTaskNotifications(task);
+        }
+      }
+
       await _saveData();
 
       if (mounted) {
@@ -343,39 +363,58 @@ class _HomePageState extends State<HomePage> {
 
   // Task Management Methods
   void _showAddTaskDialog(Category category) {
+    // Reset due date state for new task
+    _selectedDueDate = null;
+    _selectedDueTime = null;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Add Task'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _taskNameController,
-              decoration: const InputDecoration(
-                labelText: 'Task Name',
-                hintText: 'Enter task name',
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _taskNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Task Name',
+                  hintText: 'Enter task name',
+                ),
+                autofocus: true,
+                onSubmitted: (_) => _addTask(category),
               ),
-              autofocus: true,
-              onSubmitted: (_) => _addTask(category),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _taskDescriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description (Optional)',
-                hintText: 'Enter task description',
+              const SizedBox(height: 16),
+              TextField(
+                controller: _taskDescriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description (Optional)',
+                  hintText: 'Enter task description',
+                ),
+                maxLines: 3,
+                onSubmitted: (_) => _addTask(category),
               ),
-              maxLines: 3,
-              onSubmitted: (_) => _addTask(category),
-            ),
-          ],
+              const SizedBox(height: 20),
+              DueDateInput(
+                initialDate: _selectedDueDate,
+                initialTime: _selectedDueTime,
+                onChanged: (date, time) {
+                  setState(() {
+                    _selectedDueDate = date;
+                    _selectedDueTime = time;
+                  });
+                },
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () {
               _taskNameController.clear();
               _taskDescriptionController.clear();
+              _selectedDueDate = null;
+              _selectedDueTime = null;
               Navigator.pop(context);
             },
             child: const Text('Cancel'),
@@ -389,10 +428,12 @@ class _HomePageState extends State<HomePage> {
     ).then((_) {
       _taskNameController.clear();
       _taskDescriptionController.clear();
+      _selectedDueDate = null;
+      _selectedDueTime = null;
     });
   }
 
-  void _addTask(Category category) {
+  void _addTask(Category category) async {
     final name = _taskNameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -401,9 +442,23 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
+    // Validate due date if set
+    if (_selectedDueDate != null || _selectedDueTime != null) {
+      final validationError =
+          _validateDueDateTime(_selectedDueDate, _selectedDueTime);
+      if (validationError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(validationError)),
+        );
+        return;
+      }
+    }
+
     final newTask = Task(
       name: name,
       description: _taskDescriptionController.text.trim(),
+      dueDate: _selectedDueDate,
+      dueTime: _selectedDueTime,
     );
 
     setState(() {
@@ -414,9 +469,16 @@ class _HomePageState extends State<HomePage> {
       }
     });
 
+    // Schedule notifications for the new task if it has a due date
+    if (newTask.dueDateTime != null) {
+      await _notificationService.scheduleTaskNotifications(newTask);
+    }
+
     _saveData();
     _taskNameController.clear();
     _taskDescriptionController.clear();
+    _selectedDueDate = null;
+    _selectedDueTime = null;
     Navigator.pop(context);
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -428,39 +490,58 @@ class _HomePageState extends State<HomePage> {
     _taskNameController.text = task.name;
     _taskDescriptionController.text = task.description;
 
+    // Set due date state from existing task
+    _selectedDueDate = task.dueDate;
+    _selectedDueTime = task.dueTime;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Edit Task'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _taskNameController,
-              decoration: const InputDecoration(
-                labelText: 'Task Name',
-                hintText: 'Enter task name',
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _taskNameController,
+                decoration: const InputDecoration(
+                  labelText: 'Task Name',
+                  hintText: 'Enter task name',
+                ),
+                autofocus: true,
+                onSubmitted: (_) => _editTask(category, task),
               ),
-              autofocus: true,
-              onSubmitted: (_) => _editTask(category, task),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _taskDescriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description (Optional)',
-                hintText: 'Enter task description',
+              const SizedBox(height: 16),
+              TextField(
+                controller: _taskDescriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Description (Optional)',
+                  hintText: 'Enter task description',
+                ),
+                maxLines: 3,
+                onSubmitted: (_) => _editTask(category, task),
               ),
-              maxLines: 3,
-              onSubmitted: (_) => _editTask(category, task),
-            ),
-          ],
+              const SizedBox(height: 20),
+              DueDateInput(
+                initialDate: _selectedDueDate,
+                initialTime: _selectedDueTime,
+                onChanged: (date, time) {
+                  setState(() {
+                    _selectedDueDate = date;
+                    _selectedDueTime = time;
+                  });
+                },
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
             onPressed: () {
               _taskNameController.clear();
               _taskDescriptionController.clear();
+              _selectedDueDate = null;
+              _selectedDueTime = null;
               Navigator.pop(context);
             },
             child: const Text('Cancel'),
@@ -474,10 +555,12 @@ class _HomePageState extends State<HomePage> {
     ).then((_) {
       _taskNameController.clear();
       _taskDescriptionController.clear();
+      _selectedDueDate = null;
+      _selectedDueTime = null;
     });
   }
 
-  void _editTask(Category category, Task task) {
+  void _editTask(Category category, Task task) async {
     final name = _taskNameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -486,9 +569,25 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
+    // Validate due date if set
+    if (_selectedDueDate != null || _selectedDueTime != null) {
+      final validationError =
+          _validateDueDateTime(_selectedDueDate, _selectedDueTime);
+      if (validationError != null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(validationError)),
+        );
+        return;
+      }
+    }
+
     final updatedTask = task.copyWith(
       name: name,
       description: _taskDescriptionController.text.trim(),
+      dueDate: _selectedDueDate,
+      dueTime: _selectedDueTime,
+      clearDueDate: _selectedDueDate == null,
+      clearDueTime: _selectedDueTime == null,
     );
 
     setState(() {
@@ -499,9 +598,17 @@ class _HomePageState extends State<HomePage> {
       }
     });
 
+    // Cancel old notifications and schedule new ones if needed
+    await _notificationService.cancelTaskNotifications(task.id);
+    if (updatedTask.dueDateTime != null && !updatedTask.isCompleted) {
+      await _notificationService.scheduleTaskNotifications(updatedTask);
+    }
+
     _saveData();
     _taskNameController.clear();
     _taskDescriptionController.clear();
+    _selectedDueDate = null;
+    _selectedDueTime = null;
     Navigator.pop(context);
 
     ScaffoldMessenger.of(context).showSnackBar(
@@ -533,7 +640,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _deleteTask(Category category, Task task) {
+  void _deleteTask(Category category, Task task) async {
     setState(() {
       final categoryIndex =
           _categories.indexWhere((cat) => cat.id == category.id);
@@ -541,6 +648,9 @@ class _HomePageState extends State<HomePage> {
         _categories[categoryIndex].removeTask(task);
       }
     });
+
+    // Cancel notifications for the deleted task
+    await _notificationService.cancelTaskNotifications(task.id);
 
     _saveData();
     Navigator.pop(context);
@@ -550,7 +660,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _toggleTaskCompletion(Category category, Task task) {
+  void _toggleTaskCompletion(Category category, Task task) async {
     final updatedTask = task.copyWith(
       isCompleted: !task.isCompleted,
       completedAt: !task.isCompleted ? DateTime.now() : null,
@@ -563,6 +673,15 @@ class _HomePageState extends State<HomePage> {
         _categories[categoryIndex].updateTask(updatedTask);
       }
     });
+
+    // Handle notifications based on completion status
+    if (updatedTask.isCompleted) {
+      // Cancel notifications when task is completed
+      await _notificationService.cancelTaskNotifications(task.id);
+    } else if (updatedTask.dueDateTime != null) {
+      // Reschedule notifications when task is uncompleted
+      await _notificationService.scheduleTaskNotifications(updatedTask);
+    }
 
     _saveData();
 
@@ -649,6 +768,15 @@ class _HomePageState extends State<HomePage> {
               Text(task.description),
               const SizedBox(height: 16),
             ],
+            if (task.dueDateTime != null) ...[
+              const Text(
+                'Due Date:',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              TaskDetailDueDateDisplay(task: task),
+              const SizedBox(height: 16),
+            ],
             Text(
               'Status: ${task.isCompleted ? "Completed" : "Pending"}',
               style: TextStyle(
@@ -682,6 +810,46 @@ class _HomePageState extends State<HomePage> {
 
   String _formatDate(DateTime date) {
     return '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+
+  // Validation function for due date and time
+  String? _validateDueDateTime(DateTime? dueDate, TimeOfDay? dueTime) {
+    if (dueDate == null && dueTime == null) {
+      return null; // Both null is valid (no due date)
+    }
+
+    final now = DateTime.now();
+
+    // If only time is set, assume today's date
+    final effectiveDate = dueDate ?? now;
+
+    // Check if date is in the past
+    if (_isSameDay(effectiveDate, now)) {
+      // If it's today, check the time
+      if (dueTime != null) {
+        final dueDateTime = DateTime(
+          effectiveDate.year,
+          effectiveDate.month,
+          effectiveDate.day,
+          dueTime.hour,
+          dueTime.minute,
+        );
+
+        if (dueDateTime.isBefore(now)) {
+          return 'Due time cannot be in the past';
+        }
+      }
+    } else if (effectiveDate.isBefore(DateTime(now.year, now.month, now.day))) {
+      return 'Due date cannot be in the past';
+    }
+
+    return null;
+  }
+
+  bool _isSameDay(DateTime date1, DateTime date2) {
+    return date1.year == date2.year &&
+        date1.month == date2.month &&
+        date1.day == date2.day;
   }
 
   void _reorderTasks(Category category, int oldIndex, int newIndex) {
@@ -910,20 +1078,36 @@ class _HomePageState extends State<HomePage> {
                           ),
                           title: Consumer<ThemeProvider>(
                             builder: (context, themeProvider, child) {
-                              return Text(
-                                task.name,
-                                style: themeProvider
-                                    .getTaskTextStyle(task.isCompleted),
+                              return Row(
+                                children: [
+                                  // Colored dot for due date status
+                                  if (task.dueDateTime != null) ...[
+                                    Container(
+                                      width: 8,
+                                      height: 8,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: task.isCompleted
+                                            ? Colors.green
+                                            : task.isOverdue
+                                                ? Colors.red
+                                                : Colors.grey,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  // Task name
+                                  Expanded(
+                                    child: Text(
+                                      task.name,
+                                      style: themeProvider
+                                          .getTaskTextStyle(task.isCompleted),
+                                    ),
+                                  ),
+                                ],
                               );
                             },
                           ),
-                          /*    subtitle: task.description.isNotEmpty
-                              ? Text(
-                                  task.description,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                )
-                              : null, */
                           onTap: () => _showTaskDetails(task),
                         ),
                       );
