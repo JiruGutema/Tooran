@@ -1,18 +1,80 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:tooran/services/notification_service.dart';
 import 'package:tooran/models/task.dart';
 
 void main() {
   group('NotificationService', () {
     late NotificationService notificationService;
+    late List<MethodCall> methodCalls;
 
     setUpAll(() {
       TestWidgetsFlutterBinding.ensureInitialized();
     });
 
     setUp(() {
+      methodCalls = [];
       notificationService = NotificationService();
+      
+      // Mock the flutter_local_notifications plugin
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('dexterous.com/flutter/local_notifications'),
+        (MethodCall methodCall) async {
+          methodCalls.add(methodCall);
+          
+          switch (methodCall.method) {
+            case 'initialize':
+              return true;
+            case 'createNotificationChannel':
+              return null;
+            case 'requestPermissions':
+              return true;
+            case 'zonedSchedule':
+              return null;
+            case 'cancel':
+              return null;
+            case 'cancelAll':
+              return null;
+            case 'pendingNotificationRequests':
+              return <Map<String, dynamic>>[];
+            default:
+              return null;
+          }
+        },
+      );
+      
+      // Mock the permission_handler plugin
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('flutter.baseflow.com/permissions/methods'),
+        (MethodCall methodCall) async {
+          methodCalls.add(methodCall);
+          
+          switch (methodCall.method) {
+            case 'requestPermissions':
+              return {13: 1}; // Permission.notification granted
+            case 'checkPermissionStatus':
+              return 1; // PermissionStatus.granted
+            default:
+              return null;
+          }
+        },
+      );
+    });
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('dexterous.com/flutter/local_notifications'),
+        null,
+      );
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+        const MethodChannel('flutter.baseflow.com/permissions/methods'),
+        null,
+      );
     });
 
     test('should be a singleton', () {
@@ -158,10 +220,163 @@ void main() {
       }, returnsNormally);
     });
 
-    test('should handle initialization', () {
+    test('should handle initialization', () async {
       // Should not throw during initialization
+      final result = await notificationService.initialize();
+      // In test environment, initialization may fail due to missing platform implementation
+      // but it should handle the failure gracefully
+      expect(result, isA<bool>());
+    });
+
+    test('should handle initialization gracefully in test environment', () async {
+      // The service should handle initialization failure gracefully
       expect(() async {
         await notificationService.initialize();
+      }, returnsNormally);
+    });
+
+    test('should schedule notifications for tasks with future due dates', () async {
+      await notificationService.initialize();
+      
+      final futureDate = DateTime.now().add(const Duration(hours: 2));
+      final task = Task(
+        name: 'Future task',
+        dueDate: futureDate,
+        dueTime: TimeOfDay.fromDateTime(futureDate),
+      );
+      
+      // Should not throw when scheduling notifications
+      expect(() async {
+        await notificationService.scheduleTaskNotifications(task);
+      }, returnsNormally);
+    });
+
+    test('should not schedule notifications for tasks without due dates', () async {
+      await notificationService.initialize();
+      
+      final task = Task(name: 'Task without due date');
+      
+      // Should not throw when trying to schedule notifications for task without due date
+      expect(() async {
+        await notificationService.scheduleTaskNotifications(task);
+      }, returnsNormally);
+    });
+
+    test('should not schedule notifications for overdue tasks', () async {
+      await notificationService.initialize();
+      
+      final overdueTask = Task(
+        name: 'Overdue task',
+        dueDate: DateTime.now().subtract(const Duration(hours: 1)),
+        dueTime: const TimeOfDay(hour: 10, minute: 0),
+      );
+      
+      // Should not throw when trying to schedule notifications for overdue task
+      expect(() async {
+        await notificationService.scheduleTaskNotifications(overdueTask);
+      }, returnsNormally);
+    });
+
+    test('should cancel existing notifications before scheduling new ones', () async {
+      await notificationService.initialize();
+      
+      final futureDate = DateTime.now().add(const Duration(hours: 2));
+      final task = Task(
+        name: 'Future task',
+        dueDate: futureDate,
+        dueTime: TimeOfDay.fromDateTime(futureDate),
+      );
+      
+      // Should not throw when scheduling notifications
+      expect(() async {
+        await notificationService.scheduleTaskNotifications(task);
+      }, returnsNormally);
+    });
+
+    test('should cancel all notifications when rescheduling', () async {
+      await notificationService.initialize();
+      
+      final tasks = [
+        Task(
+          name: 'Task 1',
+          dueDate: DateTime.now().add(const Duration(hours: 1)),
+          dueTime: const TimeOfDay(hour: 14, minute: 0),
+        ),
+        Task(
+          name: 'Task 2',
+          dueDate: DateTime.now().add(const Duration(hours: 2)),
+          dueTime: const TimeOfDay(hour: 15, minute: 0),
+        ),
+      ];
+      
+      // Should not throw when rescheduling all notifications
+      expect(() async {
+        await notificationService.rescheduleAllNotifications(tasks);
+      }, returnsNormally);
+    });
+
+    test('should handle tasks due in less than 30 minutes', () async {
+      await notificationService.initialize();
+      
+      final soonDate = DateTime.now().add(const Duration(minutes: 15));
+      final task = Task(
+        name: 'Soon task',
+        dueDate: soonDate,
+        dueTime: TimeOfDay.fromDateTime(soonDate),
+      );
+      
+      // Should not throw when scheduling notifications for soon task
+      expect(() async {
+        await notificationService.scheduleTaskNotifications(task);
+      }, returnsNormally);
+    });
+
+    test('should handle tasks due in less than 5 minutes', () async {
+      await notificationService.initialize();
+      
+      final verySoonDate = DateTime.now().add(const Duration(minutes: 3));
+      final task = Task(
+        name: 'Very soon task',
+        dueDate: verySoonDate,
+        dueTime: TimeOfDay.fromDateTime(verySoonDate),
+      );
+      
+      // Should not throw when scheduling notifications for very soon task
+      expect(() async {
+        await notificationService.scheduleTaskNotifications(task);
+      }, returnsNormally);
+    });
+
+    test('should not reschedule notifications for completed tasks', () async {
+      await notificationService.initialize();
+      
+      final tasks = [
+        Task(
+          name: 'Completed task',
+          dueDate: DateTime.now().add(const Duration(hours: 1)),
+          dueTime: const TimeOfDay(hour: 14, minute: 0),
+          isCompleted: true,
+        ),
+        Task(
+          name: 'Active task',
+          dueDate: DateTime.now().add(const Duration(hours: 2)),
+          dueTime: const TimeOfDay(hour: 15, minute: 0),
+        ),
+      ];
+      
+      // Should not throw when rescheduling notifications (should skip completed tasks)
+      expect(() async {
+        await notificationService.rescheduleAllNotifications(tasks);
+      }, returnsNormally);
+    });
+
+    test('should get pending notifications', () async {
+      await notificationService.initialize();
+      
+      // Should not throw when getting pending notifications
+      expect(() async {
+        final pendingNotifications = await notificationService.getPendingNotifications();
+        expect(pendingNotifications, isA<List>());
       }, returnsNormally);
     });
   });

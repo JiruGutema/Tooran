@@ -6,9 +6,76 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import '../models/task.dart';
 
+/// Enum for notification error categories
+enum NotificationErrorType {
+  initialization,
+  permission,
+  scheduling,
+  cancellation,
+  timezone,
+  platform,
+  unknown
+}
+
+/// Class to represent notification logs
+class NotificationLog {
+  final DateTime timestamp;
+  final String level; // INFO, WARNING, ERROR
+  final String event;
+  final Map<String, dynamic> data;
+  final String? error;
+  final NotificationErrorType? errorType;
+
+  NotificationLog({
+    required this.timestamp,
+    required this.level,
+    required this.event,
+    required this.data,
+    this.error,
+    this.errorType,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'timestamp': timestamp.toIso8601String(),
+    'level': level,
+    'event': event,
+    'data': data,
+    'error': error,
+    'errorType': errorType?.name,
+  };
+}
+
+/// Class to represent notification status
+class NotificationStatus {
+  final bool isInitialized;
+  final bool hasPermissions;
+  final bool canScheduleExactAlarms;
+  final int pendingNotificationsCount;
+  final List<String> errors;
+  final Map<String, dynamic> systemInfo;
+
+  NotificationStatus({
+    required this.isInitialized,
+    required this.hasPermissions,
+    required this.canScheduleExactAlarms,
+    required this.pendingNotificationsCount,
+    required this.errors,
+    required this.systemInfo,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'isInitialized': isInitialized,
+    'hasPermissions': hasPermissions,
+    'canScheduleExactAlarms': canScheduleExactAlarms,
+    'pendingNotificationsCount': pendingNotificationsCount,
+    'errors': errors,
+    'systemInfo': systemInfo,
+  };
+}
+
 class NotificationService {
-  static const String _30_MIN_CHANNEL = 'task_30_min_reminder';
-  static const String _5_MIN_CHANNEL = 'task_5_min_reminder';
+  static const String _thirtyMinChannel = 'task_30_min_reminder';
+  static const String _fiveMinChannel = 'task_5_min_reminder';
   
   static final NotificationService _instance = NotificationService._internal();
   factory NotificationService() => _instance;
@@ -16,14 +83,115 @@ class NotificationService {
 
   final FlutterLocalNotificationsPlugin _notifications = FlutterLocalNotificationsPlugin();
   bool _isInitialized = false;
+  
+  // Logging system
+  final List<NotificationLog> _logs = [];
+  static const int _maxLogEntries = 100;
+  
+  // Error tracking
+  final List<String> _recentErrors = [];
+  static const int _maxErrorEntries = 20;
+
+  /// Log notification events with detailed information
+  void _logEvent(String level, String event, Map<String, dynamic> data, {String? error, NotificationErrorType? errorType}) {
+    final log = NotificationLog(
+      timestamp: DateTime.now(),
+      level: level,
+      event: event,
+      data: data,
+      error: error,
+      errorType: errorType,
+    );
+    
+    _logs.add(log);
+    
+    // Keep logs within limit
+    if (_logs.length > _maxLogEntries) {
+      _logs.removeAt(0);
+    }
+    
+    // Track errors separately
+    if (level == 'ERROR' && error != null) {
+      _recentErrors.add('${DateTime.now().toIso8601String()}: $error');
+      if (_recentErrors.length > _maxErrorEntries) {
+        _recentErrors.removeAt(0);
+      }
+    }
+    
+    // Debug print for development
+    if (kDebugMode) {
+      final logMessage = '[$level] $event: ${data.isNotEmpty ? data : ''}${error != null ? ' - Error: $error' : ''}';
+      debugPrint('NotificationService: $logMessage');
+    }
+  }
+
+  /// Log info level events
+  void _logInfo(String event, Map<String, dynamic> data) {
+    _logEvent('INFO', event, data);
+  }
+
+  /// Log warning level events
+  void _logWarning(String event, Map<String, dynamic> data, {String? error}) {
+    _logEvent('WARNING', event, data, error: error);
+  }
+
+  /// Log error level events
+  void _logError(String event, Map<String, dynamic> data, String error, NotificationErrorType errorType) {
+    _logEvent('ERROR', event, data, error: error, errorType: errorType);
+  }
+
+  /// Get recent logs for debugging
+  List<NotificationLog> getRecentLogs({int? limit}) {
+    final logLimit = limit ?? _maxLogEntries;
+    if (_logs.length <= logLimit) {
+      return List.from(_logs);
+    }
+    return _logs.sublist(_logs.length - logLimit);
+  }
+
+  /// Get recent errors
+  List<String> getRecentErrors() {
+    return List.from(_recentErrors);
+  }
+
+  /// Clear all logs
+  void clearLogs() {
+    _logs.clear();
+    _recentErrors.clear();
+    _logInfo('logs_cleared', {'timestamp': DateTime.now().toIso8601String()});
+  }
 
   /// Initialize the notification service
-  Future<bool> initialize() async {
-    if (_isInitialized) return true;
+  Future<bool> initialize({bool forceReinit = false}) async {
+    _logInfo('initialize_start', {
+      'isInitialized': _isInitialized,
+      'forceReinit': forceReinit,
+      'platform': Platform.operatingSystem,
+    });
+
+    if (_isInitialized && !forceReinit) {
+      _logInfo('initialize_already_done', {'status': 'success'});
+      return true;
+    }
 
     try {
       // Initialize timezone data
+      _logInfo('timezone_init_start', {});
       tz.initializeTimeZones();
+      
+      // Set local timezone location
+      final String timeZoneName = DateTime.now().timeZoneName;
+      try {
+        tz.setLocalLocation(tz.getLocation(timeZoneName));
+        _logInfo('timezone_set_success', {'timezone': timeZoneName});
+      } catch (e) {
+        // Fallback to UTC if local timezone is not found
+        tz.setLocalLocation(tz.getLocation('UTC'));
+        _logWarning('timezone_fallback_utc', {
+          'originalTimezone': timeZoneName,
+          'fallbackTimezone': 'UTC'
+        }, error: e.toString());
+      }
 
       // Android initialization settings
       const AndroidInitializationSettings androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -40,19 +208,33 @@ class NotificationService {
         iOS: iosSettings,
       );
 
+      _logInfo('plugin_init_start', {});
       final bool? initialized = await _notifications.initialize(
         initSettings,
         onDidReceiveNotificationResponse: _onNotificationTapped,
       );
 
       if (initialized == true) {
+        _logInfo('plugin_init_success', {});
+        
         await _createNotificationChannels();
-        await _requestPermissions();
+        final hasPermissions = await _requestPermissions();
+        
         _isInitialized = true;
+        _logInfo('initialize_complete', {
+          'hasPermissions': hasPermissions,
+          'timezone': tz.local.name,
+        });
         return true;
+      } else {
+        _logError('plugin_init_failed', {
+          'initialized': initialized,
+        }, 'Plugin initialization returned false or null', NotificationErrorType.initialization);
       }
-    } catch (e) {
-      debugPrint('Failed to initialize notifications: $e');
+    } catch (e, stackTrace) {
+      _logError('initialize_exception', {
+        'stackTrace': stackTrace.toString(),
+      }, e.toString(), NotificationErrorType.initialization);
     }
     
     return false;
@@ -60,33 +242,53 @@ class NotificationService {
 
   /// Create notification channels for Android
   Future<void> _createNotificationChannels() async {
-    if (!Platform.isAndroid) return;
+    if (!Platform.isAndroid) {
+      _logInfo('channels_skip_non_android', {'platform': Platform.operatingSystem});
+      return;
+    }
 
-    // 30-minute reminder channel
-    const AndroidNotificationChannel channel30Min = AndroidNotificationChannel(
-      _30_MIN_CHANNEL,
-      '30 Minute Reminders',
-      description: 'Notifications sent 30 minutes before task due time',
-      importance: Importance.high,
-      playSound: true,
-    );
+    _logInfo('channels_create_start', {});
 
-    // 5-minute reminder channel
-    const AndroidNotificationChannel channel5Min = AndroidNotificationChannel(
-      _5_MIN_CHANNEL,
-      '5 Minute Reminders',
-      description: 'Notifications sent 5 minutes before task due time',
-      importance: Importance.max,
-      playSound: true,
-    );
+    try {
+      // 30-minute reminder channel
+      const AndroidNotificationChannel channel30Min = AndroidNotificationChannel(
+        _thirtyMinChannel,
+        '30 Minute Reminders',
+        description: 'Notifications sent 30 minutes before task due time',
+        importance: Importance.high,
+        playSound: true,
+      );
 
-    await _notifications
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel30Min);
+      // 5-minute reminder channel
+      const AndroidNotificationChannel channel5Min = AndroidNotificationChannel(
+        _fiveMinChannel,
+        '5 Minute Reminders',
+        description: 'Notifications sent 5 minutes before task due time',
+        importance: Importance.max,
+        playSound: true,
+      );
 
-    await _notifications
-        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(channel5Min);
+      final androidPlugin = _notifications
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+
+      if (androidPlugin == null) {
+        _logError('channels_android_plugin_null', {}, 
+          'Android plugin implementation is null', NotificationErrorType.platform);
+        return;
+      }
+
+      await androidPlugin.createNotificationChannel(channel30Min);
+      _logInfo('channel_created', {'channelId': _thirtyMinChannel, 'importance': 'high'});
+
+      await androidPlugin.createNotificationChannel(channel5Min);
+      _logInfo('channel_created', {'channelId': _fiveMinChannel, 'importance': 'max'});
+
+      _logInfo('channels_create_complete', {'channelsCreated': 2});
+    } catch (e, stackTrace) {
+      _logError('channels_create_failed', {
+        'stackTrace': stackTrace.toString(),
+      }, e.toString(), NotificationErrorType.platform);
+    }
   }
 
   /// Request notification permissions
@@ -137,7 +339,7 @@ class NotificationService {
         title: 'Task Due Soon',
         body: '${task.name} is due in 30 minutes',
         scheduledDate: thirtyMinBefore,
-        channelId: _30_MIN_CHANNEL,
+        channelId: _thirtyMinChannel,
         payload: 'task_${taskId}_30min',
       );
     }
@@ -150,7 +352,7 @@ class NotificationService {
         title: 'Task Due Very Soon!',
         body: '${task.name} is due in 5 minutes',
         scheduledDate: fiveMinBefore,
-        channelId: _5_MIN_CHANNEL,
+        channelId: _fiveMinChannel,
         payload: 'task_${taskId}_5min',
       );
     }
@@ -168,14 +370,23 @@ class NotificationService {
     try {
       final tz.TZDateTime tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
 
+      _logInfo('schedule_notification_start', {
+        'id': id,
+        'title': title,
+        'scheduledDate': scheduledDate.toIso8601String(),
+        'tzScheduledDate': tzScheduledDate.toIso8601String(),
+        'channelId': channelId,
+        'payload': payload,
+      });
+
       // Create platform-specific details with correct channel
       final platformDetails = NotificationDetails(
         android: AndroidNotificationDetails(
           channelId,
           'Task Reminders',
           channelDescription: 'Reminders for upcoming task due dates',
-          importance: channelId == _5_MIN_CHANNEL ? Importance.max : Importance.high,
-          priority: channelId == _5_MIN_CHANNEL ? Priority.max : Priority.high,
+          importance: channelId == _fiveMinChannel ? Importance.max : Importance.high,
+          priority: channelId == _fiveMinChannel ? Priority.max : Priority.high,
           showWhen: true,
         ),
         iOS: const DarwinNotificationDetails(
@@ -193,11 +404,22 @@ class NotificationService {
         platformDetails,
         payload: payload,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
       );
 
+      _logInfo('schedule_notification_success', {
+        'id': id,
+        'scheduledDate': scheduledDate.toIso8601String(),
+      });
+
       debugPrint('Scheduled notification $id for $scheduledDate');
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _logError('schedule_notification_failed', {
+        'id': id,
+        'scheduledDate': scheduledDate.toIso8601String(),
+        'stackTrace': stackTrace.toString(),
+      }, e.toString(), NotificationErrorType.scheduling);
+      
       debugPrint('Failed to schedule notification: $e');
     }
   }
@@ -259,5 +481,106 @@ class NotificationService {
   /// Get pending notifications (for debugging)
   Future<List<PendingNotificationRequest>> getPendingNotifications() async {
     return await _notifications.pendingNotificationRequests();
+  }
+
+  /// Send a test notification immediately (for debugging)
+  Future<void> sendTestNotification() async {
+    if (!_isInitialized) {
+      final initialized = await initialize();
+      if (!initialized) {
+        debugPrint('Cannot send test notification: service not initialized');
+        return;
+      }
+    }
+
+    try {
+      const platformDetails = NotificationDetails(
+        android: AndroidNotificationDetails(
+          _fiveMinChannel,
+          'Test Notification',
+          channelDescription: 'Test notification for debugging',
+          importance: Importance.max,
+          priority: Priority.max,
+          showWhen: true,
+        ),
+        iOS: DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      );
+
+      await _notifications.show(
+        999999, // Use a unique ID for test notifications
+        'Test Notification',
+        'This is a test notification from Tooran app',
+        platformDetails,
+        payload: 'test_notification',
+      );
+
+      debugPrint('Test notification sent successfully');
+    } catch (e) {
+      debugPrint('Failed to send test notification: $e');
+    }
+  }
+
+  /// Schedule a test notification for a specific time (for debugging)
+  Future<void> scheduleTestNotification({required Duration delay}) async {
+    if (!_isInitialized) {
+      final initialized = await initialize();
+      if (!initialized) {
+        debugPrint('Cannot schedule test notification: service not initialized');
+        return;
+      }
+    }
+
+    try {
+      final scheduledTime = DateTime.now().add(delay);
+      
+      await _scheduleNotification(
+        id: 999998, // Use a unique ID for test scheduled notifications
+        title: 'Scheduled Test Notification',
+        body: 'This scheduled test notification was set for ${delay.inMinutes} minute(s) from now',
+        scheduledDate: scheduledTime,
+        channelId: _fiveMinChannel,
+        payload: 'test_scheduled_notification',
+      );
+
+      _logInfo('test_notification_scheduled', {
+        'delay': delay.toString(),
+        'scheduledTime': scheduledTime.toIso8601String(),
+      });
+
+      debugPrint('Test notification scheduled for $scheduledTime');
+    } catch (e) {
+      debugPrint('Failed to schedule test notification: $e');
+    }
+  }
+
+  /// Get detailed notification status for debugging
+  Future<Map<String, dynamic>> getNotificationStatus() async {
+    final status = <String, dynamic>{};
+    
+    status['isInitialized'] = _isInitialized;
+    
+    try {
+      status['hasPermissions'] = await areNotificationsEnabled();
+      status['pendingNotifications'] = (await getPendingNotifications()).length;
+      
+      if (Platform.isAndroid) {
+        status['platform'] = 'Android';
+        status['notificationPermission'] = await Permission.notification.status;
+      } else if (Platform.isIOS) {
+        status['platform'] = 'iOS';
+      }
+      
+      status['timezone'] = tz.local.name;
+      status['currentTime'] = DateTime.now().toIso8601String();
+      
+    } catch (e) {
+      status['error'] = e.toString();
+    }
+    
+    return status;
   }
 }
