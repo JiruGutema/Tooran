@@ -13,18 +13,32 @@ import 'services/data_service.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize notification service and reschedule notifications on app startup
+  // Initialize notification service with release-specific handling
   final notificationService = NotificationService();
-  await notificationService.initialize();
   
-  // Load all tasks and reschedule notifications
   try {
-    final dataService = DataService();
-    final categories = await dataService.loadCategoriesWithRecovery();
-    final allTasks = categories.expand((category) => category.tasks).toList();
-    await notificationService.rescheduleAllNotifications(allTasks);
+    // Force initialization with better error handling for release builds
+    final initialized = await notificationService.initialize(forceReinit: true);
+    
+    if (initialized) {
+      debugPrint('Notification service initialized successfully');
+      
+      // Load all tasks and reschedule notifications
+      try {
+        final dataService = DataService();
+        final categories = await dataService.loadCategoriesWithRecovery();
+        final allTasks = categories.expand((category) => category.tasks).toList();
+        await notificationService.rescheduleAllNotifications(allTasks);
+        debugPrint('Notifications rescheduled for ${allTasks.length} tasks');
+      } catch (e) {
+        debugPrint('Failed to reschedule notifications on startup: $e');
+      }
+    } else {
+      debugPrint('Notification service initialization failed');
+    }
   } catch (e) {
-    debugPrint('Failed to reschedule notifications on startup: $e');
+    debugPrint('Critical error initializing notifications: $e');
+    // Continue app startup even if notifications fail
   }
   
   runApp(TaskManagerApp());

@@ -31,6 +31,12 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode.toInteger()
         versionName = flutter.versionName
+        
+        // Notification configuration
+        multiDexEnabled true
+        
+        // Keep notification classes in release builds
+        consumerProguardFiles 'proguard-rules.pro'
     }
 
     signingConfigs {
@@ -45,7 +51,8 @@ android {
     buildTypes {
         release {
             signingConfig signingConfigs.release
-            minifyEnabled true
+            minifyEnabled false
+            shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
@@ -60,4 +67,5 @@ flutter {
 
 dependencies {
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.2.2'
+    implementation 'androidx.multidex:multidex:2.0.1'
 }

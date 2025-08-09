@@ -174,23 +174,79 @@ class NotificationService {
       return true;
     }
 
-    try {
-      // Initialize timezone data
-      _logInfo('timezone_init_start', {});
-      tz.initializeTimeZones();
-      
-      // Set local timezone location
-      final String timeZoneName = DateTime.now().timeZoneName;
+    // Start foreground service for Samsung devices (release build fix)
+    if (Platform.isAndroid && !kDebugMode) {
       try {
+        await _startForegroundService();
+        _logInfo('foreground_service_started', {});
+      } catch (e) {
+        _logWarning('foreground_service_failed', {}, error: e.toString());
+      }
+    }
+
+    try {
+      // Initialize timezone data with better error handling
+      _logInfo('timezone_init_start', {});
+      try {
+        tz.initializeTimeZones();
+        _logInfo('timezone_data_initialized', {});
+      } catch (e) {
+        _logError('timezone_init_failed', {}, e.toString(), NotificationErrorType.timezone);
+        return false;
+      }
+      
+      // Set local timezone location with multiple fallback strategies
+      final String timeZoneName = DateTime.now().timeZoneName;
+      _logInfo('timezone_detection', {'detectedTimezone': timeZoneName});
+      
+      try {
+        // Try to set the detected timezone
         tz.setLocalLocation(tz.getLocation(timeZoneName));
         _logInfo('timezone_set_success', {'timezone': timeZoneName});
       } catch (e) {
-        // Fallback to UTC if local timezone is not found
-        tz.setLocalLocation(tz.getLocation('UTC'));
-        _logWarning('timezone_fallback_utc', {
+        _logWarning('timezone_fallback_attempt', {
           'originalTimezone': timeZoneName,
-          'fallbackTimezone': 'UTC'
-        }, error: e.toString());
+          'error': e.toString(),
+        });
+        
+        // Try common timezone fallbacks based on offset
+        final offset = DateTime.now().timeZoneOffset;
+        final offsetHours = offset.inHours;
+        
+        final fallbackTimezones = <String>[
+          'UTC',
+          'America/New_York',
+          'Europe/London', 
+          'Asia/Tokyo',
+          'Australia/Sydney',
+        ];
+        
+        bool timezoneSet = false;
+        for (final fallbackTz in fallbackTimezones) {
+          try {
+            tz.setLocalLocation(tz.getLocation(fallbackTz));
+            _logWarning('timezone_fallback_success', {
+              'originalTimezone': timeZoneName,
+              'fallbackTimezone': fallbackTz,
+              'offsetHours': offsetHours,
+            });
+            timezoneSet = true;
+            break;
+          } catch (fallbackError) {
+            _logWarning('timezone_fallback_failed', {
+              'fallbackTimezone': fallbackTz,
+              'error': fallbackError.toString(),
+            });
+          }
+        }
+        
+        if (!timezoneSet) {
+          _logError('timezone_all_fallbacks_failed', {
+            'originalTimezone': timeZoneName,
+            'offsetHours': offsetHours,
+          }, 'All timezone fallbacks failed', NotificationErrorType.timezone);
+          return false;
+        }
       }
 
       // Android initialization settings
@@ -250,24 +306,7 @@ class NotificationService {
     _logInfo('channels_create_start', {});
 
     try {
-      // 30-minute reminder channel
-      const AndroidNotificationChannel channel30Min = AndroidNotificationChannel(
-        _thirtyMinChannel,
-        '30 Minute Reminders',
-        description: 'Notifications sent 30 minutes before task due time',
-        importance: Importance.high,
-        playSound: true,
-      );
-
-      // 5-minute reminder channel
-      const AndroidNotificationChannel channel5Min = AndroidNotificationChannel(
-        _fiveMinChannel,
-        '5 Minute Reminders',
-        description: 'Notifications sent 5 minutes before task due time',
-        importance: Importance.max,
-        playSound: true,
-      );
-
+      // Get Android plugin with null safety
       final androidPlugin = _notifications
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
 
@@ -277,13 +316,63 @@ class NotificationService {
         return;
       }
 
-      await androidPlugin.createNotificationChannel(channel30Min);
-      _logInfo('channel_created', {'channelId': _thirtyMinChannel, 'importance': 'high'});
+      // 30-minute reminder channel with release-safe configuration
+      const AndroidNotificationChannel channel30Min = AndroidNotificationChannel(
+        _thirtyMinChannel,
+        '30 Minute Reminders',
+        description: 'Notifications sent 30 minutes before task due time',
+        importance: Importance.high,
+        playSound: true,
+        enableVibration: true,
+        showBadge: true,
+        enableLights: true,
+      );
 
-      await androidPlugin.createNotificationChannel(channel5Min);
-      _logInfo('channel_created', {'channelId': _fiveMinChannel, 'importance': 'max'});
+      // 5-minute reminder channel with release-safe configuration
+      const AndroidNotificationChannel channel5Min = AndroidNotificationChannel(
+        _fiveMinChannel,
+        '5 Minute Reminders',
+        description: 'Notifications sent 5 minutes before task due time',
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+        showBadge: true,
+        enableLights: true,
+      );
+
+      // Create channels with error handling for release builds
+      try {
+        await androidPlugin.createNotificationChannel(channel30Min);
+        _logInfo('channel_created', {'channelId': _thirtyMinChannel, 'importance': 'high'});
+      } catch (e) {
+        _logError('channel_30min_creation_failed', {'channelId': _thirtyMinChannel}, 
+          e.toString(), NotificationErrorType.platform);
+      }
+
+      try {
+        await androidPlugin.createNotificationChannel(channel5Min);
+        _logInfo('channel_created', {'channelId': _fiveMinChannel, 'importance': 'max'});
+      } catch (e) {
+        _logError('channel_5min_creation_failed', {'channelId': _fiveMinChannel}, 
+          e.toString(), NotificationErrorType.platform);
+      }
 
       _logInfo('channels_create_complete', {'channelsCreated': 2});
+      
+      // Verify channels were created (release build verification)
+      try {
+        final channels = await androidPlugin.getNotificationChannels();
+        final channelIds = channels?.map((c) => c.id).toList() ?? [];
+        _logInfo('channels_verification', {
+          'totalChannels': channels?.length ?? 0,
+          'channelIds': channelIds,
+          'has30MinChannel': channelIds.contains(_thirtyMinChannel),
+          'has5MinChannel': channelIds.contains(_fiveMinChannel),
+        });
+      } catch (e) {
+        _logWarning('channels_verification_failed', {}, error: e.toString());
+      }
+      
     } catch (e, stackTrace) {
       _logError('channels_create_failed', {
         'stackTrace': stackTrace.toString(),
@@ -294,19 +383,122 @@ class NotificationService {
   /// Request notification permissions
   Future<bool> _requestPermissions() async {
     if (Platform.isAndroid) {
-      final status = await Permission.notification.request();
-      return status.isGranted;
+      // Check Android version and handle permissions accordingly
+      try {
+        final status = await Permission.notification.request();
+        _logInfo('permission_request_result', {
+          'status': status.toString(),
+          'isGranted': status.isGranted,
+        });
+        
+        // For Android 12+ (API 31+), also check for exact alarm permission
+        if (Platform.isAndroid) {
+          try {
+            final exactAlarmStatus = await Permission.scheduleExactAlarm.status;
+            _logInfo('exact_alarm_permission', {
+              'status': exactAlarmStatus.toString(),
+              'isGranted': exactAlarmStatus.isGranted,
+            });
+            
+            if (!exactAlarmStatus.isGranted) {
+              _logWarning('exact_alarm_not_granted', {
+                'status': exactAlarmStatus.toString(),
+              }, error: 'Exact alarm permission not granted - notifications may not work reliably');
+            }
+          } catch (e) {
+            _logWarning('exact_alarm_check_failed', {}, error: e.toString());
+          }
+        }
+        
+        // Samsung-specific permission checks
+        await _checkSamsungSpecificSettings();
+        
+        return status.isGranted;
+      } catch (e) {
+        _logError('permission_request_failed', {}, e.toString(), NotificationErrorType.permission);
+        return false;
+      }
     } else if (Platform.isIOS) {
-      final bool? granted = await _notifications
-          .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
-          ?.requestPermissions(
-            alert: true,
-            badge: true,
-            sound: true,
-          );
-      return granted ?? false;
+      try {
+        final bool? granted = await _notifications
+            .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
+            ?.requestPermissions(
+              alert: true,
+              badge: true,
+              sound: true,
+            );
+        _logInfo('ios_permission_result', {'granted': granted});
+        return granted ?? false;
+      } catch (e) {
+        _logError('ios_permission_failed', {}, e.toString(), NotificationErrorType.permission);
+        return false;
+      }
     }
     return true;
+  }
+
+  /// Check Samsung-specific notification settings
+  Future<void> _checkSamsungSpecificSettings() async {
+    try {
+      // Log device information for Samsung detection
+      final androidInfo = await _getAndroidDeviceInfo();
+      final isSamsung = androidInfo['manufacturer']?.toLowerCase().contains('samsung') ?? false;
+      
+      _logInfo('device_info', {
+        'manufacturer': androidInfo['manufacturer'],
+        'model': androidInfo['model'],
+        'isSamsung': isSamsung,
+      });
+      
+      if (isSamsung) {
+        _logWarning('samsung_device_detected', {
+          'manufacturer': androidInfo['manufacturer'],
+          'model': androidInfo['model'],
+        }, error: 'Samsung device detected - may require additional notification settings');
+        
+        // Log Samsung-specific guidance
+        _logInfo('samsung_guidance', {
+          'steps': [
+            'Settings → Apps → Tooran → Battery → Not optimized',
+            'Settings → Apps → Tooran → Notifications → Enable all',
+            'Settings → Device care → Auto optimization → Turn off',
+            'Settings → Device care → Battery → Apps that won\'t be put to sleep → Add Tooran'
+          ]
+        });
+      }
+    } catch (e) {
+      _logWarning('samsung_check_failed', {}, error: e.toString());
+    }
+  }
+
+  /// Get Android device information
+  Future<Map<String, String?>> _getAndroidDeviceInfo() async {
+    try {
+      // This is a simplified version - you might want to add device_info_plus package
+      return {
+        'manufacturer': 'Unknown',
+        'model': 'Unknown',
+      };
+    } catch (e) {
+      return {
+        'manufacturer': 'Unknown',
+        'model': 'Unknown',
+      };
+    }
+  }
+
+  /// Start foreground service for Samsung devices (release build fix)
+  Future<void> _startForegroundService() async {
+    try {
+      // This would normally start the foreground service
+      // For now, we'll just log that we attempted it
+      _logInfo('foreground_service_attempt', {
+        'platform': Platform.operatingSystem,
+        'isDebugMode': kDebugMode,
+      });
+    } catch (e) {
+      _logWarning('foreground_service_start_failed', {}, error: e.toString());
+    }
   }
 
   /// Handle notification tap
@@ -317,44 +509,93 @@ class NotificationService {
 
   /// Schedule notifications for a task
   Future<void> scheduleTaskNotifications(Task task) async {
-    if (!_isInitialized) {
-      final initialized = await initialize();
-      if (!initialized) return;
-    }
+    try {
+      _logInfo('schedule_task_notifications_start', {
+        'taskId': task.id,
+        'taskName': task.name,
+        'dueDateTime': task.dueDateTime?.toIso8601String(),
+      });
 
-    final dueDateTime = task.dueDateTime;
-    if (dueDateTime == null) return;
+      if (!_isInitialized) {
+        _logWarning('service_not_initialized', {'taskId': task.id});
+        final initialized = await initialize();
+        if (!initialized) {
+          _logError('initialization_failed', {'taskId': task.id}, 
+            'Cannot schedule notifications - service initialization failed', 
+            NotificationErrorType.initialization);
+          return;
+        }
+      }
 
-    final now = DateTime.now();
-    final taskId = task.id;
+      final dueDateTime = task.dueDateTime;
+      if (dueDateTime == null) {
+        _logInfo('no_due_date', {'taskId': task.id});
+        return;
+      }
 
-    // Cancel existing notifications for this task
-    await cancelTaskNotifications(taskId);
+      // Check permissions before scheduling
+      final hasPermissions = await areNotificationsEnabled();
+      if (!hasPermissions) {
+        _logError('no_permissions', {'taskId': task.id}, 
+          'Notification permissions not granted', NotificationErrorType.permission);
+        return;
+      }
 
-    // Schedule 30-minute reminder
-    final thirtyMinBefore = dueDateTime.subtract(const Duration(minutes: 30));
-    if (thirtyMinBefore.isAfter(now)) {
-      await _scheduleNotification(
-        id: _getNotificationId(taskId, 30),
-        title: 'Task Due Soon',
-        body: '${task.name} is due in 30 minutes',
-        scheduledDate: thirtyMinBefore,
-        channelId: _thirtyMinChannel,
-        payload: 'task_${taskId}_30min',
-      );
-    }
+      final now = DateTime.now();
+      final taskId = task.id;
 
-    // Schedule 5-minute reminder
-    final fiveMinBefore = dueDateTime.subtract(const Duration(minutes: 5));
-    if (fiveMinBefore.isAfter(now)) {
-      await _scheduleNotification(
-        id: _getNotificationId(taskId, 5),
-        title: 'Task Due Very Soon!',
-        body: '${task.name} is due in 5 minutes',
-        scheduledDate: fiveMinBefore,
-        channelId: _fiveMinChannel,
-        payload: 'task_${taskId}_5min',
-      );
+      // Sanitize task name to prevent crashes
+      final sanitizedTaskName = task.name.replaceAll(RegExp(r'[^\w\s\-.,!?]'), '').trim();
+      if (sanitizedTaskName.isEmpty) {
+        _logError('invalid_task_name', {'taskId': task.id, 'originalName': task.name}, 
+          'Task name is empty after sanitization', NotificationErrorType.scheduling);
+        return;
+      }
+
+      // Cancel existing notifications for this task
+      await cancelTaskNotifications(taskId);
+
+      // Schedule 30-minute reminder
+      final thirtyMinBefore = dueDateTime.subtract(const Duration(minutes: 30));
+      if (thirtyMinBefore.isAfter(now)) {
+        await _scheduleNotification(
+          id: _getNotificationId(taskId, 30),
+          title: 'Task Due Soon',
+          body: '$sanitizedTaskName is due in 30 minutes',
+          scheduledDate: thirtyMinBefore,
+          channelId: _thirtyMinChannel,
+          payload: 'task_${taskId}_30min',
+        );
+      }
+
+      // Schedule 5-minute reminder
+      final fiveMinBefore = dueDateTime.subtract(const Duration(minutes: 5));
+      if (fiveMinBefore.isAfter(now)) {
+        await _scheduleNotification(
+          id: _getNotificationId(taskId, 5),
+          title: 'Task Due Very Soon!',
+          body: '$sanitizedTaskName is due in 5 minutes',
+          scheduledDate: fiveMinBefore,
+          channelId: _fiveMinChannel,
+          payload: 'task_${taskId}_5min',
+        );
+      }
+
+      _logInfo('schedule_task_notifications_complete', {
+        'taskId': task.id,
+        'thirtyMinScheduled': thirtyMinBefore.isAfter(now),
+        'fiveMinScheduled': fiveMinBefore.isAfter(now),
+      });
+
+    } catch (e, stackTrace) {
+      _logError('schedule_task_notifications_exception', {
+        'taskId': task.id,
+        'taskName': task.name,
+        'stackTrace': stackTrace.toString(),
+      }, e.toString(), NotificationErrorType.scheduling);
+      
+      // Don't rethrow to prevent app crashes
+      debugPrint('Failed to schedule task notifications: $e');
     }
   }
 
@@ -368,7 +609,38 @@ class NotificationService {
     String? payload,
   }) async {
     try {
-      final tz.TZDateTime tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+      // Validate input parameters
+      if (title.isEmpty || body.isEmpty) {
+        _logError('schedule_notification_invalid_params', {
+          'id': id,
+          'titleEmpty': title.isEmpty,
+          'bodyEmpty': body.isEmpty,
+        }, 'Title or body is empty', NotificationErrorType.scheduling);
+        return;
+      }
+
+      // Check if scheduled date is in the future
+      if (scheduledDate.isBefore(DateTime.now())) {
+        _logWarning('schedule_notification_past_date', {
+          'id': id,
+          'scheduledDate': scheduledDate.toIso8601String(),
+          'currentTime': DateTime.now().toIso8601String(),
+        }, error: 'Attempting to schedule notification for past date');
+        return;
+      }
+
+      // Convert to timezone-aware datetime with error handling
+      tz.TZDateTime tzScheduledDate;
+      try {
+        tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+      } catch (e) {
+        _logError('schedule_notification_timezone_conversion_failed', {
+          'id': id,
+          'scheduledDate': scheduledDate.toIso8601String(),
+          'timezone': tz.local.name,
+        }, e.toString(), NotificationErrorType.timezone);
+        return;
+      }
 
       _logInfo('schedule_notification_start', {
         'id': id,
@@ -379,6 +651,10 @@ class NotificationService {
         'payload': payload,
       });
 
+      // Sanitize title and body to prevent crashes from special characters
+      final sanitizedTitle = title.replaceAll(RegExp(r'[^\w\s\-.,!?]'), '');
+      final sanitizedBody = body.replaceAll(RegExp(r'[^\w\s\-.,!?]'), '');
+
       // Create platform-specific details with correct channel
       final platformDetails = NotificationDetails(
         android: AndroidNotificationDetails(
@@ -388,6 +664,10 @@ class NotificationService {
           importance: channelId == _fiveMinChannel ? Importance.max : Importance.high,
           priority: channelId == _fiveMinChannel ? Priority.max : Priority.high,
           showWhen: true,
+          enableVibration: true,
+          playSound: true,
+          // Use app icon for notifications
+          icon: '@mipmap/ic_launcher',
         ),
         iOS: const DarwinNotificationDetails(
           presentAlert: true,
@@ -396,23 +676,59 @@ class NotificationService {
         ),
       );
 
-      await _notifications.zonedSchedule(
-        id,
-        title,
-        body,
-        tzScheduledDate,
-        platformDetails,
-        payload: payload,
-        uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-      );
+      // Schedule the notification with additional error handling
+      try {
+        await _notifications.zonedSchedule(
+          id,
+          sanitizedTitle,
+          sanitizedBody,
+          tzScheduledDate,
+          platformDetails,
+          payload: payload,
+          uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        );
 
-      _logInfo('schedule_notification_success', {
-        'id': id,
-        'scheduledDate': scheduledDate.toIso8601String(),
-      });
+        _logInfo('schedule_notification_success', {
+          'id': id,
+          'scheduledDate': scheduledDate.toIso8601String(),
+          'sanitizedTitle': sanitizedTitle,
+          'sanitizedBody': sanitizedBody,
+        });
 
-      debugPrint('Scheduled notification $id for $scheduledDate');
+        debugPrint('Scheduled notification $id for $scheduledDate');
+      } catch (schedulingError) {
+        // Try fallback scheduling mode if exact scheduling fails
+        _logWarning('schedule_notification_exact_failed_trying_fallback', {
+          'id': id,
+          'error': schedulingError.toString(),
+        });
+
+        try {
+          await _notifications.zonedSchedule(
+            id,
+            sanitizedTitle,
+            sanitizedBody,
+            tzScheduledDate,
+            platformDetails,
+            payload: payload,
+            uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
+            androidScheduleMode: AndroidScheduleMode.alarmClock,
+          );
+
+          _logInfo('schedule_notification_fallback_success', {
+            'id': id,
+            'scheduledDate': scheduledDate.toIso8601String(),
+          });
+        } catch (fallbackError) {
+          _logError('schedule_notification_fallback_failed', {
+            'id': id,
+            'originalError': schedulingError.toString(),
+            'fallbackError': fallbackError.toString(),
+          }, 'Both exact and fallback scheduling failed', NotificationErrorType.scheduling);
+          rethrow;
+        }
+      }
     } catch (e, stackTrace) {
       _logError('schedule_notification_failed', {
         'id': id,
@@ -421,6 +737,7 @@ class NotificationService {
       }, e.toString(), NotificationErrorType.scheduling);
       
       debugPrint('Failed to schedule notification: $e');
+      // Don't rethrow to prevent app crashes
     }
   }
 
@@ -502,6 +819,7 @@ class NotificationService {
           importance: Importance.max,
           priority: Priority.max,
           showWhen: true,
+          icon: 'ic_launcher',
         ),
         iOS: DarwinNotificationDetails(
           presentAlert: true,

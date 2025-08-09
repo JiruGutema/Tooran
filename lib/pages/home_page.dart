@@ -1,14 +1,20 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/theme_provider.dart';
-import '../models/category.dart';
+import '../models/category.dart' as models;
 import '../models/deleted_category.dart';
 import '../models/task.dart';
 import '../services/data_service.dart';
 import '../services/notification_service.dart';
 import '../widgets/due_date_input.dart';
 import '../widgets/due_date_display.dart';
+import '../utils/notification_debug.dart';
+import '../crash_test.dart';
+import '../simple_notification_test.dart';
+import '../utils/data_reset_helper.dart';
+import '../utils/samsung_notification_helper.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -25,7 +31,7 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _taskDescriptionController =
       TextEditingController();
 
-  List<Category> _categories = [];
+  List<models.Category> _categories = [];
   bool _isLoading = true;
 
   // Due date state for task dialogs
@@ -127,7 +133,7 @@ class _HomePageState extends State<HomePage> {
       return;
     }
 
-    final newCategory = Category(
+    final newCategory = models.Category(
       name: name,
       sortOrder: _categories.length,
     );
@@ -145,7 +151,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showEditCategoryDialog(Category category) {
+  void _showEditCategoryDialog(models.Category category) {
     _categoryController.text = category.name;
 
     showDialog(
@@ -180,7 +186,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _editCategory(Category category) {
+  void _editCategory(models.Category category) {
     final name = _categoryController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -215,7 +221,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _showDeleteCategoryDialog(Category category) {
+  void _showDeleteCategoryDialog(models.Category category) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -255,7 +261,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _deleteCategory(Category category) async {
+  Future<void> _deleteCategory(models.Category category) async {
     try {
       // Cancel notifications for all tasks in the category
       for (final task in category.tasks) {
@@ -362,7 +368,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Task Management Methods
-  void _showAddTaskDialog(Category category) {
+  void _showAddTaskDialog(models.Category category) {
     // Reset due date state for new task
     _selectedDueDate = null;
     _selectedDueTime = null;
@@ -433,7 +439,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _addTask(Category category) async {
+  void _addTask(models.Category category) async {
     final name = _taskNameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -479,14 +485,16 @@ class _HomePageState extends State<HomePage> {
     _taskDescriptionController.clear();
     _selectedDueDate = null;
     _selectedDueTime = null;
-    Navigator.pop(context);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Task "$name" added to ${category.name}')),
-    );
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Task "$name" added to ${category.name}')),
+      );
+    }
   }
 
-  void _showEditTaskDialog(Category category, Task task) {
+  void _showEditTaskDialog(models.Category category, Task task) {
     _taskNameController.text = task.name;
     _taskDescriptionController.text = task.description;
 
@@ -560,7 +568,7 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
-  void _editTask(Category category, Task task) async {
+  void _editTask(models.Category category, Task task) async {
     final name = _taskNameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -609,14 +617,16 @@ class _HomePageState extends State<HomePage> {
     _taskDescriptionController.clear();
     _selectedDueDate = null;
     _selectedDueTime = null;
-    Navigator.pop(context);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Task "$name" updated')),
-    );
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Task "$name" updated')),
+      );
+    }
   }
 
-  void _showDeleteTaskDialog(Category category, Task task) {
+  void _showDeleteTaskDialog(models.Category category, Task task) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -640,7 +650,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  void _deleteTask(Category category, Task task) async {
+  void _deleteTask(models.Category category, Task task) async {
     setState(() {
       final categoryIndex =
           _categories.indexWhere((cat) => cat.id == category.id);
@@ -653,14 +663,16 @@ class _HomePageState extends State<HomePage> {
     await _notificationService.cancelTaskNotifications(task.id);
 
     _saveData();
-    Navigator.pop(context);
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Task "${task.name}" deleted')),
-    );
+    if (mounted) {
+      Navigator.pop(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Task "${task.name}" deleted')),
+      );
+    }
   }
 
-  void _toggleTaskCompletion(Category category, Task task) async {
+  void _toggleTaskCompletion(models.Category category, Task task) async {
     final updatedTask = task.copyWith(
       isCompleted: !task.isCompleted,
       completedAt: !task.isCompleted ? DateTime.now() : null,
@@ -684,70 +696,6 @@ class _HomePageState extends State<HomePage> {
     }
 
     _saveData();
-
-    // Show completion feedback
-    if (updatedTask.isCompleted) {
-      final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Row(
-            children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.white,
-                size: 20,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Task "${task.name}" completed!',
-                  style: const TextStyle(fontWeight: FontWeight.w500),
-                ),
-              ),
-            ],
-          ),
-          duration: const Duration(seconds: 2),
-          backgroundColor: themeProvider.successColor,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        ),
-      );
-
-      // Check if category is now fully completed
-      final updatedCategory =
-          _categories.firstWhere((cat) => cat.id == category.id);
-      if (updatedCategory.isCompleted) {
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Category "${category.name}" completed!',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                duration: const Duration(seconds: 3),
-                backgroundColor: themeProvider.successColor,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            );
-          }
-        });
-      }
-    }
   }
 
   void _showTaskDetails(Task task) {
@@ -852,7 +800,7 @@ class _HomePageState extends State<HomePage> {
         date1.day == date2.day;
   }
 
-  void _reorderTasks(Category category, int oldIndex, int newIndex) {
+  void _reorderTasks(models.Category category, int oldIndex, int newIndex) {
     setState(() {
       final categoryIndex =
           _categories.indexWhere((cat) => cat.id == category.id);
@@ -1270,14 +1218,126 @@ class _HomePageState extends State<HomePage> {
                 ? _buildEmptyState()
                 : _buildCategoryList(),
       ),
-      floatingActionButton: AnimatedScale(
-        scale: _isLoading ? 0.0 : 1.0,
-        duration: const Duration(milliseconds: 300),
-        child: FloatingActionButton(
-          onPressed: _isLoading ? null : _showAddCategoryDialog,
-          tooltip: 'Add Category',
-          child: const Icon(Icons.add),
-        ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          // Debug FAB (only in debug mode)
+          if (kDebugMode) ...[
+            AnimatedScale(
+              scale: _isLoading ? 0.0 : 1.0,
+              duration: const Duration(milliseconds: 300),
+              child: FloatingActionButton(
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        showModalBottomSheet(
+                          context: context,
+                          builder: (context) => Container(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text('Notification Debug Menu',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 16),
+                                ListTile(
+                                  leading: const Icon(Icons.science,
+                                      color: Colors.blue),
+                                  title: const Text('🧪 SIMPLE NOTIFICATION TEST',
+                                      style: TextStyle(
+                                          color: Colors.blue,
+                                          fontWeight: FontWeight.bold)),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    SimpleNotificationTest.showTestDialog(context);
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.warning,
+                                      color: Colors.red),
+                                  title: const Text('🚨 EMERGENCY CRASH TEST',
+                                      style: TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold)),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    NotificationCrashTest.emergencyCrashTest(
+                                        context);
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.info),
+                                  title: const Text('Show Debug Info'),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    NotificationDebugger.showDebugDialog(
+                                        context);
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.play_arrow),
+                                  title: const Text('Run Notification Tests'),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    NotificationDebugger.runNotificationTests(
+                                        context);
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.notification_add),
+                                  title: const Text('Send Test Notification'),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    _notificationService.sendTestNotification();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content:
+                                              Text('Test notification sent!')),
+                                    );
+                                  },
+                                ),
+                                ListTile(
+                                  leading: const Icon(Icons.schedule),
+                                  title: const Text('Schedule Test (30s)'),
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    _notificationService
+                                        .scheduleTestNotification(
+                                            delay: const Duration(seconds: 30));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                          content: Text(
+                                              'Test notification scheduled for 30 seconds!')),
+                                    );
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                tooltip: 'Debug Notifications',
+                backgroundColor: Colors.red,
+                heroTag: "debug_fab",
+                child: const Icon(Icons.bug_report),
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          // Main FAB
+          AnimatedScale(
+            scale: _isLoading ? 0.0 : 1.0,
+            duration: const Duration(milliseconds: 300),
+            child: FloatingActionButton(
+              onPressed: _isLoading ? null : _showAddCategoryDialog,
+              tooltip: 'Add Category',
+              heroTag: "main_fab",
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ],
       ),
     );
   }
