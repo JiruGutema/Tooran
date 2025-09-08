@@ -1,2 +1,0 @@
-/home/jiren/dev/flutter/Tooran/android/app/.cxx/Debug/282ai654/armeabi-v7a/CMakeFiles/edit_cache.dir
-/home/jiren/dev/flutter/Tooran/android/app/.cxx/Debug/282ai654/armeabi-v7a/CMakeFiles/rebuild_cache.dir
