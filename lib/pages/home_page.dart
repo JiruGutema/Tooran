@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:tooran/theme/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../providers/theme_provider.dart';
 import '../models/category.dart';
@@ -74,10 +75,25 @@ class _HomePageState extends State<HomePage> {
       builder: (context) => AlertDialog(
         title: const Text('Add Category'),
         content: TextField(
-          controller: _categoryController,
-          decoration: const InputDecoration(
-            labelText: 'Category Name',
-            hintText: 'Enter category name',
+          controller: _taskNameController,
+          decoration: InputDecoration(
+            labelText: 'Task Name',
+            hintText: 'Enter task name',
+            hintStyle: TextStyle(
+              color: Colors.grey,
+              fontSize: 14,
+              fontStyle: FontStyle.italic,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(4),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(4),
+              borderSide: BorderSide(
+                color: AppTheme.primary,
+                width: 2,
+              ),
+            ),
           ),
           autofocus: true,
           onSubmitted: (_) => _addCategory(),
@@ -91,7 +107,16 @@ class _HomePageState extends State<HomePage> {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: _addCategory,
+            onPressed: () => _addCategory(),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
             child: const Text('Add'),
           ),
         ],
@@ -163,6 +188,15 @@ class _HomePageState extends State<HomePage> {
           ),
           ElevatedButton(
             onPressed: () => _editCategory(category),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
             child: const Text('Save'),
           ),
         ],
@@ -211,7 +245,6 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Category'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -239,6 +272,11 @@ class _HomePageState extends State<HomePage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              textStyle: Theme.of(context).textTheme.labelLarge,
             ),
             child: const Text('Delete'),
           ),
@@ -346,31 +384,77 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Add Task'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _taskNameController,
-              decoration: const InputDecoration(
-                labelText: 'Task Name',
-                hintText: 'Enter task name',
-              ),
-              autofocus: true,
-              onSubmitted: (_) => _addTask(category),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _taskDescriptionController,
-              decoration: const InputDecoration(
-                labelText: 'Description (Optional)',
-                hintText: 'Enter task description',
-              ),
-              maxLines: 3,
-              onSubmitted: (_) => _addTask(category),
-            ),
-          ],
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: Text(
+          'Add Task',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: _taskNameController,
+                decoration: InputDecoration(
+                  labelText: 'Task Name',
+                  hintText: 'Enter task name',
+                  hintStyle: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide(
+                      color: AppTheme.primary,
+                      width: 2,
+                    ),
+                  ),
+                ),
+                autofocus: true,
+                onSubmitted: (_) => _addTask(category),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _taskDescriptionController,
+                decoration: InputDecoration(
+                  labelText: 'Description (Optional)',
+                  labelStyle: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  hintText: 'Enter task description',
+                  hintStyle: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 14,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(4),
+                    borderSide: BorderSide(
+                      color: AppTheme.primary,
+                      width: 2,
+                    ),
+                  ),
+                ),
+                maxLines: 8,
+                onSubmitted: (_) => _addTask(category),
+                minLines: 2,
+              ),
+            ],
+          ),
+        ),
+        actionsPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         actions: [
           TextButton(
             onPressed: () {
@@ -378,10 +462,23 @@ class _HomePageState extends State<HomePage> {
               _taskDescriptionController.clear();
               Navigator.pop(context);
             },
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.error,
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
             child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () => _addTask(category),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primary,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
             child: const Text('Add'),
           ),
         ],
@@ -437,22 +534,62 @@ class _HomePageState extends State<HomePage> {
           children: [
             TextField(
               controller: _taskNameController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Task Name',
                 hintText: 'Enter task name',
+                hintStyle: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(
+                    color: AppTheme.primary,
+                    width: 2,
+                  ),
+                ),
               ),
               autofocus: true,
-              onSubmitted: (_) => _editTask(category, task),
+              onSubmitted: (_) => _addTask(category),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _taskDescriptionController,
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 labelText: 'Description (Optional)',
+                labelStyle: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                ),
                 hintText: 'Enter task description',
+                hintStyle: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 14,
+                  fontStyle: FontStyle.italic,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(4),
+                  borderSide: BorderSide(
+                    color: AppTheme.primary,
+                    width: 2,
+                  ),
+                  // Set a minimum height for the description field
+                ),
               ),
-              maxLines: 3,
-              onSubmitted: (_) => _editTask(category, task),
+              maxLines: 8,
+              onSubmitted: (_) => _addTask(category),
+              // Set a minimum height for the description field
+              minLines: 2,
+
+              textInputAction: TextInputAction.newline,
             ),
           ],
         ),
@@ -513,7 +650,6 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Task'),
         content: Text('Are you sure you want to delete "${task.name}"?'),
         actions: [
           TextButton(
@@ -525,6 +661,11 @@ class _HomePageState extends State<HomePage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(4),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              textStyle: Theme.of(context).textTheme.labelLarge,
             ),
             child: const Text('Delete'),
           ),
@@ -571,18 +712,44 @@ class _HomePageState extends State<HomePage> {
       final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           content: Row(
             children: [
-              Icon(
-                Icons.check_circle,
-                color: Colors.white,
-                size: 20,
+              Container(
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [AppTheme.primary, AppTheme.accentNeon],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppTheme.primary.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                padding: const EdgeInsets.all(2),
+                child: const Icon(
+                  Icons.check_circle,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   'Task "${task.name}" completed!',
-                  style: const TextStyle(fontWeight: FontWeight.w500),
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                        letterSpacing: 0.2,
+                      ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -591,43 +758,11 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: themeProvider.successColor,
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(4),
           ),
+          elevation: 8,
         ),
       );
-
-      // Check if category is now fully completed
-      final updatedCategory =
-          _categories.firstWhere((cat) => cat.id == category.id);
-      if (updatedCategory.isCompleted) {
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Category "${category.name}" completed!',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                duration: const Duration(seconds: 3),
-                backgroundColor: themeProvider.successColor,
-                behavior: SnackBarBehavior.floating,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            );
-          }
-        });
-      }
     }
   }
 
@@ -635,7 +770,27 @@ class _HomePageState extends State<HomePage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(task.name),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        title: Row(
+          children: [
+            Icon(
+              task.isCompleted ? Icons.check_circle : Icons.info_outline,
+              color: task.isCompleted ? Colors.green : Colors.orange,
+              size: 24,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                task.name,
+                style: Theme.of(context).textTheme.titleLarge,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -643,18 +798,62 @@ class _HomePageState extends State<HomePage> {
             if (task.description.isNotEmpty) ...[
               const Text(
                 'Description:',
-                style: TextStyle(fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                  color: Colors.deepOrange,
+                ),
               ),
-              const SizedBox(height: 4),
-              Text(task.description),
+              const SizedBox(height: 8),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 200),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white.withOpacity(0.04)
+                        : Colors.grey[100],
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: Theme.of(context).dividerColor.withOpacity(0.2),
+                    ),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  child: Scrollbar(
+                    thumbVisibility: true,
+                    radius: const Radius.circular(8),
+                    thickness: 4,
+                    child: SingleChildScrollView(
+                      child: Text(
+                        task.description,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Divider(height: 1),
               const SizedBox(height: 16),
             ],
-            Text(
-              'Status: ${task.isCompleted ? "Completed" : "Pending"}',
-              style: TextStyle(
-                color: task.isCompleted ? Colors.green : Colors.orange,
-                fontWeight: FontWeight.w600,
-              ),
+            Row(
+              children: [
+                Text(
+                  'Status: ',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+                Text(
+                  task.isCompleted ? "Completed" : "Pending",
+                  style: TextStyle(
+                    color: task.isCompleted ? Colors.green : Colors.orange,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Text(
@@ -673,6 +872,10 @@ class _HomePageState extends State<HomePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.primary,
+              textStyle: Theme.of(context).textTheme.labelLarge,
+            ),
             child: const Text('Close'),
           ),
         ],
