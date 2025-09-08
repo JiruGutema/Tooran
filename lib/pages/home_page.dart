@@ -75,10 +75,10 @@ class _HomePageState extends State<HomePage> {
       builder: (context) => AlertDialog(
         title: const Text('Add Category'),
         content: TextField(
-          controller: _taskNameController,
+          controller: _categoryController,
           decoration: InputDecoration(
-            labelText: 'Task Name',
-            hintText: 'Enter task name',
+            labelText: 'Category Name',
+            hintText: 'Enter category name',
             hintStyle: TextStyle(
               color: Colors.grey,
               fontSize: 14,
@@ -418,7 +418,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 autofocus: true,
-                onSubmitted: (_) => _addTask(category),
+                onSubmitted: (_) => _addCategory(),
               ),
               const SizedBox(height: 16),
               TextField(
@@ -806,8 +806,10 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 8),
               ConstrainedBox(
-                constraints: const BoxConstraints(maxHeight: 200),
+                constraints:
+                    BoxConstraints(maxHeight: 200, maxWidth: double.infinity),
                 child: Container(
+                  width: double.infinity, // Make width full
                   decoration: BoxDecoration(
                     color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.white.withOpacity(0.04)
