@@ -731,24 +731,20 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ],
                 ),
-                padding: const EdgeInsets.all(2),
-                child: const Icon(
-                  Icons.check_circle,
-                  color: Colors.white,
-                  size: 24,
-                ),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  'Task "${task.name}" completed!',
+                  'Task <${task.name}> completed!',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
-                        fontSize: 18,
+                        backgroundColor: Colors.transparent,
+                        height: 3,
+                        fontSize: 14,
                         letterSpacing: 0.2,
                       ),
-                  maxLines: 2,
+                  maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -909,21 +905,6 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            TweenAnimationBuilder<double>(
-              duration: const Duration(milliseconds: 800),
-              tween: Tween(begin: 0.0, end: 1.0),
-              builder: (context, value, child) {
-                return Transform.scale(
-                  scale: value,
-                  child: Icon(
-                    Icons.task_alt,
-                    size: 100,
-                    color: Colors.grey[400],
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 24),
             Text(
               'Welcome to Tooran!',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
