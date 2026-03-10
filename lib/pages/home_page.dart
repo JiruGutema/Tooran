@@ -1029,6 +1029,7 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildCategoryList() {
     return ReorderableListView.builder(
+      buildDefaultDragHandles: false,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       itemCount: _categories.length,
       onReorder: _reorderCategories,
@@ -1099,10 +1100,12 @@ class _HomePageState extends State<HomePage> {
           return false;
         }
       },
-      child: Card(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        child: ExpansionTile(
+      child: ReorderableDelayedDragStartListener(
+        index: index,
+        child: Card(
+          margin: const EdgeInsets.symmetric(vertical: 4),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          child: ExpansionTile(
             shape: const Border(),
             key: ValueKey('expansion_${category.id}'),
             tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
@@ -1116,11 +1119,6 @@ class _HomePageState extends State<HomePage> {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                ),
-       
-                ReorderableDragStartListener(
-                  index: index,
-                  child: const Icon(Icons.drag_handle, color: Colors.transparent),
                 ),
               ],
             ),
@@ -1177,6 +1175,7 @@ class _HomePageState extends State<HomePage> {
               const Divider(height: 1),
               if (category.tasks.isNotEmpty)
                 ReorderableListView.builder(
+                  buildDefaultDragHandles: false,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: category.tasks.length,
@@ -1217,8 +1216,8 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-      );
-    
+      ),
+    );
   }
 
   Widget _buildTaskItem(Category category, Task task, int taskIndex) {
@@ -1245,8 +1244,10 @@ class _HomePageState extends State<HomePage> {
           return false;
         }
       },
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+      child: ReorderableDelayedDragStartListener(
+        index: taskIndex,
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
         leading: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1260,10 +1261,6 @@ class _HomePageState extends State<HomePage> {
                   borderRadius: BorderRadius.circular(6),
                 ),
               ),
-            ),
-            ReorderableDragStartListener(
-              index: taskIndex,
-              child: const Icon(Icons.drag_handle, color: Colors.transparent, size: 0),
             ),
           ],
         ),
@@ -1290,6 +1287,7 @@ class _HomePageState extends State<HomePage> {
               )
             : null,
         onTap: () => _showTaskDetails(task),
+      ),
       ),
     );
   }
