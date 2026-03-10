@@ -3,34 +3,26 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // 1. REFINED COLOR PALETTE
-  // Primary & Accent Colors (Vibrant but controlled)
-  static const Color primary = Color(0xFF6A5AE0); // A more sophisticated purple
-  static const Color accentNeon = Color(0xFF00F5D4); // Bright, modern teal
-  static const Color accentPink = Color(0xFFF72585); // Punchy magenta
+  static const Color primary = Color(0xFF5B5FC7);
 
-  // Neutral Colors (The foundation)
-  static const Color lightBackground = Color(0xFFF8F9FA); // Clean off-white
-  static const Color lightSurface = Color(0xFFFFFFFF); // Pure white for cards
-  static const Color lightText = Color(0xFF212529); // Dark, readable text
-  static const Color lightTextSecondary = Color(0xFF6C757D); // Muted gray text
-  static const Color lightBorder = Color(0xFFE9ECEF); // Subtle border
+  static const Color lightBackground = Color(0xFFF8F9FA);
+  static const Color lightSurface = Color(0xFFFFFFFF);
+  static const Color lightText = Color(0xFF1A1C1E);
+  static const Color lightTextSecondary = Color(0xFF6C757D);
+  static const Color lightBorder = Color(0xFFE0E0E0);
 
-  static const Color darkBackground = Color(0xFF121212); // True dark background
-  static const Color darkSurface =
-      Color(0xFF1E1E1E); // Slightly lighter surface
-  static const Color darkText = Color(0xFFE9ECEF); // Soft white text
-  static const Color darkTextSecondary =
-      Color(0xFFADB5BD); // Muted light gray text
-  static const Color darkBorder = Color(0xFF343A40); // Subtle dark border
+  static const Color darkBackground = Color(0xFF111113);
+  static const Color darkSurface = Color(0xFF1C1C1E);
+  static const Color darkText = Color(0xFFE4E4E6);
+  static const Color darkTextSecondary = Color(0xFF9A9A9E);
+  static const Color darkBorder = Color(0xFF2C2C2E);
 
-  // System Colors
-  static const Color success = Color(0xFF28A745);
-  static const Color warning = Color(0xFFFFC107);
-  static const Color error = Color(0xFFDC3545);
-  static const Color info = Color(0xFF17A2B8);
+  static const Color success = Color(0xFF34C759);
+  static const Color warning = Color(0xFFFF9F0A);
+  static const Color error = Color(0xFFFF3B30);
+  static const Color info = Color(0xFF5AC8FA);
 
-  // 2. MODERN TYPOGRAPHY SETUP
+  // Typography
   static final _lightTextTheme = GoogleFonts.manropeTextTheme(
     const TextTheme(
       headlineLarge: TextStyle(fontWeight: FontWeight.w800, color: lightText),
@@ -53,7 +45,6 @@ class AppTheme {
     ),
   );
 
-  // 3. SOFTER CORNER RADIUS
   static const double _borderRadius = 12.0;
   static final _shape = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(_borderRadius),
@@ -66,11 +57,11 @@ class AppTheme {
       brightness: Brightness.light,
       colorScheme: const ColorScheme.light(
         primary: primary,
-        secondary: accentNeon,
+        secondary: primary,
         background: lightBackground,
         surface: lightSurface,
         onPrimary: Colors.white,
-        onSecondary: Colors.black,
+        onSecondary: Colors.white,
         onBackground: lightText,
         onSurface: lightText,
         error: error,
@@ -84,11 +75,11 @@ class AppTheme {
         scrolledUnderElevation: 0.5,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: lightSurface,
         elevation: 0,
         shape: _shape.copyWith(
-          side: const BorderSide(color: lightBorder, width: 1.5),
+          side: const BorderSide(color: lightBorder, width: 1),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -98,11 +89,11 @@ class AppTheme {
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_borderRadius),
-          borderSide: const BorderSide(color: lightBorder, width: 1.5),
+          borderSide: const BorderSide(color: lightBorder, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_borderRadius),
-          borderSide: const BorderSide(color: lightBorder, width: 1.5),
+          borderSide: const BorderSide(color: lightBorder, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_borderRadius),
@@ -118,18 +109,34 @@ class AppTheme {
           textStyle: _lightTextTheme.labelLarge,
         ),
       ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: accentPink,
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: primary,
         foregroundColor: Colors.white,
-        shape: const CircleBorder(),
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: lightSurface,
         shape: _shape,
       ),
       checkboxTheme: CheckboxThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-        side: const BorderSide(color: lightTextSecondary, width: 2),
+        side: const BorderSide(color: lightTextSecondary, width: 1.5),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
       ),
     );
   }
@@ -141,11 +148,11 @@ class AppTheme {
       brightness: Brightness.dark,
       colorScheme: const ColorScheme.dark(
         primary: primary,
-        secondary: accentNeon,
+        secondary: primary,
         background: darkBackground,
         surface: darkSurface,
         onPrimary: Colors.white,
-        onSecondary: Colors.black,
+        onSecondary: Colors.white,
         onBackground: darkText,
         onSurface: darkText,
         error: error,
@@ -159,11 +166,11 @@ class AppTheme {
         scrolledUnderElevation: 0.5,
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: darkSurface,
         elevation: 0,
         shape: _shape.copyWith(
-          side: const BorderSide(color: darkBorder, width: 1.5),
+          side: const BorderSide(color: darkBorder, width: 1),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -173,11 +180,11 @@ class AppTheme {
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_borderRadius),
-          borderSide: const BorderSide(color: darkBorder, width: 1.5),
+          borderSide: const BorderSide(color: darkBorder, width: 1),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_borderRadius),
-          borderSide: const BorderSide(color: darkBorder, width: 1.5),
+          borderSide: const BorderSide(color: darkBorder, width: 1),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(_borderRadius),
@@ -193,41 +200,36 @@ class AppTheme {
           textStyle: _darkTextTheme.labelLarge,
         ),
       ),
-      floatingActionButtonTheme: FloatingActionButtonThemeData(
-        backgroundColor: accentNeon,
-        foregroundColor: Colors.black,
-        shape: const CircleBorder(),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
       ),
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: darkSurface,
         shape: _shape,
       ),
       checkboxTheme: CheckboxThemeData(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-        side: const BorderSide(color: darkTextSecondary, width: 2),
+        side: const BorderSide(color: darkTextSecondary, width: 1.5),
+      ),
+      bottomSheetTheme: const BottomSheetThemeData(
+        backgroundColor: Colors.transparent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+      ),
+      chipTheme: ChipThemeData(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
       ),
     );
   }
 
-  // --- Utility Decorations ---
-
-  // Modern gradient decoration
-  static BoxDecoration get primaryGradientDecoration => BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [primary, accentPink],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(_borderRadius),
-      );
-
-  // Glassmorphism effect for dark theme
-  static BoxDecoration get glassmorphismDecoration => BoxDecoration(
-        color: const Color(0x1AFFFFFF), // Translucent white
-        borderRadius: BorderRadius.circular(_borderRadius),
-        border: Border.all(
-          color: const Color(0x33FFFFFF),
-          width: 1.5,
-        ),
-      );
 }

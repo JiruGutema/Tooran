@@ -69,6 +69,7 @@ class ContactPage extends StatelessWidget {
               title: 'Email Support',
               subtitle: 'jirudagutema@gmail.com',
               description: 'For general inquiries and support',
+              icon: Icons.email_outlined,
               onTap: () => _launchUrl(
                   'mailto:jirudagutema@gmail.com?subject=Tooran App Support'),
               onLongPress: () =>
@@ -82,6 +83,7 @@ class ContactPage extends StatelessWidget {
               title: 'Official Website',
               subtitle: 'tooran.vercel.app',
               description: 'Visit our website for updates and news',
+              icon: Icons.language_rounded,
               onTap: () => _launchUrl('https://tooran.vercel.app'),
               onLongPress: () => _copyToClipboard(
                   context, 'https://tooran.vercel.app', 'Website URL'),
@@ -94,6 +96,7 @@ class ContactPage extends StatelessWidget {
               title: 'Source Code',
               subtitle: 'github.com/jirugutema/tooran',
               description: 'View source code and contribute',
+              icon: Icons.code_rounded,
               onTap: () => _launchUrl('https://github.com/jirugutema/tooran'),
               onLongPress: () => _copyToClipboard(context,
                   'https://github.com/jirugutema/tooran', 'GitHub URL'),
@@ -109,7 +112,7 @@ class ContactPage extends StatelessWidget {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: theme.cardTheme.color,
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: theme.dividerColor.withOpacity(0.2),
                 ),
@@ -205,13 +208,14 @@ class ContactPage extends StatelessWidget {
     required String description,
     required VoidCallback onTap,
     required VoidCallback onLongPress,
+    IconData? icon,
   }) {
     final theme = Theme.of(context);
 
     return Container(
       decoration: BoxDecoration(
         color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(
           color: theme.dividerColor.withOpacity(0.2),
         ),
@@ -221,13 +225,22 @@ class ContactPage extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           onLongPress: onLongPress,
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(16),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Row(
               children: [
-                // Removed Icon container
-                const SizedBox(width: 0),
+                if (icon != null) ...[
+                  Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Icon(icon, color: theme.colorScheme.primary, size: 22),
+                  ),
+                  const SizedBox(width: 16),
+                ],
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,8 +270,7 @@ class ContactPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Removed arrow icon
-                const SizedBox(width: 0),
+                const Icon(Icons.chevron_right_rounded, size: 20),
               ],
             ),
           ),
