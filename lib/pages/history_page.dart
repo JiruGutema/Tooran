@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import '../models/deleted_category.dart';
 import '../services/data_service.dart';
+import '../widgets/glass_container.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
@@ -172,95 +175,135 @@ class _HistoryPageState extends State<HistoryPage> {
         initialChildSize: 0.5,
         maxChildSize: 0.85,
         minChildSize: 0.3,
-        builder: (context, scrollController) => Container(
-          decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-            children: [
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
+        builder: (context, scrollController) {
+          final colorScheme = Theme.of(context).colorScheme;
+
+          return ClipRRect(
+            borderRadius:
+                const BorderRadius.vertical(top: Radius.circular(24)),
+            child: BackdropFilter(
+              filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+              child: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      colorScheme.surface.withOpacity(0.95),
+                      colorScheme.surface.withOpacity(0.75),
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                  border: Border.all(
+                    color: colorScheme.onSurface.withOpacity(0.08),
                   ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                deletedCategory.name,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                'Deleted: ${_formatDate(deletedCategory.deletedAt)}',
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 14,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Tasks (${deletedCategory.tasks.length})',
-                style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              if (deletedCategory.tasks.isEmpty)
-                Text(
-                  'No tasks in this category',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontStyle: FontStyle.italic,
-                  ),
-                )
-              else
-                ...deletedCategory.tasks.map((task) => Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                  children: [
+                    Center(
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        width: 36,
+                        height: 4,
                         decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.3),
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Row(
-                          children: [
-                            Icon(
-                              task.isCompleted
-                                  ? Icons.check_circle_rounded
-                                  : Icons.radio_button_unchecked_rounded,
-                              size: 20,
-                              color: task.isCompleted ? Colors.green : Colors.grey,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Text(
-                                task.name,
-                                style: TextStyle(
-                                  decoration: task.isCompleted
-                                      ? TextDecoration.lineThrough
-                                      : null,
-                                  color: task.isCompleted
-                                      ? Theme.of(context).colorScheme.onSurfaceVariant
-                                      : null,
-                                ),
-                              ),
-                            ),
-                          ],
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant
+                              .withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(2),
                         ),
                       ),
-                    )),
-            ],
-          ),
-        ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      deletedCategory.name,
+                      style: Theme.of(context)
+                          .textTheme
+                          .headlineSmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Deleted: ${_formatDate(deletedCategory.deletedAt)}',
+                      style: TextStyle(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurfaceVariant,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      'Tasks (${deletedCategory.tasks.length})',
+                      style: Theme.of(context)
+                          .textTheme
+                          .titleSmall
+                          ?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    const SizedBox(height: 12),
+                    if (deletedCategory.tasks.isEmpty)
+                      Text(
+                        'No tasks in this category',
+                        style: TextStyle(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurfaceVariant,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      )
+                    else
+                      ...deletedCategory.tasks.map(
+                        (task) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: GlassContainer(
+                            borderRadius: BorderRadius.circular(12),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  task.isCompleted
+                                      ? Icons.check_circle_rounded
+                                      : Icons
+                                          .radio_button_unchecked_rounded,
+                                  size: 20,
+                                  color: task.isCompleted
+                                      ? Colors.green
+                                      : Colors.grey,
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Text(
+                                    task.name,
+                                    style: TextStyle(
+                                      decoration: task.isCompleted
+                                          ? TextDecoration.lineThrough
+                                          : null,
+                                      color: task.isCompleted
+                                          ? Theme.of(context)
+                                              .colorScheme
+                                              .onSurfaceVariant
+                                          : null,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -305,11 +348,12 @@ class _HistoryPageState extends State<HistoryPage> {
       itemCount: _deletedCategories.length,
       itemBuilder: (context, index) {
         final deletedCategory = _deletedCategories[index];
-        final completedTasks = deletedCategory.tasks.where((task) => task.isCompleted).length;
-        
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        final completedTasks =
+            deletedCategory.tasks.where((task) => task.isCompleted).length;
+
+        return GlassContainer(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          borderRadius: BorderRadius.circular(18),
           child: ListTile(
               contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
               leading: const Icon(Icons.folder_delete_outlined, size: 22),
@@ -325,18 +369,23 @@ class _HistoryPageState extends State<HistoryPage> {
               children: [
                 Text(
                   '${deletedCategory.tasks.length} task(s) • $completedTasks completed',
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 14,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurfaceVariant
+                            .withOpacity(0.8),
+                        fontSize: 13,
+                      ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Deleted: ${_formatDate(deletedCategory.deletedAt)}',
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 12,
-                  ),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurfaceVariant
+                            .withOpacity(0.7),
+                      ),
                 ),
               ],
             ),
@@ -390,23 +439,45 @@ class _HistoryPageState extends State<HistoryPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('History'),
-        actions: [
-          if (_deletedCategories.isNotEmpty)
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _loadDeletedCategories,
-              tooltip: 'Refresh',
-            ),
-        ],
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? const [
+                  Color(0xFF050816),
+                  Color(0xFF111827),
+                  Color(0xFF020617),
+                ]
+              : const [
+                  Color(0xFFE0F4FF),
+                  Color(0xFFF5E9FF),
+                  Color(0xFFE8F3FF),
+                ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : _deletedCategories.isEmpty
-              ? _buildEmptyState()
-              : _buildDeletedCategoryList(),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('History'),
+          actions: [
+            if (_deletedCategories.isNotEmpty)
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: _loadDeletedCategories,
+                tooltip: 'Refresh',
+              ),
+          ],
+        ),
+        body: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _deletedCategories.isEmpty
+                ? _buildEmptyState()
+                : _buildDeletedCategoryList(),
+      ),
     );
   }
 }

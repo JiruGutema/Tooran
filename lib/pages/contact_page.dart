@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../widgets/glass_container.dart';
+
 class ContactPage extends StatelessWidget {
   const ContactPage({super.key});
 
@@ -31,155 +33,181 @@ class ContactPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Contact & Support'),
-        elevation: 0,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Section
-            Center(
-              child: Column(
-                children: [
-                  const SizedBox(height: 16),
-                  Text(
-                    'Get in touch with our team for support, feedback, or collaboration',
-                    style: theme.textTheme.bodyLarge?.copyWith(
-                      color: theme.textTheme.bodyLarge?.color?.withOpacity(0.8),
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? const [
+                  Color(0xFF050816),
+                  Color(0xFF111827),
+                  Color(0xFF020617),
+                ]
+              : const [
+                  Color(0xFFE0F4FF),
+                  Color(0xFFF5E9FF),
+                  Color(0xFFE8F3FF),
                 ],
-              ),
-            ),
-
-            const SizedBox(height: 40),
-
-            // Contact Methods
-            _buildSectionHeader(context, 'Contact Information'),
-            const SizedBox(height: 16),
-
-            _buildContactCard(
-              context,
-              title: 'Email Support',
-              subtitle: 'jirudagutema@gmail.com',
-              description: 'For general inquiries and support',
-              icon: Icons.email_outlined,
-              onTap: () => _launchUrl(
-                  'mailto:jirudagutema@gmail.com?subject=Tooran App Support'),
-              onLongPress: () =>
-                  _copyToClipboard(context, 'jirudagutema@gmail.com', 'Email'),
-            ),
-
-            const SizedBox(height: 12),
-
-            _buildContactCard(
-              context,
-              title: 'Official Website',
-              subtitle: 'tooran.vercel.app',
-              description: 'Visit our website for updates and news',
-              icon: Icons.language_rounded,
-              onTap: () => _launchUrl('https://tooran.vercel.app'),
-              onLongPress: () => _copyToClipboard(
-                  context, 'https://tooran.vercel.app', 'Website URL'),
-            ),
-
-            const SizedBox(height: 12),
-
-            _buildContactCard(
-              context,
-              title: 'Source Code',
-              subtitle: 'github.com/jirugutema/tooran',
-              description: 'View source code and contribute',
-              icon: Icons.code_rounded,
-              onTap: () => _launchUrl('https://github.com/jirugutema/tooran'),
-              onLongPress: () => _copyToClipboard(context,
-                  'https://github.com/jirugutema/tooran', 'GitHub URL'),
-            ),
-
-            const SizedBox(height: 40),
-
-            // Developer Section
-            _buildSectionHeader(context, 'About the Developer'),
-            const SizedBox(height: 16),
-
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: theme.cardTheme.color,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: theme.dividerColor.withOpacity(0.2),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('Contact & Support'),
+          elevation: 0,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Section
+              Center(
+                child: Column(
+                  children: [
+                    const SizedBox(height: 16),
+                    Text(
+                      'Get in touch with our team for support, feedback, or collaboration',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        color:
+                            theme.textTheme.bodyLarge?.color?.withOpacity(0.8),
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
                 ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      // Removed CircleAvatar and Icon
-                      const SizedBox(width: 0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Jiru Gutema',
-                              style: theme.textTheme.titleLarge?.copyWith(
-                                fontWeight: FontWeight.w700,
+
+              const SizedBox(height: 40),
+
+              // Contact Methods
+              _buildSectionHeader(context, 'Contact Information'),
+              const SizedBox(height: 16),
+
+              _buildContactCard(
+                context,
+                title: 'Email Support',
+                subtitle: 'jirudagutema@gmail.com',
+                description: 'For general inquiries and support',
+                icon: Icons.email_outlined,
+                onTap: () => _launchUrl(
+                  'mailto:jirudagutema@gmail.com?subject=Tooran App Support',
+                ),
+                onLongPress: () => _copyToClipboard(
+                  context,
+                  'jirudagutema@gmail.com',
+                  'Email',
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              _buildContactCard(
+                context,
+                title: 'Official Website',
+                subtitle: 'tooran.vercel.app',
+                description: 'Visit our website for updates and news',
+                icon: Icons.language_rounded,
+                onTap: () => _launchUrl('https://tooran.vercel.app'),
+                onLongPress: () => _copyToClipboard(
+                  context,
+                  'https://tooran.vercel.app',
+                  'Website URL',
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              _buildContactCard(
+                context,
+                title: 'Source Code',
+                subtitle: 'github.com/jirugutema/tooran',
+                description: 'View source code and contribute',
+                icon: Icons.code_rounded,
+                onTap: () =>
+                    _launchUrl('https://github.com/jirugutema/tooran'),
+                onLongPress: () => _copyToClipboard(
+                  context,
+                  'https://github.com/jirugutema/tooran',
+                  'GitHub URL',
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // Developer Section
+              _buildSectionHeader(context, 'About the Developer'),
+              const SizedBox(height: 16),
+
+              GlassContainer(
+                borderRadius: BorderRadius.circular(20),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const SizedBox(width: 0),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Jiru Gutema',
+                                style: theme.textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Software Developer',
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: theme.colorScheme.secondary,
-                                fontWeight: FontWeight.w500,
+                              const SizedBox(height: 4),
+                              Text(
+                                'Software Developer',
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  color: theme.colorScheme.secondary,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Addis Ababa University',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: theme.textTheme.bodySmall?.color
-                                    ?.withOpacity(0.8),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Addis Ababa University',
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: theme.textTheme.bodySmall?.color
+                                      ?.withOpacity(0.8),
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'Passionate about creating intuitive and powerful productivity tools. Always open to feedback and collaboration opportunities.',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GestureDetector(
+                      onTap: () => _launchUrl('https://jirugutema.vercel.app'),
+                      child: Text(
+                        'Portfolio',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.blue,
+                          decoration: TextDecoration.underline,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Passionate about creating intuitive and powerful productivity tools. Always open to feedback and collaboration opportunities.',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      height: 1.5,
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  GestureDetector(
-                    onTap: () => _launchUrl('https://jirugutema.vercel.app'),
-                    child: Text(
-                      'Portfolio',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.blue,
-                        decoration: TextDecoration.underline,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  )
-                ],
+                  ],
+                ),
               ),
-            ),
 
-            const SizedBox(height: 40),
-          ],
+              const SizedBox(height: 40),
+            ],
+          ),
         ),
       ),
     );
@@ -212,14 +240,8 @@ class ContactPage extends StatelessWidget {
   }) {
     final theme = Theme.of(context);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: theme.dividerColor.withOpacity(0.2),
-        ),
-      ),
+    return GlassContainer(
+      borderRadius: BorderRadius.circular(20),
       child: Material(
         color: Colors.transparent,
         child: InkWell(

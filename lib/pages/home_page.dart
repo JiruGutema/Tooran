@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tooran/theme/app_theme.dart';
@@ -8,6 +10,7 @@ import '../models/deleted_category.dart';
 import '../models/task.dart';
 import '../services/data_service.dart';
 import '../widgets/formatted_text.dart';
+import '../widgets/glass_container.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -72,39 +75,64 @@ class _HomePageState extends State<HomePage> {
 
   // ─── Bottom Sheet Helper ────────────────────────────────────────────
 
-  Widget _buildBottomSheet({required String title, required Widget child, IconData? icon}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+  Widget _buildBottomSheet({
+    required String title,
+    required Widget child,
+    IconData? icon,
+  }) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ClipRRect(
+      borderRadius: const BorderRadius.vertical(
+        top: Radius.circular(AppTheme.radius),
       ),
-      padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 12,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 36,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.3),
-              borderRadius: BorderRadius.circular(2),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                colorScheme.surface.withOpacity(0.9),
+                colorScheme.surface.withOpacity(0.7),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(
+              color: colorScheme.onSurface.withOpacity(0.08),
             ),
           ),
-          const SizedBox(height: 20),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+          padding: EdgeInsets.only(
+            left: 24,
+            right: 24,
+            top: 12,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
           ),
-          const SizedBox(height: 20),
-          child,
-        ],
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color:
+                      colorScheme.onSurfaceVariant.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Text(
+                title,
+                style: Theme.of(context)
+                    .textTheme
+                    .titleLarge
+                    ?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 20),
+              child,
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -116,7 +144,7 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppTheme.radius),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -231,7 +259,7 @@ class _HomePageState extends State<HomePage> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppTheme.radius),
                       ),
                     ),
                     child: const Text('Cancel'),
@@ -325,7 +353,7 @@ class _HomePageState extends State<HomePage> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(AppTheme.radius),
                       ),
                     ),
                     child: const Text('Cancel'),
@@ -575,7 +603,7 @@ class _HomePageState extends State<HomePage> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                     child: const Text('Cancel'),
@@ -694,7 +722,7 @@ class _HomePageState extends State<HomePage> {
                     style: OutlinedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
                       ),
                     ),
                     child: const Text('Cancel'),
@@ -834,15 +862,28 @@ class _HomePageState extends State<HomePage> {
         initialChildSize: 0.5,
         maxChildSize: 0.85,
         minChildSize: 0.3,
-        builder: (context, scrollController) => Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surface,
-            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
-          ),
-          child: ListView(
-            controller: scrollController,
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-            children: [
+        builder: (context, scrollController) => ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
+            child: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    colorScheme.surface.withOpacity(0.95),
+                    colorScheme.surface.withOpacity(0.75),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                border: Border.all(
+                  color: colorScheme.onSurface.withOpacity(0.08),
+                ),
+              ),
+              child: ListView(
+                controller: scrollController,
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
+                children: [
               // Drag handle
               Center(
                 child: Container(
@@ -898,7 +939,7 @@ class _HomePageState extends State<HomePage> {
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
                     color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(16),
                   ),
                   child: FormattedText(
                     text: task.description,
@@ -921,7 +962,7 @@ class _HomePageState extends State<HomePage> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Column(
                   children: [
@@ -947,8 +988,10 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
-            ],
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
           ),
         ),
       ),
@@ -1038,7 +1081,7 @@ class _HomePageState extends State<HomePage> {
           animation: animation,
           builder: (context, child) => Material(
             elevation: 2,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(16),
             child: child,
           ),
           child: child,
@@ -1061,7 +1104,7 @@ class _HomePageState extends State<HomePage> {
         margin: const EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(
           color: Colors.blue,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
         alignment: Alignment.centerLeft,
         padding: const EdgeInsets.only(left: 24),
@@ -1078,7 +1121,7 @@ class _HomePageState extends State<HomePage> {
         margin: const EdgeInsets.symmetric(vertical: 4),
         decoration: BoxDecoration(
           color: Colors.red,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(16),
         ),
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 24),
@@ -1102,9 +1145,9 @@ class _HomePageState extends State<HomePage> {
       },
       child: ReorderableDelayedDragStartListener(
         index: index,
-        child: Card(
-          margin: const EdgeInsets.symmetric(vertical: 4),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: GlassContainer(
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          borderRadius: BorderRadius.circular(16),
           child: ExpansionTile(
             shape: const Border(),
             key: ValueKey('expansion_${category.id}'),
@@ -1172,7 +1215,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
             children: [
-              const Divider(height: 1),
+              // const Divider(height: 1),
               if (category.tasks.isNotEmpty)
                 ReorderableListView.builder(
                   buildDefaultDragHandles: false,
@@ -1294,141 +1337,165 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Tooran',
-          style: TextStyle(fontWeight: FontWeight.w800, fontSize: 22),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? const [
+                  Color(0xFF050816),
+                  Color(0xFF111827),
+                  Color(0xFF020617),
+                ]
+              : const [
+                  Color(0xFFE0F4FF),
+                  Color(0xFFF5E9FF),
+                  Color(0xFFE8F3FF),
+                ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        actions: [
-          Consumer<ThemeProvider>(
-            builder: (context, themeProvider, child) {
-              return IconButton(
-                icon: AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  child: Icon(
-                    themeProvider.isDarkMode
-                        ? Icons.light_mode_rounded
-                        : Icons.dark_mode_rounded,
-                    key: ValueKey(themeProvider.isDarkMode),
+      ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text(
+            'Tooran',
+            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 22),
+          ),
+          actions: [
+            Consumer<ThemeProvider>(
+              builder: (context, themeProvider, child) {
+                return IconButton(
+                  icon: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    child: Icon(
+                      themeProvider.isDarkMode
+                          ? Icons.light_mode_rounded
+                          : Icons.dark_mode_rounded,
+                      key: ValueKey(themeProvider.isDarkMode),
+                    ),
+                  ),
+                  onPressed: () => themeProvider.toggleTheme(),
+                  tooltip: 'Toggle theme',
+                );
+              },
+            ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert_rounded),
+              tooltip: 'More options',
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              position: PopupMenuPosition.under,
+              onSelected: (value) {
+                switch (value) {
+                  case 'history':
+                    Navigator.pushNamed(context, '/history');
+                    break;
+                  case 'help':
+                    Navigator.pushNamed(context, '/help');
+                    break;
+                  case 'contact':
+                    Navigator.pushNamed(context, '/contact');
+                    break;
+                  case 'about':
+                    Navigator.pushNamed(context, '/about');
+                    break;
+                  case 'update':
+                    launchUrl(Uri.parse('https://tooran.vercel.app'));
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'history',
+                  child: ListTile(
+                    leading: Icon(Icons.history_rounded),
+                    title: Text('History'),
+                    contentPadding: EdgeInsets.zero,
                   ),
                 ),
-                onPressed: () => themeProvider.toggleTheme(),
-                tooltip: 'Toggle theme',
-              );
-            },
-          ),
-          PopupMenuButton<String>(
-            icon: const Icon(Icons.more_vert_rounded),
-            tooltip: 'More options',
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
+                const PopupMenuDivider(),
+                const PopupMenuItem(
+                  value: 'help',
+                  child: ListTile(
+                    leading: Icon(Icons.help_outline_rounded),
+                    title: Text('Help'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'contact',
+                  child: ListTile(
+                    leading: Icon(Icons.contact_mail_outlined),
+                    title: Text('Contact'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'about',
+                  child: ListTile(
+                    leading: Icon(Icons.info_outline_rounded),
+                    title: Text('About'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+                const PopupMenuItem(
+                  value: 'update',
+                  child: ListTile(
+                    leading: Icon(Icons.system_update_rounded),
+                    title: Text('Check for Updates'),
+                    contentPadding: EdgeInsets.zero,
+                  ),
+                ),
+              ],
             ),
-            position: PopupMenuPosition.under,
-            onSelected: (value) {
-              switch (value) {
-                case 'history':
-                  Navigator.pushNamed(context, '/history');
-                  break;
-                case 'help':
-                  Navigator.pushNamed(context, '/help');
-                  break;
-                case 'contact':
-                  Navigator.pushNamed(context, '/contact');
-                  break;
-                case 'about':
-                  Navigator.pushNamed(context, '/about');
-                  break;
-                case 'update':
-                  launchUrl(Uri.parse('https://tooran.vercel.app'));
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'history',
-                child: ListTile(
-                  leading: Icon(Icons.history_rounded),
-                  title: Text('History'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuDivider(),
-              const PopupMenuItem(
-                value: 'help',
-                child: ListTile(
-                  leading: Icon(Icons.help_outline_rounded),
-                  title: Text('Help'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'contact',
-                child: ListTile(
-                  leading: Icon(Icons.contact_mail_outlined),
-                  title: Text('Contact'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'about',
-                child: ListTile(
-                  leading: Icon(Icons.info_outline_rounded),
-                  title: Text('About'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'update',
-                child: ListTile(
-                  leading: Icon(Icons.system_update_rounded),
-                  title: Text('Check for Updates'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ],
+          ],
+        ),
+        body: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: _isLoading
+              ? Center(
+                  key: const ValueKey('loading'),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: 48,
+                        height: 48,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: AppTheme.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+                      Text(
+                        'Loading your tasks...',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color:
+                              Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                )
+              : _categories.isEmpty
+                  ? _buildEmptyState()
+                  : _buildCategoryList(),
+        ),
+        floatingActionButton: AnimatedScale(
+          scale: _isLoading ? 0.0 : 1.0,
+          duration: const Duration(milliseconds: 300),
+          child: FloatingActionButton.extended(
+            backgroundColor: AppTheme.primary,
+            onPressed: _isLoading ? null : _showAddCategoryDialog,
+            tooltip: 'Add Category',
+            icon: const Icon(Icons.add_rounded),
+            label: const Text('Category'),
           ),
-        ],
-      ),
-      body: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 300),
-        child: _isLoading
-            ? Center(
-                key: const ValueKey('loading'),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: 48,
-                      height: 48,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 3,
-                        color: AppTheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    Text(
-                      'Loading your tasks...',
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            : _categories.isEmpty
-                ? _buildEmptyState()
-                : _buildCategoryList(),
-      ),
-      floatingActionButton: AnimatedScale(
-        scale: _isLoading ? 0.0 : 1.0,
-        duration: const Duration(milliseconds: 300),
-        child: FloatingActionButton.extended(
-          onPressed: _isLoading ? null : _showAddCategoryDialog,
-          tooltip: 'Add Category',
-          icon: const Icon(Icons.add_rounded),
-          label: const Text('Category'),
         ),
       ),
     );

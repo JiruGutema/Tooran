@@ -3,16 +3,17 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color primary = Color(0xFF5B5FC7);
+  // Telegram-style blue accent
+  static const Color primary = Color(0xFF0088CC);
 
-  static const Color lightBackground = Color(0xFFF8F9FA);
+  static const Color lightBackground = Color(0xFFE6F0FF);
   static const Color lightSurface = Color(0xFFFFFFFF);
   static const Color lightText = Color(0xFF1A1C1E);
   static const Color lightTextSecondary = Color(0xFF6C757D);
   static const Color lightBorder = Color(0xFFE0E0E0);
 
-  static const Color darkBackground = Color(0xFF111113);
-  static const Color darkSurface = Color(0xFF1C1C1E);
+  static const Color darkBackground = Color(0xFF050816);
+  static const Color darkSurface = Color(0xFF111827);
   static const Color darkText = Color(0xFFE4E4E6);
   static const Color darkTextSecondary = Color(0xFF9A9A9E);
   static const Color darkBorder = Color(0xFF2C2C2E);
@@ -21,6 +22,9 @@ class AppTheme {
   static const Color warning = Color(0xFFFF9F0A);
   static const Color error = Color(0xFFFF3B30);
   static const Color info = Color(0xFF5AC8FA);
+
+  // Corner radius (used across the app)
+  static const double radius = 18.0;
 
   // Typography
   static final _lightTextTheme = GoogleFonts.manropeTextTheme(
@@ -45,7 +49,7 @@ class AppTheme {
     ),
   );
 
-  static const double _borderRadius = 12.0;
+  static const double _borderRadius = radius;
   static final _shape = RoundedRectangleBorder(
     borderRadius: BorderRadius.circular(_borderRadius),
   );
@@ -69,22 +73,26 @@ class AppTheme {
       scaffoldBackgroundColor: lightBackground,
       textTheme: _lightTextTheme,
       appBarTheme: const AppBarTheme(
-        backgroundColor: lightBackground,
+        backgroundColor: Colors.transparent,
         foregroundColor: lightText,
         elevation: 0,
         scrolledUnderElevation: 0.5,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
       ),
       cardTheme: CardThemeData(
-        color: lightSurface,
+        color: Colors.white70.withOpacity(0.18),
         elevation: 0,
+        shadowColor: Colors.black.withOpacity(0.08),
         shape: _shape.copyWith(
-          side: const BorderSide(color: lightBorder, width: 1),
+          side: BorderSide(
+            color: Colors.white.withOpacity(0.35),
+            width: 1,
+          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: lightSurface,
+        fillColor: Colors.white.withOpacity(0.18),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
@@ -114,7 +122,7 @@ class AppTheme {
         foregroundColor: Colors.white,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: lightSurface,
+        backgroundColor: Colors.white.withOpacity(0.22),
         shape: _shape,
       ),
       checkboxTheme: CheckboxThemeData(
@@ -160,22 +168,26 @@ class AppTheme {
       scaffoldBackgroundColor: darkBackground,
       textTheme: _darkTextTheme,
       appBarTheme: const AppBarTheme(
-        backgroundColor: darkBackground,
+        backgroundColor: Colors.transparent,
         foregroundColor: darkText,
         elevation: 0,
         scrolledUnderElevation: 0.5,
         systemOverlayStyle: SystemUiOverlayStyle.light,
       ),
       cardTheme: CardThemeData(
-        color: darkSurface,
+        color: Colors.white10.withOpacity(0.12),
         elevation: 0,
+        shadowColor: Colors.black.withOpacity(0.6),
         shape: _shape.copyWith(
-          side: const BorderSide(color: darkBorder, width: 1),
+          side: BorderSide(
+            color: Colors.white.withOpacity(0.18),
+            width: 1,
+          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: darkSurface,
+        fillColor: Colors.white10.withOpacity(0.12),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         border: OutlineInputBorder(
@@ -205,7 +217,7 @@ class AppTheme {
         foregroundColor: Colors.white,
       ),
       dialogTheme: DialogThemeData(
-        backgroundColor: darkSurface,
+        backgroundColor: Colors.white10.withOpacity(0.16),
         shape: _shape,
       ),
       checkboxTheme: CheckboxThemeData(

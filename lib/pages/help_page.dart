@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/glass_container.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
@@ -7,14 +8,35 @@ class HelpPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Help & Guide'),
-        elevation: 0,
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? const [
+                  Color(0xFF050816),
+                  Color(0xFF111827),
+                  Color(0xFF020617),
+                ]
+              : const [
+                  Color(0xFFE0F4FF),
+                  Color(0xFFF5E9FF),
+                  Color(0xFFE8F3FF),
+                ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          title: const Text('Help & Guide'),
+          elevation: 0,
+        ),
+        body: SingleChildScrollView(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Welcome Section
@@ -177,15 +199,9 @@ class HelpPage extends StatelessWidget {
             const SizedBox(height: 32),
 
             // Support Section
-            Container(
+            GlassContainer(
+              borderRadius: BorderRadius.circular(18),
               padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.secondary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: theme.colorScheme.secondary.withOpacity(0.2),
-                ),
-              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -209,6 +225,7 @@ class HelpPage extends StatelessWidget {
 
             const SizedBox(height: 20),
           ],
+          ),
         ),
       ),
     );
@@ -236,15 +253,9 @@ class HelpPage extends StatelessWidget {
     return actions
         .map((action) => Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: Container(
+              child: GlassContainer(
+                borderRadius: BorderRadius.circular(18),
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: theme.cardTheme.color,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: theme.dividerColor.withOpacity(0.2),
-                  ),
-                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -304,15 +315,9 @@ class HelpPage extends StatelessWidget {
     return features
         .map((feature) => Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: Container(
+              child: GlassContainer(
+                borderRadius: BorderRadius.circular(18),
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: theme.cardTheme.color,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: theme.dividerColor.withOpacity(0.2),
-                  ),
-                ),
                 child: Row(
                   children: [
                     Expanded(
@@ -351,15 +356,9 @@ class HelpPage extends StatelessWidget {
     return tips
         .map((tip) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: Container(
+              child: GlassContainer(
+                borderRadius: BorderRadius.circular(18),
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: theme.primaryColor.withOpacity(0.1),
-                  ),
-                ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -385,15 +384,9 @@ class HelpPage extends StatelessWidget {
     return issues
         .map((issue) => Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: Container(
+              child: GlassContainer(
+                borderRadius: BorderRadius.circular(18),
                 padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: theme.cardTheme.color,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(
-                    color: theme.dividerColor.withOpacity(0.2),
-                  ),
-                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
