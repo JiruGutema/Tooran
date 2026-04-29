@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' as developer;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/category.dart';
 import '../models/deleted_category.dart';
@@ -122,12 +123,16 @@ class DataService {
 
 
 
-  // Data recovery methods
   Future<List<Category>> loadCategoriesWithRecovery() async {
     try {
       return await loadCategories();
-    } catch (e) {
-      // Attempt to recover from backup or return empty list
+    } catch (e, st) {
+      developer.log(
+        'loadCategories failed; returning empty list',
+        name: 'DataService',
+        error: e,
+        stackTrace: st,
+      );
       return [];
     }
   }
@@ -135,33 +140,14 @@ class DataService {
   Future<List<DeletedCategory>> loadDeletedCategoriesWithRecovery() async {
     try {
       return await loadDeletedCategories();
-    } catch (e) {
-      // Attempt to recover from backup or return empty list
+    } catch (e, st) {
+      developer.log(
+        'loadDeletedCategories failed; returning empty list',
+        name: 'DataService',
+        error: e,
+        stackTrace: st,
+      );
       return [];
-    }
-  }
-
-  // Backup operations
-  Future<void> createBackup() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final timestamp = DateTime.now().millisecondsSinceEpoch;
-      
-      final categoriesData = prefs.getString(_categoriesKey);
-      final deletedData = prefs.getString(_deletedCategoriesKey);
-      final settingsData = prefs.getString(_settingsKey);
-      
-      if (categoriesData != null) {
-        await prefs.setString('${_categoriesKey}_backup_$timestamp', categoriesData);
-      }
-      if (deletedData != null) {
-        await prefs.setString('${_deletedCategoriesKey}_backup_$timestamp', deletedData);
-      }
-      if (settingsData != null) {
-        await prefs.setString('${_settingsKey}_backup_$timestamp', settingsData);
-      }
-    } catch (e) {
-      throw DataServiceException('Failed to create backup: $e');
     }
   }
 }

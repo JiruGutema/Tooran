@@ -1,304 +1,146 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import '../widgets/glass_container.dart';
+import '../theme/app_theme.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
 
+  static const _features = [
+    ['Categories', 'A folder for the things you keep close.'],
+    ['Tasks', 'Names, descriptions, gentle progress.'],
+    ['Drag & drop', 'Long-press to lift. Drop anywhere.'],
+    ['History', 'Deleted categories are recoverable.'],
+    ['Themes', 'Warm paper by day. Deep ink by night.'],
+    ['Local-first', 'No cloud, no sign-in, no telemetry.'],
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink = dark ? AppTheme.dInk : AppTheme.lInk;
+    final ink2 = dark ? AppTheme.dInk2 : AppTheme.lInk2;
+    final ink3 = dark ? AppTheme.dInk3 : AppTheme.lInk3;
+    final primary = Theme.of(context).colorScheme.primary;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? const [
-                  Color(0xFF050816),
-                  Color(0xFF111827),
-                  Color(0xFF020617),
-                ]
-              : const [
-                  Color(0xFFE0F4FF),
-                  Color(0xFFF5E9FF),
-                  Color(0xFFE8F3FF),
-                ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-      ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('About Tooran'),
-          elevation: 0,
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-
-              // App Header Section
-              Center(
-                child: GlassContainer(
-                  borderRadius: BorderRadius.circular(24),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                  child: Column(
-                    children: [
-                      Text(
-                        'Tooran',
-                        style: theme.textTheme.headlineLarge?.copyWith(
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 6,
-                        ),
-                        decoration: BoxDecoration(
-                          color:
-                              theme.colorScheme.secondary.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          'Version 1.6.1',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.secondary,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 40),
-
-              // Mission Statement
-              GlassContainer(
-                borderRadius: BorderRadius.circular(20),
-                padding: const EdgeInsets.all(18),
-                child: _buildSection(
-                  context,
-                  'Our Mission',
-                  'Tooran helps you to manage you tasks. We believe productivity should be simple, beautiful, and accessible to everyone.',
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Key Features
-              GlassContainer(
-                borderRadius: BorderRadius.circular(20),
-                padding: const EdgeInsets.all(18),
-                child: _buildSection(
-                  context,
-                  'Key Features',
-                  null,
-                ),
-              ),
-              const SizedBox(height: 16),
-
-              ..._buildFeatureList(context),
-
-              const SizedBox(height: 32),
-
-              // Developer Info
-              GlassContainer(
-                borderRadius: BorderRadius.circular(20),
-                padding: const EdgeInsets.all(18),
-                child: _buildSection(
-                  context,
-                  'Developer',
-                  'Created with passion by Jiru Gutema, a dedicated software developer from Addis Ababa University, committed to building tools that make life more organized and productive.',
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Copyright
-              Center(
-                child: GlassContainer(
-                  borderRadius: BorderRadius.circular(20),
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    children: [
-                      Text(
-                        '© 2025 Tooran',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'All rights reserved',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: theme.textTheme.bodySmall?.color
-                              ?.withOpacity(0.7),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSection(
-    BuildContext context,
-    String title,
-    String? description,
-  ) {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return Scaffold(
+      body: SafeArea(
+        child: ListView(
+          padding: EdgeInsets.zero,
           children: [
-            Container(
-              padding: const EdgeInsets.all(4),
-            ),
-            const SizedBox(width: 12),
-            Text(
-              title,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
-        if (description != null) ...[
-          const SizedBox(height: 12),
-          Text(
-            description,
-            style: theme.textTheme.bodyLarge?.copyWith(
-              height: 1.6,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
-  List<Widget> _buildFeatureList(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final features = [
-      {
-        'title': 'Smart Categories',
-        'desc': 'Organize tasks with intelligent categorization',
-      },
-      {
-        'title': 'Progress Tracking',
-        'desc': 'Visual indicators and completion analytics',
-      },
-      {
-        'title': 'Drag & Drop',
-        'desc': 'Intuitive reordering for better organization',
-      },
-      {
-        'title': 'Adaptive Themes',
-        'desc': 'Beautiful dark and light mode support',
-      },
-      {
-        'title': 'Auto-Save',
-        'desc': 'Never lose your data with automatic persistence',
-      },
-      {
-        'title': 'Task Recovery',
-        'desc': 'Restore accidentally deleted items',
-      },
-    ];
-
-    return features
-        .map(
-          (feature) => Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: GlassContainer(
-              borderRadius: BorderRadius.circular(18),
-              padding: const EdgeInsets.all(16),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 8, 14, 0),
               child: Row(
                 children: [
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  IconButton(
+                    icon: const Icon(Icons.arrow_back, size: 18),
+                    color: ink2,
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  Text('ABOUT', style: AppTheme.eyebrow(ink3)),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 22, 22, 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text.rich(
+                    TextSpan(
+                      style: AppTheme.display(size: 56, color: ink),
                       children: [
-                        Text(
-                          feature['title'] as String,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          feature['desc'] as String,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.textTheme.bodyMedium?.color
-                                ?.withOpacity(0.8),
-                          ),
+                        const TextSpan(text: 'tooran'),
+                        TextSpan(
+                          text: '.',
+                          style: AppTheme.display(size: 56, color: primary),
                         ),
                       ],
                     ),
                   ),
+                  const SizedBox(height: 6),
+                  Text('VERSION 1.6.1', style: AppTheme.eyebrow(ink3)),
                 ],
               ),
             ),
-          ),
-        )
-        .toList();
-  }
-
-  Widget _buildTechStack(BuildContext context) {
-    final theme = Theme.of(context);
-
-    final technologies = [
-      {'name': 'Flutter', 'desc': 'Cross-platform UI framework'},
-      {'name': 'Dart', 'desc': 'Modern programming language'},
-      {'name': 'Material Design 3', 'desc': 'Latest design system'},
-      {'name': 'SharedPreferences', 'desc': 'Local data persistence'},
-    ];
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      children: technologies
-          .map(
-            (tech) => Container(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: theme.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: theme.primaryColor.withOpacity(0.2),
-                ),
-              ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 18, 22, 28),
               child: Text(
-                tech['name'] as String,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                  color: theme.primaryColor,
+                'Tooran is a local-first task organizer. Categories hold tasks. Tasks have descriptions. Nothing leaves your device. Productivity, in a quieter key.',
+                style: AppTheme.body(size: 16, color: ink2).copyWith(height: 1.55),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 0, 22, 8),
+              child: Text('WHAT IT DOES', style: AppTheme.eyebrow(ink3)),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 22),
+              child: Column(
+                children: [
+                  for (final f in _features) _row(context, f[0], f[1]),
+                ],
+              ),
+            ),
+            const SizedBox(height: 28),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 0, 22, 8),
+              child: Text('CRAFTED BY', style: AppTheme.eyebrow(ink3)),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 8, 22, 36),
+              child: Text(
+                'Jiru Gutema, Addis Ababa University. Made with care, in Flutter, on a quiet evening.',
+                style: AppTheme.body(size: 14, color: ink2).copyWith(height: 1.55),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(22, 0, 22, 32),
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 14),
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(color: AppTheme.hairline(dark), width: 1),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('© 2025 TOORAN', style: AppTheme.mono(size: 11, color: ink3)),
+                    Text('ALL RIGHTS RESERVED', style: AppTheme.mono(size: 11, color: ink3)),
+                  ],
                 ),
               ),
             ),
-          )
-          .toList(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _row(BuildContext context, String k, String v) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink = dark ? AppTheme.dInk : AppTheme.lInk;
+    final ink3 = dark ? AppTheme.dInk3 : AppTheme.lInk3;
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: AppTheme.hairline(dark), width: 1),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 110,
+            child: Text(k.toUpperCase(), style: AppTheme.eyebrow(ink3)),
+          ),
+          Expanded(
+            child: Text(v,
+                style: AppTheme.body(size: 14.5, color: ink).copyWith(height: 1.45)),
+          ),
+        ],
+      ),
     );
   }
 }

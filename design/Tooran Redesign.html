@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Tooran — Redesign</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;450;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="styles.css"/>
+  <style>
+    html, body, #root { height: 100%; }
+    body { background: #f0eee9; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <script type="text/babel" src="ios-frame.jsx"></script>
+  <script type="text/babel" src="design-canvas.jsx"></script>
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="tooran-components.jsx"></script>
+  <script type="text/babel" src="tooran-app.jsx"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "primaryLight": "#C8553D",
+      "primaryDark": "#E8B65A",
+      "bgLight": "#F5F1E8",
+      "bgDark": "#0E0C09",
+      "displayFont": "Instrument Serif",
+      "bodyFont": "Geist",
+      "showSegmentedDots": true,
+      "celebration": "confetti"
+    }/*EDITMODE-END*/;
+
+    function Root() {
+      const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+      // apply tweaks as CSS variables on <body>
+      useEffect(() => {
+        const root = document.documentElement;
+        root.style.setProperty('--l-primary', tweaks.primaryLight);
+        root.style.setProperty('--d-primary', tweaks.primaryDark);
+        root.style.setProperty('--l-bg', tweaks.bgLight);
+        root.style.setProperty('--d-bg', tweaks.bgDark);
+        root.style.setProperty('--font-display', `"${tweaks.displayFont}", Georgia, serif`);
+        root.style.setProperty('--font-body', `"${tweaks.bodyFont}", -apple-system, system-ui, sans-serif`);
+      }, [tweaks]);
+
+      return (
+        <>
+          <DesignCanvas>
+            <DCSection id="home" title="Home — Mobile" subtitle="Categories, tasks, today summary. Tap categories to expand. Tap circles to complete tasks. Tap the menu (•••) for History and Help.">
+              <DCArtboard id="home-light" label="A · Light" width={402} height={874}>
+                <IOSDevice width={402} height={874} dark={false}>
+                  <MobileHome initialDark={false}/>
+                </IOSDevice>
+              </DCArtboard>
+              <DCArtboard id="home-dark" label="B · Dark" width={402} height={874}>
+                <IOSDevice width={402} height={874} dark={true}>
+                  <MobileHome initialDark={true}/>
+                </IOSDevice>
+              </DCArtboard>
+            </DCSection>
+
+            <DCSection id="sheets" title="Sheets & details" subtitle="Add/edit category, add/edit task with formatting, task details with rich description and metadata.">
+              <DCArtboard id="cat-sheet" label="A · New category" width={402} height={874}>
+                <IOSDevice width={402} height={874} dark={false}>
+                  <SheetPreview kind="cat-add"/>
+                </IOSDevice>
+              </DCArtboard>
+              <DCArtboard id="task-sheet" label="B · New task with formatting" width={402} height={874}>
+                <IOSDevice width={402} height={874} dark={false}>
+                  <SheetPreview kind="task-add"/>
+                </IOSDevice>
+              </DCArtboard>
+              <DCArtboard id="task-details" label="C · Task details" width={402} height={874}>
+                <IOSDevice width={402} height={874} dark={false}>
+                  <SheetPreview kind="task-details"/>
+                </IOSDevice>
+              </DCArtboard>
+              <DCArtboard id="confirm" label="D · Confirm delete" width={402} height={874}>
+                <IOSDevice width={402} height={874} dark={false}>
+                  <SheetPreview kind="confirm"/>
+                </IOSDevice>
+              </DCArtboard>
+            </DCSection>
+
+            <DCSection id="utility" title="Utility screens" subtitle="History (soft-deleted categories), Help, and the empty state.">
+              <DCArtboard id="history" label="A · History" width={402} height={874}>
+                <IOSDevice width={402} height={874} dark={false}>
+                  <MobileHome initialDark={false} view="history"/>
+                </IOSDevice>
+              </DCArtboard>
+              <DCArtboard id="help" label="B · Help" width={402} height={874}>
+                <IOSDevice width={402} height={874} dark={false}>
+                  <MobileHome initialDark={false} view="help"/>
+                </IOSDevice>
+              </DCArtboard>
+              <DCArtboard id="empty" label="C · Empty state" width={402} height={874}>
+                <IOSDevice width={402} height={874} dark={false}>
+                  <EmptyPreview/>
+                </IOSDevice>
+              </DCArtboard>
+            </DCSection>
+
+            <DCSection id="desktop" title="Desktop / Linux — two-pane" subtitle="Master/detail layout: categories on the left, the active category's tasks on the right. Editorial header, segmented progress, keyboard-first.">
+              <DCArtboard id="desk-light" label="A · Light" width={1200} height={780}>
+                <DesktopApp initialDark={false}/>
+              </DCArtboard>
+              <DCArtboard id="desk-dark" label="B · Dark" width={1200} height={780}>
+                <DesktopApp initialDark={true}/>
+              </DCArtboard>
+            </DCSection>
+
+            <DCSection id="system" title="Visual system" subtitle="A quick reference for the design language.">
+              <DCArtboard id="tokens" label="A · Color & type" width={760} height={780}>
+                <SystemSheet/>
+              </DCArtboard>
+              <DCArtboard id="components" label="B · Components" width={760} height={780}>
+                <ComponentSheet/>
+              </DCArtboard>
+            </DCSection>
+          </DesignCanvas>
+
+          <TweaksPanel title="Tweaks">
+            <TweakSection title="Color">
+              <TweakColor label="Primary (light)" value={tweaks.primaryLight} onChange={v => setTweak('primaryLight', v)}/>
+              <TweakColor label="Primary (dark)"  value={tweaks.primaryDark}  onChange={v => setTweak('primaryDark', v)}/>
+              <TweakColor label="Background (light)" value={tweaks.bgLight} onChange={v => setTweak('bgLight', v)}/>
+              <TweakColor label="Background (dark)"  value={tweaks.bgDark}  onChange={v => setTweak('bgDark', v)}/>
+            </TweakSection>
+            <TweakSection title="Typography">
+              <TweakSelect label="Display font" value={tweaks.displayFont} onChange={v => setTweak('displayFont', v)}
+                options={['Instrument Serif', 'Fraunces', 'Cormorant Garamond', 'Geist', 'JetBrains Mono']}/>
+              <TweakSelect label="Body font" value={tweaks.bodyFont} onChange={v => setTweak('bodyFont', v)}
+                options={['Geist', 'Inter', 'Söhne', 'JetBrains Mono', 'Instrument Serif']}/>
+            </TweakSection>
+          </TweaksPanel>
+        </>
+      );
+    }
+
+    // Sheet previews — open the relevant sheet over a representative home state
+    function SheetPreview({ kind }) {
+      const [open, setOpen] = useState(false);
+      useEffect(() => {
+        const t = setTimeout(() => setOpen(true), 200);
+        return () => clearTimeout(t);
+      }, []);
+      return (
+        <div className="tooran" style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ height: '100%', overflow: 'hidden', paddingTop: 50 }}>
+            <div className="appbar">
+              <div className="brand">tooran<span className="dot-mark">.</span></div>
+              <div className="appbar-actions">
+                <button className="icon-btn">{Icon.moon()}</button>
+                <button className="icon-btn">{Icon.more()}</button>
+              </div>
+            </div>
+            <div className="meta-strip">
+              <div>
+                <div className="t-eyebrow" style={{ marginBottom: 6 }}>Wednesday, April 29</div>
+                <div className="greeting">A <em>quiet</em><br/>list of things.</div>
+              </div>
+            </div>
+          </div>
+          {kind === 'cat-add' && (
+            <Sheet open={open} onClose={() => {}}>
+              <div className="sheet-header"><span className="eyebrow">New category</span></div>
+              <div className="field">
+                <label>Name</label>
+                <div className="input" style={{ display: 'block' }}>Reading List</div>
+              </div>
+              <div className="sheet-footer">
+                <button className="btn">Cancel</button>
+                <button className="btn primary">Create</button>
+              </div>
+            </Sheet>
+          )}
+          {kind === 'task-add' && (
+            <Sheet open={open} onClose={() => {}}>
+              <div className="sheet-header"><span className="eyebrow">New task</span></div>
+              <div className="field">
+                <label>Name</label>
+                <div className="input" style={{ display: 'block' }}>Plan the Lisbon trip</div>
+              </div>
+              <div className="field" style={{ paddingTop: 18 }}>
+                <label>Description</label>
+                <div className="textarea" style={{ display: 'block', whiteSpace: 'pre-wrap' }}>{`• Flights from JFK\n• A quiet apartment in Alfama\n• Make a list of bookshops`}</div>
+              </div>
+              <div className="format-toolbar">
+                <button className="tool">{Icon.bullet()} Bullet</button>
+                <button className="tool">{Icon.numlist()} Numbered</button>
+              </div>
+              <div className="sheet-footer">
+                <button className="btn">Cancel</button>
+                <button className="btn primary">Add task</button>
+              </div>
+            </Sheet>
+          )}
+          {kind === 'task-details' && (
+            <Sheet open={open} onClose={() => {}} height="78%">
+              <div className="sheet-header" style={{ alignItems: 'center' }}>
+                <span className="eyebrow">Open</span>
+                <button className="icon-btn">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M11 2.5l2.5 2.5L5 13.5l-3 .5.5-3L11 2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+              <div style={{ padding: '0 22px', flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '4px 0 18px' }}>
+                  <div className="checkbox" style={{ marginLeft: 0, width: 26, height: 26 }}>{Icon.check()}</div>
+                  <div className="t-display" style={{ fontSize: 28 }}>Reply to Mira about the contract</div>
+                </div>
+                <div style={{ background: 'var(--surface-2)', border: '1px solid var(--hairline)', borderRadius: 14, padding: '16px 18px', marginBottom: 18 }}>
+                  <div style={{ color: 'var(--ink)', fontSize: 14.5, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{`Confirm the timeline and the deposit amount.\n\n1. Confirm milestones\n2. Send draft\n3. Schedule call`}</div>
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+                  <div>
+                    <div className="t-eyebrow" style={{ marginBottom: 4 }}>Status</div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 18 }}>In progress</div>
+                  </div>
+                  <div>
+                    <div className="t-eyebrow" style={{ marginBottom: 4 }}>Created</div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 18 }}>Apr 28</div>
+                    <div className="t-meta" style={{ marginTop: 2 }}>9:14 AM</div>
+                  </div>
+                </div>
+              </div>
+            </Sheet>
+          )}
+          {kind === 'confirm' && (
+            <>
+              <div className="scrim open" style={{ zIndex: 59 }}/>
+              <div className="dialog open">
+                <h4>Delete "Today"?</h4>
+                <p>It has 4 tasks. The category and its tasks will move to History — you can restore them later.</p>
+                <div className="row">
+                  <button className="btn">Cancel</button>
+                  <button className="btn danger">Delete</button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      );
+    }
+
+    function EmptyPreview() {
+      return (
+        <div className="tooran" style={{ height: '100%', overflow: 'hidden' }}>
+          <div style={{ paddingTop: 50, height: '100%', overflow: 'auto', position: 'relative' }}>
+            <div className="appbar">
+              <div className="brand">tooran<span className="dot-mark">.</span></div>
+              <div className="appbar-actions">
+                <button className="icon-btn">{Icon.moon()}</button>
+                <button className="icon-btn">{Icon.more()}</button>
+              </div>
+            </div>
+            <div className="meta-strip">
+              <div>
+                <div className="t-eyebrow" style={{ marginBottom: 6 }}>Wednesday, April 29</div>
+                <div className="greeting">A <em>blank</em><br/>page, yours.</div>
+              </div>
+            </div>
+            <div className="empty">
+              <div className="glyph">
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+                  <path d="M3 9a2 2 0 012-2h6l3 3h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h3>No categories yet</h3>
+              <p>Tap the button below to create your first category — a folder for the things you want to keep close.</p>
+            </div>
+            <button className="fab"><span className="plus">+</span> Category</button>
+          </div>
+        </div>
+      );
+    }
+
+    function SystemSheet() {
+      const swatches = [
+        ['Clay', '#C8553D', 'primary · light'],
+        ['Ember', '#E8B65A', 'primary · dark'],
+        ['Telegram demoted', '#2F6B8A', 'secondary'],
+        ['Sage', '#6A8C57', 'success'],
+        ['Amber', '#D08A3C', 'warning'],
+        ['Brick', '#B5482F', 'error'],
+      ];
+      const surfaces = [
+        ['Paper', '#F5F1E8'], ['Surface', '#FBF7EE'], ['Card', '#FFFFFF'],
+        ['Ink', '#1F1B16'], ['Midnight', '#0E0C09'], ['Surface dk', '#1A1612'],
+      ];
+      return (
+        <div style={{ padding: 36, fontFamily: 'var(--font-body)', color: '#1F1B16', background: '#FBF7EE', height: '100%', overflow: 'auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid rgba(31,27,22,0.12)', paddingBottom: 16, marginBottom: 24 }}>
+            <div className="t-display" style={{ fontSize: 48 }}>The system.</div>
+            <div className="t-meta">tooran v2 · 2026</div>
+          </div>
+
+          <div className="t-eyebrow" style={{ marginBottom: 10 }}>Type</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 30 }}>
+            <div>
+              <div className="t-display" style={{ fontSize: 56, lineHeight: 1.0 }}>A quiet<br/>list, kept.</div>
+              <div className="t-meta" style={{ marginTop: 8 }}>Instrument Serif · 56/56</div>
+            </div>
+            <div>
+              <div style={{ fontSize: 17, lineHeight: 1.5, color: '#1F1B16' }}>Tooran is a place for the things you want to keep close. Categories hold tasks. Tasks hold what they hold. Nothing more.</div>
+              <div className="t-meta" style={{ marginTop: 8 }}>Geist · 17/26</div>
+            </div>
+          </div>
+
+          <div className="t-eyebrow" style={{ marginBottom: 10 }}>Color</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14, marginBottom: 24 }}>
+            {swatches.map(([n, hex, role]) => (
+              <div key={n} style={{ background: '#fff', border: '1px solid rgba(31,27,22,0.10)', borderRadius: 12, overflow: 'hidden' }}>
+                <div style={{ background: hex, height: 80 }}/>
+                <div style={{ padding: 12 }}>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 20 }}>{n}</div>
+                  <div className="t-meta" style={{ marginTop: 2 }}>{hex} · {role}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="t-eyebrow" style={{ marginBottom: 10 }}>Surfaces</div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            {surfaces.map(([n, hex]) => (
+              <div key={n} style={{ flex: 1, height: 56, background: hex, border: '1px solid rgba(31,27,22,0.10)', borderRadius: 8, position: 'relative' }}>
+                <div className="t-meta" style={{ position: 'absolute', bottom: 6, left: 8, color: hex.startsWith('#0') || hex.startsWith('#1') ? 'rgba(255,255,255,.7)' : undefined }}>{hex}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function ComponentSheet() {
+      const [done, setDone] = useState({ a: false, b: true, c: false });
+      return (
+        <div style={{ padding: 36, fontFamily: 'var(--font-body)', color: '#1F1B16', background: '#FBF7EE', height: '100%', overflow: 'auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid rgba(31,27,22,0.12)', paddingBottom: 16, marginBottom: 24 }}>
+            <div className="t-display" style={{ fontSize: 48 }}>Components.</div>
+            <div className="t-meta">try the checkbox →</div>
+          </div>
+
+          <div className="t-eyebrow" style={{ marginBottom: 12 }}>Checkbox</div>
+          <div style={{ display: 'flex', gap: 28, alignItems: 'center', marginBottom: 28 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div className="checkbox" style={{ marginLeft: 0 }}>{Icon.check()}</div>
+              <span className="t-meta">idle</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div className="checkbox" style={{ marginLeft: 0, borderColor: 'var(--ink-2)' }}>{Icon.check()}</div>
+              <span className="t-meta">hover</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div className="checkbox checked" style={{ marginLeft: 0 }}>{Icon.check()}</div>
+              <span className="t-meta">checked</span>
+            </div>
+            <div className="tooran" style={{ background: 'transparent', display: 'flex', alignItems: 'center', gap: 12 }}>
+              <div onClick={() => setDone(d => ({ ...d, a: !d.a }))} className={`checkbox ${done.a ? 'checked' : ''}`} style={{ marginLeft: 0, cursor: 'pointer' }}>{Icon.check()}</div>
+              <span className="t-meta">try me</span>
+            </div>
+          </div>
+
+          <div className="t-eyebrow" style={{ marginBottom: 12 }}>Progress — segmented dots</div>
+          <div className="tooran" style={{ background: 'transparent', marginBottom: 28 }}>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 6 }}>
+              {[1,1,1,0,0,0,0].map((on, i) => <span key={i} className={`dot ${on ? 'done' : ''}`} style={{ width: 10, height: 10 }}/>)}
+            </div>
+            <div className="t-meta">3 of 7 · one dot per task</div>
+          </div>
+
+          <div className="t-eyebrow" style={{ marginBottom: 12 }}>Buttons</div>
+          <div className="tooran" style={{ background: 'transparent', display: 'flex', gap: 10, marginBottom: 28 }}>
+            <button className="btn primary" style={{ flex: 0, padding: '0 22px' }}>Primary</button>
+            <button className="btn" style={{ flex: 0, padding: '0 22px' }}>Secondary</button>
+            <button className="btn danger" style={{ flex: 0, padding: '0 22px' }}>Destructive</button>
+            <button className="fab" style={{ position: 'static' }}><span className="plus">+</span> Category</button>
+          </div>
+
+          <div className="t-eyebrow" style={{ marginBottom: 12 }}>Motion language</div>
+          <div style={{ fontSize: 14.5, lineHeight: 1.55, maxWidth: 580 }}>
+            Cards expand on a 350ms grid-row ease (cubic-bezier .2 .7 .3 1). Sheets enter from below at 350ms. Checkmarks settle with a soft overshoot at 250ms. Reordering uses 180ms slot transitions. No bounce. No glow.
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<Root/>);
+  </script>
+</body>
+</html>

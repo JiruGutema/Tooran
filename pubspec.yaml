@@ -31,8 +31,6 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_staggered_animations: ^1.0.0
-  hive: ^2.2.3
-  hive_flutter: ^1.1.0
   shared_preferences: ^2.0.15
   flutter_native_splash: ^2.3.2
   window_manager: ^0.3.7
@@ -52,15 +50,21 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-    
-
-
-  # The "flutter_lints" package below contains a set of recommended lints to
-  # encourage good coding practices. The lint set provided by the package is
-  # activated in the `analysis_options.yaml` file located at the root of your
-  # package. See that file for information about deactivating specific lint
-  # rules and activating additional ones.
+  flutter_launcher_icons: ^0.14.1
   flutter_lints: ^5.0.0
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
+  adaptive_icon_background: "#F5F1E8"
+  adaptive_icon_foreground: "assets/logo.png"
+  min_sdk_android: 21
+  web:
+    generate: true
+    image_path: "assets/icon.png"
+    background_color: "#F5F1E8"
+    theme_color: "#C8553D"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -76,6 +80,27 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/logo.png
+    - assets/logo_dark.png
+    - assets/icon.png
+
+  fonts:
+    - family: InstrumentSerif
+      fonts:
+        - asset: assets/fonts/InstrumentSerif-Regular.ttf
+        - asset: assets/fonts/InstrumentSerif-Italic.ttf
+          style: italic
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/Inter-Regular.ttf
+        - asset: assets/fonts/Inter-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Inter-SemiBold.ttf
+          weight: 600
+    - family: JetBrainsMono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
+        - asset: assets/fonts/JetBrainsMono-Medium.ttf
+          weight: 500
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -103,8 +128,12 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 flutter_native_splash:
-  color: "#212C39"
+  color: "#F5F1E8"
   image: assets/logo.png
+  color_dark: "#0E0C09"
+  image_dark: assets/logo_dark.png
   android_12:
     image: assets/logo.png
-    icon_background_color: "#212C39"
+    icon_background_color: "#F5F1E8"
+    image_dark: assets/logo_dark.png
+    icon_background_color_dark: "#0E0C09"

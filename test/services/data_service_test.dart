@@ -206,31 +206,7 @@ void main() {
       });
     });
 
-    group('Backup Operations', () {
-      test('should create backup successfully', () async {
-        // Add some data
-        final category = Category(name: 'Test Category');
-        await dataService.saveCategories([category]);
-
-        // Create backup
-        await dataService.createBackup();
-
-        // Verify backup was created (we can't easily test the exact backup key due to timestamp)
-        final prefs = await SharedPreferences.getInstance();
-        final keys = prefs.getKeys();
-        expect(keys.any((key) => key.contains('categories_backup_')), equals(true));
-      });
-
-      test('should handle backup creation when no data exists', () async {
-        // Should not throw error even when no data exists
-        expect(
-          () => dataService.createBackup(),
-          returnsNormally,
-        );
-      });
-    });
-
-    group('Data Integrity', () {
+group('Data Integrity', () {
       test('should preserve task completion status through save/load cycle', () async {
         final completedTask = Task(name: 'Completed', isCompleted: true);
         final pendingTask = Task(name: 'Pending', isCompleted: false);

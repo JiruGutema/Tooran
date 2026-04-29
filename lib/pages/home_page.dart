@@ -1,16 +1,15 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:tooran/theme/app_theme.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../providers/theme_provider.dart';
+
 import '../models/category.dart';
 import '../models/deleted_category.dart';
 import '../models/task.dart';
+import '../providers/theme_provider.dart';
 import '../services/data_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/cat_ring.dart';
 import '../widgets/formatted_text.dart';
-import '../widgets/glass_container.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -23,10 +22,10 @@ class _HomePageState extends State<HomePage> {
   final DataService _dataService = DataService();
   final TextEditingController _categoryController = TextEditingController();
   final TextEditingController _taskNameController = TextEditingController();
-  final TextEditingController _taskDescriptionController =
-      TextEditingController();
+  final TextEditingController _taskDescriptionController = TextEditingController();
 
   List<Category> _categories = [];
+  Set<String> _expanded = {};
   bool _isLoading = true;
 
   @override
@@ -43,6 +42,8 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
+  // ─── Data ───────────────────────────────────────────────────────────
+
   Future<void> _loadData() async {
     try {
       setState(() => _isLoading = true);
@@ -53,1016 +54,464 @@ class _HomePageState extends State<HomePage> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading data: $e')),
-        );
-      }
+      _toast('Could not load your tasks');
     }
   }
 
   Future<void> _saveData() async {
     try {
       await _dataService.saveCategories(_categories);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error saving data: $e')),
-        );
-      }
+    } catch (_) {
+      _toast('Could not save changes');
     }
   }
 
-  // ─── Bottom Sheet Helper ────────────────────────────────────────────
-
-  Widget _buildBottomSheet({
-    required String title,
-    required Widget child,
-    IconData? icon,
-  }) {
-    final colorScheme = Theme.of(context).colorScheme;
-
-    return ClipRRect(
-      borderRadius: const BorderRadius.vertical(
-        top: Radius.circular(AppTheme.radius),
-      ),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                colorScheme.surface.withOpacity(0.9),
-                colorScheme.surface.withOpacity(0.7),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            border: Border.all(
-              color: colorScheme.onSurface.withOpacity(0.08),
-            ),
-          ),
-          padding: EdgeInsets.only(
-            left: 24,
-            right: 24,
-            top: 12,
-            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 36,
-                height: 4,
-                decoration: BoxDecoration(
-                  color:
-                      colorScheme.onSurfaceVariant.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                title,
-                style: Theme.of(context)
-                    .textTheme
-                    .titleLarge
-                    ?.copyWith(fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 20),
-              child,
-            ],
-          ),
-        ),
-      ),
-    );
+  void _toast(String msg, {VoidCallback? onUndo, String undoLabel = 'Undo'}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(
+        content: Text(msg),
+        action: onUndo == null
+            ? null
+            : SnackBarAction(label: undoLabel.toUpperCase(), onPressed: onUndo),
+      ));
   }
 
-  // ─── Description Formatting Helpers ─────────────────────────────────
+  // ─── Category ops ───────────────────────────────────────────────────
 
-  Widget _buildFormattingToolbar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(AppTheme.radius),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildToolbarButton(
-            icon: Icons.format_list_bulleted_rounded,
-            tooltip: 'Add bullet point',
-            onTap: _insertBullet,
-          ),
-          Container(
-            width: 1,
-            height: 20,
-            color: Theme.of(context).dividerColor.withOpacity(0.3),
-            margin: const EdgeInsets.symmetric(horizontal: 2),
-          ),
-          _buildToolbarButton(
-            icon: Icons.format_list_numbered_rounded,
-            tooltip: 'Add numbered item',
-            onTap: _insertNumbered,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildToolbarButton({
-    required IconData icon,
-    required String tooltip,
-    required VoidCallback onTap,
-  }) {
-    return IconButton(
-      icon: Icon(icon, size: 20),
-      tooltip: tooltip,
-      onPressed: onTap,
-      visualDensity: VisualDensity.compact,
-    );
-  }
-
-  void _insertBullet() {
-    final controller = _taskDescriptionController;
-    final text = controller.text;
-    final sel = controller.selection;
-    final offset = sel.isValid ? sel.baseOffset : text.length;
-    final prefix = (text.isEmpty || (offset > 0 && text[offset - 1] == '\n') || offset == 0)
-        ? '\u2022 '
-        : '\n\u2022 ';
-    final newText = text.substring(0, offset) + prefix + text.substring(offset);
-    controller.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(offset: offset + prefix.length),
-    );
-  }
-
-  void _insertNumbered() {
-    final controller = _taskDescriptionController;
-    final text = controller.text;
-    final lines = text.split('\n');
-    int lastNumber = 0;
-    for (final line in lines) {
-      final match = RegExp(r'^(\d+)\.\s').firstMatch(line.trim());
-      if (match != null) {
-        lastNumber = int.parse(match.group(1)!);
-      }
-    }
-    final sel = controller.selection;
-    final offset = sel.isValid ? sel.baseOffset : text.length;
-    final numStr = '${lastNumber + 1}. ';
-    final prefix = (text.isEmpty || (offset > 0 && text[offset - 1] == '\n') || offset == 0)
-        ? numStr
-        : '\n$numStr';
-    final newText = text.substring(0, offset) + prefix + text.substring(offset);
-    controller.value = TextEditingValue(
-      text: newText,
-      selection: TextSelection.collapsed(offset: offset + prefix.length),
-    );
-  }
-
-  // ─── Category Management ────────────────────────────────────────────
-
-  void _showAddCategoryDialog() {
+  void _showAddCategorySheet() {
     _categoryController.clear();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildBottomSheet(
-        title: 'New Category',
-        icon: Icons.create_new_folder_outlined,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _categoryController,
-              decoration: const InputDecoration(
-                labelText: 'Category Name',
-                hintText: 'e.g., Work Projects, Shopping List',
-                prefixIcon: Icon(Icons.folder_outlined),
-              ),
-              autofocus: true,
-              textCapitalization: TextCapitalization.sentences,
-              onSubmitted: (_) => _addCategory(),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      _categoryController.clear();
-                      Navigator.pop(context);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.radius),
-                      ),
-                    ),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _addCategory(),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    child: const Text('Create'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+    _openSheet(_CategorySheet(
+      mode: 'New category',
+      controller: _categoryController,
+      submitLabel: 'Create',
+      onSubmit: _addCategory,
+    ));
+  }
+
+  void _showEditCategorySheet(Category c) {
+    _categoryController.text = c.name;
+    _openSheet(_CategorySheet(
+      mode: 'Edit category',
+      controller: _categoryController,
+      submitLabel: 'Save',
+      onSubmit: () => _editCategory(c),
+    ));
   }
 
   void _addCategory() {
     final name = _categoryController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a category name')),
-      );
+      _toast('Please enter a category name');
       return;
     }
-
-    if (_categories
-        .any((cat) => cat.name.toLowerCase() == name.toLowerCase())) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Category name already exists')),
-      );
+    if (_categories.any((c) => c.name.toLowerCase() == name.toLowerCase())) {
+      _toast('That name already exists');
       return;
     }
-
-    final newCategory = Category(
-      name: name,
-      sortOrder: _categories.length,
-    );
-
+    final cat = Category(name: name, sortOrder: _categories.length);
     setState(() {
-      _categories.add(newCategory);
+      _categories.add(cat);
     });
-
     _saveData();
     _categoryController.clear();
     Navigator.pop(context);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Category "$name" added')),
-    );
   }
 
-  void _showEditCategoryDialog(Category category) {
-    _categoryController.text = category.name;
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildBottomSheet(
-        title: 'Edit Category',
-        icon: Icons.edit_outlined,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _categoryController,
-              decoration: const InputDecoration(
-                labelText: 'Category Name',
-                hintText: 'Enter category name',
-                prefixIcon: Icon(Icons.folder_outlined),
-              ),
-              autofocus: true,
-              textCapitalization: TextCapitalization.sentences,
-              onSubmitted: (_) => _editCategory(category),
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      _categoryController.clear();
-                      Navigator.pop(context);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppTheme.radius),
-                      ),
-                    ),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () => _editCategory(category),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                    child: const Text('Save'),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ).then((_) {
-      _categoryController.clear();
-    });
-  }
-
-  void _editCategory(Category category) {
+  void _editCategory(Category c) {
     final name = _categoryController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a category name')),
-      );
+      _toast('Please enter a category name');
       return;
     }
-
-    if (_categories.any((cat) =>
-        cat.id != category.id &&
-        cat.name.toLowerCase() == name.toLowerCase())) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Category name already exists')),
-      );
+    if (_categories.any((x) => x.id != c.id && x.name.toLowerCase() == name.toLowerCase())) {
+      _toast('That name already exists');
       return;
     }
-
     setState(() {
-      final index = _categories.indexWhere((cat) => cat.id == category.id);
-      if (index != -1) {
-        _categories[index] = category.copyWith(name: name);
-      }
+      final i = _categories.indexWhere((x) => x.id == c.id);
+      if (i != -1) _categories[i] = c.copyWith(name: name);
     });
-
     _saveData();
-    _categoryController.clear();
     Navigator.pop(context);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Category renamed to "$name"')),
-    );
   }
 
-  void _showDeleteCategoryDialog(Category category) {
+  void _confirmDeleteCategory(Category c) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete Category?'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Are you sure you want to delete "${category.name}"?',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            if (category.totalCount > 0) ...[
-              const SizedBox(height: 8),
-              Text(
-                '${category.totalCount} task(s) will be moved to history.',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13),
-              ),
-            ],
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => _deleteCategory(category),
-            style: TextButton.styleFrom(foregroundColor: AppTheme.error),
-            child: const Text('Delete'),
-          ),
-        ],
+      builder: (_) => _ConfirmDialog(
+        title: 'Delete category?',
+        body: c.totalCount > 0
+            ? '"${c.name}" and its ${c.totalCount} task${c.totalCount == 1 ? '' : 's'} will move to history. You can restore it from there.'
+            : '"${c.name}" will move to history. You can restore it from there.',
+        confirmLabel: 'Delete',
+        onConfirm: () {
+          Navigator.pop(context);
+          _deleteCategory(c);
+        },
       ),
     );
   }
 
-  Future<void> _deleteCategory(Category category) async {
+  Future<void> _deleteCategory(Category c) async {
     try {
-      final deletedCategory = DeletedCategory.fromCategory(category);
-
-      final deletedCategories =
-          await _dataService.loadDeletedCategoriesWithRecovery();
-      deletedCategories.add(deletedCategory);
-      await _dataService.saveDeletedCategories(deletedCategories);
-
+      final dc = DeletedCategory.fromCategory(c);
+      final list = await _dataService.loadDeletedCategoriesWithRecovery();
+      list.add(dc);
+      await _dataService.saveDeletedCategories(list);
       setState(() {
-        _categories.removeWhere((cat) => cat.id == category.id);
-        for (int i = 0; i < _categories.length; i++) {
+        _categories.removeWhere((x) => x.id == c.id);
+        for (var i = 0; i < _categories.length; i++) {
           _categories[i] = _categories[i].copyWith(sortOrder: i);
         }
       });
-
       await _saveData();
-
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Category "${category.name}" deleted'),
-            action: SnackBarAction(
-              label: 'Undo',
-              onPressed: () => _undoDeleteCategory(deletedCategory),
-            ),
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        Navigator.pop(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error deleting category: $e')),
-        );
-      }
+      _toast('"${c.name}" deleted', onUndo: () => _undoDeleteCategory(dc));
+    } catch (_) {
+      _toast('Could not delete category');
     }
   }
 
-  Future<void> _undoDeleteCategory(DeletedCategory deletedCategory) async {
+  Future<void> _undoDeleteCategory(DeletedCategory dc) async {
     try {
-      final deletedCategories =
-          await _dataService.loadDeletedCategoriesWithRecovery();
-      deletedCategories.removeWhere((dc) => dc.id == deletedCategory.id);
-      await _dataService.saveDeletedCategories(deletedCategories);
-
-      final restoredCategory = deletedCategory.toCategory();
+      final list = await _dataService.loadDeletedCategoriesWithRecovery();
+      list.removeWhere((x) => x.id == dc.id);
+      await _dataService.saveDeletedCategories(list);
+      final restored = dc.toCategory();
       setState(() {
-        _categories.add(restoredCategory);
+        _categories.add(restored);
         _categories.sort((a, b) => a.sortOrder.compareTo(b.sortOrder));
       });
-
       await _saveData();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Category "${restoredCategory.name}" restored')),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error restoring category: $e')),
-        );
-      }
+    } catch (_) {
+      _toast('Could not restore category');
     }
   }
 
   void _reorderCategories(int oldIndex, int newIndex) {
     setState(() {
-      if (newIndex > oldIndex) {
-        newIndex -= 1;
-      }
-      final category = _categories.removeAt(oldIndex);
-      _categories.insert(newIndex, category);
-
-      for (int i = 0; i < _categories.length; i++) {
+      if (newIndex > oldIndex) newIndex -= 1;
+      final c = _categories.removeAt(oldIndex);
+      _categories.insert(newIndex, c);
+      for (var i = 0; i < _categories.length; i++) {
         _categories[i] = _categories[i].copyWith(sortOrder: i);
       }
     });
-
     _saveData();
   }
 
-  // ─── Task Management ────────────────────────────────────────────────
+  // ─── Task ops ───────────────────────────────────────────────────────
 
-  void _showAddTaskDialog(Category category) {
+  void _showAddTaskSheet(Category c) {
     _taskNameController.clear();
     _taskDescriptionController.clear();
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildBottomSheet(
-        title: 'New Task',
-        icon: Icons.add_task_rounded,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _taskNameController,
-              decoration: const InputDecoration(
-                labelText: 'Task Name',
-                hintText: 'What needs to be done?',
-                prefixIcon: Icon(Icons.task_outlined),
-              ),
-              autofocus: true,
-              textCapitalization: TextCapitalization.sentences,
-              onSubmitted: (_) {
-                // Move focus to description
-              },
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Text(
-                  'Description',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-                const Spacer(),
-                _buildFormattingToolbar(),
-              ],
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _taskDescriptionController,
-              decoration: const InputDecoration(
-                hintText: 'Add details, steps, or notes...\nUse toolbar for formatting',
-                alignLabelWithHint: true,
-              ),
-              maxLines: 6,
-              minLines: 3,
-              textInputAction: TextInputAction.newline,
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      _taskNameController.clear();
-                      _taskDescriptionController.clear();
-                      Navigator.pop(context);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _addTask(category),
-                    icon: const Icon(Icons.add, size: 18),
-                    label: const Text('Add Task'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
+    _openSheet(_TaskSheet(
+      mode: 'New task',
+      submitLabel: 'Add task',
+      nameCtrl: _taskNameController,
+      descCtrl: _taskDescriptionController,
+      onSubmit: () => _addTask(c),
+    ));
   }
 
-  void _addTask(Category category) {
+  void _showEditTaskSheet(Category c, Task t) {
+    _taskNameController.text = t.name;
+    _taskDescriptionController.text = t.description;
+    _openSheet(_TaskSheet(
+      mode: 'Edit task',
+      submitLabel: 'Save',
+      nameCtrl: _taskNameController,
+      descCtrl: _taskDescriptionController,
+      onSubmit: () => _editTask(c, t),
+    ));
+  }
+
+  void _addTask(Category c) {
     final name = _taskNameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a task name')),
-      );
+      _toast('Please enter a task name');
       return;
     }
-
-    final newTask = Task(
-      name: name,
-      description: _taskDescriptionController.text.trim(),
-    );
-
+    final t = Task(name: name, description: _taskDescriptionController.text.trim());
     setState(() {
-      final categoryIndex =
-          _categories.indexWhere((cat) => cat.id == category.id);
-      if (categoryIndex != -1) {
-        _categories[categoryIndex].addTask(newTask);
-      }
+      final i = _categories.indexWhere((x) => x.id == c.id);
+      if (i != -1) _categories[i].addTask(t);
     });
-
     _saveData();
-    _taskNameController.clear();
-    _taskDescriptionController.clear();
     Navigator.pop(context);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Task "$name" added to ${category.name}')),
-    );
   }
 
-  void _showEditTaskDialog(Category category, Task task) {
-    _taskNameController.text = task.name;
-    _taskDescriptionController.text = task.description;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => _buildBottomSheet(
-        title: 'Edit Task',
-        icon: Icons.edit_outlined,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _taskNameController,
-              decoration: const InputDecoration(
-                labelText: 'Task Name',
-                hintText: 'Enter task name',
-                prefixIcon: Icon(Icons.task_outlined),
-              ),
-              autofocus: true,
-              textCapitalization: TextCapitalization.sentences,
-            ),
-            const SizedBox(height: 16),
-            Row(
-              children: [
-                Text(
-                  'Description',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                ),
-                const Spacer(),
-                _buildFormattingToolbar(),
-              ],
-            ),
-            const SizedBox(height: 8),
-            TextField(
-              controller: _taskDescriptionController,
-              decoration: const InputDecoration(
-                hintText: 'Add details, steps, or notes...',
-                alignLabelWithHint: true,
-              ),
-              maxLines: 6,
-              minLines: 3,
-              textInputAction: TextInputAction.newline,
-            ),
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    onPressed: () {
-                      _taskNameController.clear();
-                      _taskDescriptionController.clear();
-                      Navigator.pop(context);
-                    },
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    child: const Text('Cancel'),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: () => _editTask(category, task),
-                    icon: const Icon(Icons.save_outlined, size: 18),
-                    label: const Text('Save'),
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ).then((_) {
-      _taskNameController.clear();
-      _taskDescriptionController.clear();
-    });
-  }
-
-  void _editTask(Category category, Task task) {
+  void _editTask(Category c, Task t) {
     final name = _taskNameController.text.trim();
     if (name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a task name')),
-      );
+      _toast('Please enter a task name');
       return;
     }
-
-    final updatedTask = task.copyWith(
-      name: name,
-      description: _taskDescriptionController.text.trim(),
-    );
-
+    final updated = t.copyWith(name: name, description: _taskDescriptionController.text.trim());
     setState(() {
-      final categoryIndex =
-          _categories.indexWhere((cat) => cat.id == category.id);
-      if (categoryIndex != -1) {
-        _categories[categoryIndex].updateTask(updatedTask);
-      }
+      final i = _categories.indexWhere((x) => x.id == c.id);
+      if (i != -1) _categories[i].updateTask(updated);
     });
-
     _saveData();
-    _taskNameController.clear();
-    _taskDescriptionController.clear();
     Navigator.pop(context);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Task "$name" updated')),
-    );
   }
 
-  void _showDeleteTaskDialog(Category category, Task task) {
+  void _confirmDeleteTask(Category c, Task t) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Delete Task?'),
-        content: Text(
-          'Are you sure you want to delete "${task.name}"?',
-          style: Theme.of(context).textTheme.bodyMedium,
+      builder: (_) => _ConfirmDialog(
+        title: 'Delete task?',
+        body: '"${t.name}" will be removed. This cannot be undone.',
+        confirmLabel: 'Delete',
+        onConfirm: () {
+          Navigator.pop(context);
+          _deleteTask(c, t);
+        },
+      ),
+    );
+  }
+
+  void _deleteTask(Category c, Task t) {
+    setState(() {
+      final i = _categories.indexWhere((x) => x.id == c.id);
+      if (i != -1) _categories[i].removeTask(t);
+    });
+    _saveData();
+    _toast('Task deleted');
+  }
+
+  void _toggleTask(Category c, Task t) {
+    final updated = t.copyWith(
+      isCompleted: !t.isCompleted,
+      completedAt: !t.isCompleted ? DateTime.now() : null,
+    );
+    setState(() {
+      final i = _categories.indexWhere((x) => x.id == c.id);
+      if (i != -1) _categories[i].updateTask(updated);
+    });
+    _saveData();
+  }
+
+  void _reorderTasks(Category c, int oldIndex, int newIndex) {
+    setState(() {
+      final i = _categories.indexWhere((x) => x.id == c.id);
+      if (i != -1) _categories[i].reorderTasks(oldIndex, newIndex);
+    });
+    _saveData();
+  }
+
+  // ─── Bottom sheet helpers ───────────────────────────────────────────
+
+  void _openSheet(Widget child) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (_) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: child,
+      ),
+    );
+  }
+
+  void _showTaskDetails(Category c, Task t) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      builder: (_) => DraggableScrollableSheet(
+        initialChildSize: 0.55,
+        minChildSize: 0.3,
+        maxChildSize: 0.9,
+        expand: false,
+        builder: (ctx, sc) => _TaskDetailsSheet(
+          category: c,
+          task: t,
+          scrollController: sc,
+          onToggle: () {
+            _toggleTask(c, t);
+            Navigator.pop(ctx);
+          },
+          onEdit: () {
+            Navigator.pop(ctx);
+            _showEditTaskSheet(c, t);
+          },
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+      ),
+    );
+  }
+
+  // ─── Build ──────────────────────────────────────────────────────────
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: _isLoading
+            ? _LoadingView()
+            : CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(child: _appBar(context)),
+                  const SliverToBoxAdapter(child: SizedBox(height: 18)),
+                  if (_categories.isEmpty)
+                    SliverFillRemaining(
+                      hasScrollBody: false,
+                      child: _emptyState(context),
+                    )
+                  else
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(22, 4, 22, 120),
+                      sliver: SliverReorderableList(
+                        itemCount: _categories.length,
+                        onReorder: _reorderCategories,
+                        proxyDecorator: (child, _, anim) => Material(
+                          color: Colors.transparent,
+                          child: child,
+                        ),
+                        itemBuilder: (ctx, i) {
+                          final c = _categories[i];
+                          return Padding(
+                            key: ValueKey(c.id),
+                            padding: const EdgeInsets.only(bottom: 12),
+                            child: ReorderableDelayedDragStartListener(
+                              index: i,
+                              child: _CategoryCard(
+                                category: c,
+                                expanded: _expanded.contains(c.id),
+                                onToggleExpanded: () => setState(() {
+                                  _expanded.contains(c.id)
+                                      ? _expanded.remove(c.id)
+                                      : _expanded.add(c.id);
+                                }),
+                                onEdit: () => _showEditCategorySheet(c),
+                                onDelete: () => _confirmDeleteCategory(c),
+                                onAddTask: () => _showAddTaskSheet(c),
+                                onToggleTask: (t) => _toggleTask(c, t),
+                                onOpenTask: (t) => _showTaskDetails(c, t),
+                                onEditTask: (t) => _showEditTaskSheet(c, t),
+                                onDeleteTask: (t) => _confirmDeleteTask(c, t),
+                                onReorderTasks: (a, b) => _reorderTasks(c, a, b),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                ],
+              ),
+      ),
+      floatingActionButton: _isLoading
+          ? null
+          : FloatingActionButton.extended(
+              onPressed: _showAddCategorySheet,
+              icon: const Icon(Icons.add, size: 20),
+              label: const Text('Category'),
+            ),
+    );
+  }
+
+  Widget _appBar(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink = dark ? AppTheme.dInk : AppTheme.lInk;
+    final ink2 = dark ? AppTheme.dInk2 : AppTheme.lInk2;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(22, 14, 14, 0),
+      child: Row(
+        children: [
+          // Brand: tooran.
+          Text.rich(
+            TextSpan(
+              style: AppTheme.display(size: 30, color: ink),
+              children: [
+                const TextSpan(text: 'tooran'),
+                TextSpan(
+                  text: '.',
+                  style: AppTheme.display(
+                    size: 30,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+              ],
+            ),
           ),
-          TextButton(
-            onPressed: () => _deleteTask(category, task),
-            style: TextButton.styleFrom(foregroundColor: AppTheme.error),
-            child: const Text('Delete'),
+          const Spacer(),
+          Consumer<ThemeProvider>(
+            builder: (_, tp, __) => _IconBtn(
+              icon: tp.isDarkMode ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+              color: ink2,
+              onTap: tp.toggleTheme,
+            ),
+          ),
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_horiz, color: ink2),
+            tooltip: 'More',
+            position: PopupMenuPosition.under,
+            offset: const Offset(0, 8),
+            onSelected: (v) {
+              switch (v) {
+                case 'history':
+                  Navigator.pushNamed(context, '/history');
+                  break;
+                case 'help':
+                  Navigator.pushNamed(context, '/help');
+                  break;
+                case 'contact':
+                  Navigator.pushNamed(context, '/contact');
+                  break;
+                case 'about':
+                  Navigator.pushNamed(context, '/about');
+                  break;
+                case 'update':
+                  launchUrl(Uri.parse('https://tooran.vercel.app'));
+                  break;
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(value: 'history', child: Text('History')),
+              PopupMenuItem(value: 'help', child: Text('Help')),
+              PopupMenuDivider(),
+              PopupMenuItem(value: 'contact', child: Text('Contact')),
+              PopupMenuItem(value: 'about', child: Text('About')),
+              PopupMenuItem(value: 'update', child: Text('Check for updates')),
+            ],
           ),
         ],
       ),
     );
   }
 
-  void _deleteTask(Category category, Task task) {
-    setState(() {
-      final categoryIndex =
-          _categories.indexWhere((cat) => cat.id == category.id);
-      if (categoryIndex != -1) {
-        _categories[categoryIndex].removeTask(task);
-      }
-    });
-
-    _saveData();
-    Navigator.pop(context);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Task "${task.name}" deleted')),
-    );
-  }
-
-  void _toggleTaskCompletion(Category category, Task task) {
-    final updatedTask = task.copyWith(
-      isCompleted: !task.isCompleted,
-      completedAt: !task.isCompleted ? DateTime.now() : null,
-    );
-
-    setState(() {
-      final categoryIndex =
-          _categories.indexWhere((cat) => cat.id == category.id);
-      if (categoryIndex != -1) {
-        _categories[categoryIndex].updateTask(updatedTask);
-      }
-    });
-
-    _saveData();
-
-    if (updatedTask.isCompleted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Task "${task.name}" completed'),
-          duration: const Duration(seconds: 2),
-        ),
-      );
-    }
-  }
-
-  void _showTaskDetails(Task task) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DraggableScrollableSheet(
-        initialChildSize: 0.5,
-        maxChildSize: 0.85,
-        minChildSize: 0.3,
-        builder: (context, scrollController) => ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    colorScheme.surface.withOpacity(0.95),
-                    colorScheme.surface.withOpacity(0.75),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                border: Border.all(
-                  color: colorScheme.onSurface.withOpacity(0.08),
-                ),
-              ),
-              child: ListView(
-                controller: scrollController,
-                padding: const EdgeInsets.fromLTRB(24, 12, 24, 24),
-                children: [
-              // Drag handle
-              Center(
-                child: Container(
-                  width: 36,
-                  height: 4,
-                  margin: const EdgeInsets.only(bottom: 24),
-                  decoration: BoxDecoration(
-                    color: colorScheme.onSurfaceVariant.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-
-              // Title + status row
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Text(
-                      task.name,
-                      style: textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Icon(
-                    task.isCompleted
-                        ? Icons.check_circle_rounded
-                        : Icons.radio_button_unchecked,
-                    color: task.isCompleted
-                        ? AppTheme.success
-                        : colorScheme.onSurfaceVariant,
-                    size: 22,
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Description section
-              if (task.description.isNotEmpty) ...[
-                Text(
-                  'Description',
-                  style: textTheme.labelMedium?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: FormattedText(
-                    text: task.description,
-                    style: textTheme.bodyMedium?.copyWith(height: 1.6),
-                  ),
-                ),
-                const SizedBox(height: 20),
-              ],
-
-              // Details section
-              Text(
-                'Details',
-                style: textTheme.labelMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              const SizedBox(height: 10),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: colorScheme.surfaceContainerHighest.withOpacity(0.35),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Column(
-                  children: [
-                    _buildDetailRow(
-                      context,
-                      'Status',
-                      task.isCompleted ? 'Completed' : 'Pending',
-                    ),
-              
-                    _buildDetailRow(
-                      context,
-                      'Created',
-                      _formatDate(task.createdAt),
-                    ),
-                    if (task.completedAt != null) ...[
-      
-                      _buildDetailRow(
-                        context,
-                        'Completed',
-                        _formatDate(task.completedAt!),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-                  const SizedBox(height: 16),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(BuildContext context, String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-        ),
-        Text(
-          value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-        ),
-      ],
-    );
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year} ${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
-  }
-
-  void _reorderTasks(Category category, int oldIndex, int newIndex) {
-    setState(() {
-      final categoryIndex =
-          _categories.indexWhere((cat) => cat.id == category.id);
-      if (categoryIndex != -1) {
-        _categories[categoryIndex].reorderTasks(oldIndex, newIndex);
-      }
-    });
-
-    _saveData();
-  }
-
-  // ─── UI Build Methods ───────────────────────────────────────────────
-
-  Widget _buildEmptyState() {
+  Widget _emptyState(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink = dark ? AppTheme.dInk : AppTheme.lInk;
+    final ink3 = dark ? AppTheme.dInk3 : AppTheme.lInk3;
     return Center(
-      key: const ValueKey('empty'),
       child: Padding(
-        padding: const EdgeInsets.all(40.0),
+        padding: const EdgeInsets.symmetric(horizontal: 36, vertical: 60),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.folder_open_rounded,
-              size: 56,
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.4),
+            Container(
+              width: 64,
+              height: 64,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(18),
+                border: Border.all(
+                  color: AppTheme.hairlineStrong(dark),
+                  width: 1.5,
+                  style: BorderStyle.solid,
+                ),
+              ),
+              child: Icon(Icons.folder_open_outlined, size: 26, color: ink3),
             ),
-            const SizedBox(height: 20),
-            Text(
-              'No categories yet',
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-            ),
+            const SizedBox(height: 18),
+            Text('No categories yet',
+                style: AppTheme.display(size: 26, color: ink)),
             const SizedBox(height: 8),
             Text(
-              'Create a category to start organizing your tasks',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
+              'Tap the button below to create your first category. A folder for the things you want to keep close.',
               textAlign: TextAlign.center,
+              style: AppTheme.body(size: 14, color: ink3),
             ),
           ],
         ),
@@ -1070,432 +519,1002 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildCategoryList() {
-    return ReorderableListView.builder(
-      buildDefaultDragHandles: false,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      itemCount: _categories.length,
-      onReorder: _reorderCategories,
-      proxyDecorator: (child, index, animation) {
-        return AnimatedBuilder(
-          animation: animation,
-          builder: (context, child) => Material(
-            elevation: 2,
-            borderRadius: BorderRadius.circular(16),
-            child: child,
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Loading view
+// ════════════════════════════════════════════════════════════════════
+
+class _LoadingView extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink3 = dark ? AppTheme.dInk3 : AppTheme.lInk3;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 28,
+            height: 28,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Theme.of(context).colorScheme.primary,
+            ),
           ),
-          child: child,
-        );
-      },
-      itemBuilder: (context, index) {
-        final category = _categories[index];
-        return _buildCategoryCard(category, index);
-      },
+          const SizedBox(height: 18),
+          Text('Loading…', style: AppTheme.mono(size: 11, color: ink3)),
+        ],
+      ),
     );
   }
+}
 
-  Widget _buildCategoryCard(Category category, int index) {
-    final progressColor =
-        Provider.of<ThemeProvider>(context).getProgressColor(category.progressPercentage);
+// ════════════════════════════════════════════════════════════════════
+// Icon button (matches design: 36px round, ink2, hover surface)
+// ════════════════════════════════════════════════════════════════════
+
+class _IconBtn extends StatelessWidget {
+  const _IconBtn({required this.icon, required this.onTap, this.color});
+  final IconData icon;
+  final VoidCallback onTap;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      customBorder: const CircleBorder(),
+      child: SizedBox(
+        width: 40,
+        height: 40,
+        child: Icon(icon, size: 20, color: color),
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Category card
+// ════════════════════════════════════════════════════════════════════
+
+class _CategoryCard extends StatelessWidget {
+  const _CategoryCard({
+    required this.category,
+    required this.expanded,
+    required this.onToggleExpanded,
+    required this.onEdit,
+    required this.onDelete,
+    required this.onAddTask,
+    required this.onToggleTask,
+    required this.onOpenTask,
+    required this.onEditTask,
+    required this.onDeleteTask,
+    required this.onReorderTasks,
+  });
+
+  final Category category;
+  final bool expanded;
+  final VoidCallback onToggleExpanded;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+  final VoidCallback onAddTask;
+  final void Function(Task) onToggleTask;
+  final void Function(Task) onOpenTask;
+  final void Function(Task) onEditTask;
+  final void Function(Task) onDeleteTask;
+  final void Function(int, int) onReorderTasks;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink = dark ? AppTheme.dInk : AppTheme.lInk;
+    final ink2 = dark ? AppTheme.dInk2 : AppTheme.lInk2;
+    final ink3 = dark ? AppTheme.dInk3 : AppTheme.lInk3;
+    final ink4 = dark ? AppTheme.dInk4 : AppTheme.lInk4;
+    final primary = Theme.of(context).colorScheme.primary;
+    final total = category.totalCount;
+    final done = category.completedCount;
+    final pct = total == 0 ? 0.0 : done / total;
 
     return Dismissible(
-      key: ValueKey(category.id),
-      background: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.blue,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 24),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.edit_rounded, color: Colors.white, size: 24),
-            SizedBox(width: 8),
-            Text('Edit', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-          ],
-        ),
+      key: ValueKey('cat_${category.id}'),
+      background: _swipeBg(
+        align: Alignment.centerLeft,
+        color: dark ? AppTheme.dInk2 : AppTheme.lInk2,
+        label: 'EDIT',
+        icon: Icons.edit_outlined,
       ),
-      secondaryBackground: Container(
-        margin: const EdgeInsets.symmetric(vertical: 4),
-        decoration: BoxDecoration(
-          color: Colors.red,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 24),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Delete', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
-            SizedBox(width: 8),
-            Icon(Icons.delete_rounded, color: Colors.white, size: 24),
-          ],
-        ),
+      secondaryBackground: _swipeBg(
+        align: Alignment.centerRight,
+        color: dark ? AppTheme.dError : AppTheme.lError,
+        label: 'DELETE',
+        icon: Icons.delete_outline,
       ),
-      confirmDismiss: (direction) async {
-        if (direction == DismissDirection.startToEnd) {
-          _showEditCategoryDialog(category);
-          return false;
+      confirmDismiss: (dir) async {
+        if (dir == DismissDirection.startToEnd) {
+          onEdit();
         } else {
-          _showDeleteCategoryDialog(category);
-          return false;
+          onDelete();
         }
+        return false;
       },
-      child: ReorderableDelayedDragStartListener(
-        index: index,
-        child: GlassContainer(
-          margin: const EdgeInsets.symmetric(vertical: 6),
-          borderRadius: BorderRadius.circular(16),
-          child: ExpansionTile(
-            shape: const Border(),
-            key: ValueKey('expansion_${category.id}'),
-            tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-            title: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    category.name,
-                    style: const TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            subtitle: category.totalCount > 0
-                ? Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const SizedBox(height: 4),
-                      Row(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 220),
+        curve: Curves.easeOutCubic,
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+          borderRadius: BorderRadius.circular(AppTheme.rMd),
+          border: Border.all(
+            color: expanded ? AppTheme.hairlineStrong(dark) : AppTheme.hairline(dark),
+            width: 1,
+          ),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header row
+            InkWell(
+              onTap: onToggleExpanded,
+              borderRadius: BorderRadius.circular(AppTheme.rMd),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 16, 14, 14),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 36,
+                      height: 36,
+                      child: Stack(
+                        alignment: Alignment.center,
                         children: [
+                          CatRing(progress: pct, size: 36, stroke: 2.5),
                           Text(
-                            '${category.completedCount} of ${category.totalCount} completed',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                              fontSize: 13,
-                            ),
-                          ),
-                          const Spacer(),
-                          Text(
-                            '${(category.progressPercentage * 100).toInt()}%',
-                            style: TextStyle(
-                              color: progressColor,
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                            ),
+                            '${(pct * 100).round()}',
+                            style: AppTheme.mono(size: 10, color: ink2),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 8),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: category.progressPercentage,
-                          backgroundColor:
-                              Theme.of(context).colorScheme.surfaceContainerHighest,
-                          valueColor: AlwaysStoppedAnimation<Color>(progressColor),
-                          minHeight: 6,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                    ],
-                  )
-                : Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      'No tasks yet',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        fontSize: 13,
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            category.name,
+                            style: AppTheme.display(size: 24, color: ink),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            total == 0
+                                ? 'No tasks yet'
+                                : '$done of $total · ${total - done} left',
+                            style: AppTheme.mono(size: 11, color: ink3),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-            children: [
-              // const Divider(height: 1),
-              if (category.tasks.isNotEmpty)
-                ReorderableListView.builder(
-                  buildDefaultDragHandles: false,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: category.tasks.length,
-                  onReorder: (oldIndex, newIndex) =>
-                      _reorderTasks(category, oldIndex, newIndex),
-                  itemBuilder: (context, taskIndex) {
-                    final task = category.tasks[taskIndex];
-                    return _buildTaskItem(category, task, taskIndex);
-                  },
-                ),
-
-              // Add task button
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                child: TextButton.icon(
-                  onPressed: () => _showAddTaskDialog(category),
-                  icon: const Icon(Icons.add_rounded, size: 20),
-                  label: const Text('Add Task'),
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppTheme.primary                    // backgroundColor: AppTheme.primary.withOpacity(1),
-                  ),
+                    AnimatedRotation(
+                      turns: expanded ? 0.25 : 0,
+                      duration: const Duration(milliseconds: 280),
+                      curve: Curves.easeOutCubic,
+                      child: Icon(Icons.chevron_right, size: 20, color: ink3),
+                    ),
+                  ],
                 ),
               ),
-
-              if (category.tasks.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 16),
-                  child: Text(
-                    'No tasks yet. Tap "Add Task" to get started!',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontStyle: FontStyle.italic,
-                      fontSize: 13,
+            ),
+            // Dots row when collapsed
+            if (!expanded && total > 0)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(66, 0, 18, 14),
+                child: Wrap(
+                  spacing: 4,
+                  runSpacing: 4,
+                  children: [
+                    for (final t in category.tasks)
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        width: 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: t.isCompleted ? primary : ink4,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            // Expanded body
+            AnimatedCrossFade(
+              firstChild: const SizedBox(width: double.infinity, height: 0),
+              secondChild: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(height: 1, color: AppTheme.hairline(dark)),
+                  if (total == 0)
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(56, 16, 22, 14),
+                      child: Text(
+                        'No tasks yet · tap below to add your first',
+                        style: AppTheme.body(size: 13, color: ink3),
+                      ),
+                    )
+                  else
+                    ReorderableListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      buildDefaultDragHandles: false,
+                      itemCount: category.tasks.length,
+                      onReorder: onReorderTasks,
+                      proxyDecorator: (child, _, __) =>
+                          Material(color: Colors.transparent, child: child),
+                      itemBuilder: (ctx, i) {
+                        final t = category.tasks[i];
+                        return ReorderableDelayedDragStartListener(
+                          key: ValueKey('task_${t.id}'),
+                          index: i,
+                          child: _TaskRow(
+                            task: t,
+                            isLast: i == category.tasks.length - 1,
+                            onToggle: () => onToggleTask(t),
+                            onOpen: () => onOpenTask(t),
+                            onEdit: () => onEditTask(t),
+                            onDelete: () => onDeleteTask(t),
+                          ),
+                        );
+                      },
+                    ),
+                  Container(height: 1, color: AppTheme.hairline(dark)),
+                  InkWell(
+                    onTap: onAddTask,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(56, 12, 22, 12),
+                      child: Row(
+                        children: [
+                          Icon(Icons.add, size: 14, color: ink3),
+                          const SizedBox(width: 8),
+                          Text(
+                            'ADD TASK',
+                            style: AppTheme.mono(size: 11, color: ink3),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                ],
+              ),
+              crossFadeState: expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 280),
+              sizeCurve: Curves.easeOutCubic,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _swipeBg({
+    required Alignment align,
+    required Color color,
+    required String label,
+    required IconData icon,
+  }) {
+    final isLeft = align == Alignment.centerLeft;
+    return Container(
+      margin: const EdgeInsets.only(bottom: 0),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(AppTheme.rMd),
+      ),
+      alignment: align,
+      padding: const EdgeInsets.symmetric(horizontal: 22),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (isLeft) Icon(icon, color: Colors.white, size: 18),
+          if (isLeft) const SizedBox(width: 8),
+          Text(label, style: AppTheme.mono(size: 11, color: Colors.white)),
+          if (!isLeft) const SizedBox(width: 8),
+          if (!isLeft) Icon(icon, color: Colors.white, size: 18),
+        ],
+      ),
+    );
+  }
+}
+
+
+// ════════════════════════════════════════════════════════════════════
+// Task row
+// ════════════════════════════════════════════════════════════════════
+
+class _TaskRow extends StatelessWidget {
+  const _TaskRow({
+    required this.task,
+    required this.isLast,
+    required this.onToggle,
+    required this.onOpen,
+    required this.onEdit,
+    required this.onDelete,
+  });
+  final Task task;
+  final bool isLast;
+  final VoidCallback onToggle;
+  final VoidCallback onOpen;
+  final VoidCallback onEdit;
+  final VoidCallback onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink = dark ? AppTheme.dInk : AppTheme.lInk;
+    final ink3 = dark ? AppTheme.dInk3 : AppTheme.lInk3;
+
+    return Dismissible(
+      key: ValueKey('dismiss_${task.id}'),
+      background: Container(
+        color: (dark ? AppTheme.dInk2 : AppTheme.lInk2).withOpacity(0.08),
+        alignment: Alignment.centerLeft,
+        padding: const EdgeInsets.only(left: 56),
+        child: Icon(Icons.edit_outlined, size: 18, color: ink3),
+      ),
+      secondaryBackground: Container(
+        color: (dark ? AppTheme.dError : AppTheme.lError).withOpacity(0.10),
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 22),
+        child: Icon(Icons.delete_outline, size: 18, color: dark ? AppTheme.dError : AppTheme.lError),
+      ),
+      confirmDismiss: (dir) async {
+        if (dir == DismissDirection.startToEnd) {
+          onEdit();
+        } else {
+          onDelete();
+        }
+        return false;
+      },
+      child: InkWell(
+        onTap: onOpen,
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(0, 12, 18, 12),
+          decoration: BoxDecoration(
+            border: isLast
+                ? null
+                : Border(
+                    bottom: BorderSide(color: AppTheme.hairline(dark), width: 1),
+                  ),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(
+                width: 56,
+                child: Center(
+                  child: _Checkbox(checked: task.isCompleted, onTap: onToggle),
                 ),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _StrikeText(
+                      text: task.name,
+                      done: task.isCompleted,
+                      style: AppTheme.body(
+                        size: 16,
+                        color: task.isCompleted ? ink3 : ink,
+                        weight: FontWeight.w400,
+                      ),
+                    ),
+                    if (task.description.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 3),
+                        child: Text(
+                          task.description.replaceAll('\n', ' ').replaceAll('• ', '').trim(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTheme.body(size: 13, color: ink3),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildTaskItem(Category category, Task task, int taskIndex) {
-    return Dismissible(
-      key: ValueKey(task.id),
-      background: Container(
-        color: Colors.blue.withOpacity(0.1),
-        alignment: Alignment.centerLeft,
-        padding: const EdgeInsets.only(left: 24),
-        child: const Icon(Icons.edit_rounded, color: Colors.blue, size: 22),
-      ),
-      secondaryBackground: Container(
-        color: Colors.red.withOpacity(0.1),
-        alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 24),
-        child: const Icon(Icons.delete_rounded, color: Colors.red, size: 22),
-      ),
-      confirmDismiss: (direction) async {
-        if (direction == DismissDirection.startToEnd) {
-          _showEditTaskDialog(category, task);
-          return false;
-        } else {
-          _showDeleteTaskDialog(category, task);
-          return false;
-        }
-      },
-      child: ReorderableDelayedDragStartListener(
-        index: taskIndex,
-        child: ListTile(
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
-        leading: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Transform.scale(
-              scale: 1.1,
-              child: Checkbox(
-                value: task.isCompleted,
-                onChanged: (value) => _toggleTaskCompletion(category, task),
-                activeColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-              ),
-            ),
-          ],
-        ),
-        title: Consumer<ThemeProvider>(
-          builder: (context, themeProvider, child) {
-            return Text(
-              task.name,
-              style: themeProvider.getTaskTextStyle(task.isCompleted),
-            );
-          },
-        ),
-        subtitle: task.description.isNotEmpty
-            ? Padding(
-                padding: const EdgeInsets.only(top: 0),
-                child: Text(
-                  task.description.replaceAll('\n', ' ').replaceAll('\u2022 ', '').trim(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              )
-            : null,
-        onTap: () => _showTaskDetails(task),
-      ),
-      ),
-    );
-  }
+class _Checkbox extends StatelessWidget {
+  const _Checkbox({required this.checked, required this.onTap});
+  final bool checked;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: isDark
-              ? const [
-                  Color(0xFF050816),
-                  Color(0xFF111827),
-                  Color(0xFF020617),
-                ]
-              : const [
-                  Color(0xFFE0F4FF),
-                  Color(0xFFF5E9FF),
-                  Color(0xFFE8F3FF),
-                ],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink4 = dark ? AppTheme.dInk4 : AppTheme.lInk4;
+    final primary = Theme.of(context).colorScheme.primary;
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 22,
+        height: 22,
+        decoration: BoxDecoration(
+          color: checked ? primary : Colors.transparent,
+          borderRadius: BorderRadius.circular(7),
+          border: Border.all(color: checked ? primary : ink4, width: 1.5),
+        ),
+        child: AnimatedScale(
+          scale: checked ? 1 : 0.5,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutBack,
+          child: AnimatedOpacity(
+            opacity: checked ? 1 : 0,
+            duration: const Duration(milliseconds: 200),
+            child: const Icon(Icons.check, size: 14, color: Colors.white),
+          ),
         ),
       ),
-      child: Scaffold(
-        backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text(
-            'Tooran',
-            style: TextStyle(fontWeight: FontWeight.w800, fontSize: 22),
-          ),
-          actions: [
-            Consumer<ThemeProvider>(
-              builder: (context, themeProvider, child) {
-                return IconButton(
-                  icon: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: Icon(
-                      themeProvider.isDarkMode
-                          ? Icons.light_mode_rounded
-                          : Icons.dark_mode_rounded,
-                      key: ValueKey(themeProvider.isDarkMode),
-                    ),
+    );
+  }
+}
+
+/// Animated strike-through that grows left-to-right.
+class _StrikeText extends StatelessWidget {
+  const _StrikeText({required this.text, required this.done, required this.style});
+  final String text;
+  final bool done;
+  final TextStyle style;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final lineColor = dark ? AppTheme.dInk3 : AppTheme.lInk3;
+    return LayoutBuilder(
+      builder: (_, c) => Stack(
+        alignment: Alignment.centerLeft,
+        children: [
+          Text(text, style: style),
+          Positioned.fill(
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: TweenAnimationBuilder<double>(
+                tween: Tween(begin: done ? 0 : 0, end: done ? 1 : 0),
+                duration: const Duration(milliseconds: 350),
+                curve: Curves.easeOutCubic,
+                builder: (_, v, __) => FractionallySizedBox(
+                  widthFactor: v,
+                  alignment: Alignment.centerLeft,
+                  child: Container(
+                    height: 1.5,
+                    color: lineColor,
                   ),
-                  onPressed: () => themeProvider.toggleTheme(),
-                  tooltip: 'Toggle theme',
-                );
-              },
-            ),
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert_rounded),
-              tooltip: 'More options',
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                ),
               ),
-              position: PopupMenuPosition.under,
-              onSelected: (value) {
-                switch (value) {
-                  case 'history':
-                    Navigator.pushNamed(context, '/history');
-                    break;
-                  case 'help':
-                    Navigator.pushNamed(context, '/help');
-                    break;
-                  case 'contact':
-                    Navigator.pushNamed(context, '/contact');
-                    break;
-                  case 'about':
-                    Navigator.pushNamed(context, '/about');
-                    break;
-                  case 'update':
-                    launchUrl(Uri.parse('https://tooran.vercel.app'));
-                    break;
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'history',
-                  child: ListTile(
-                    leading: Icon(Icons.history_rounded),
-                    title: Text('History'),
-                    contentPadding: EdgeInsets.zero,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Sheets
+// ════════════════════════════════════════════════════════════════════
+
+class _SheetShell extends StatelessWidget {
+  const _SheetShell({required this.eyebrow, required this.child, this.trailing});
+  final String eyebrow;
+  final Widget child;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink3 = dark ? AppTheme.dInk3 : AppTheme.lInk3;
+    final ink4 = dark ? AppTheme.dInk4 : AppTheme.lInk4;
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        border: Border(top: BorderSide(color: AppTheme.hairline(dark), width: 1)),
+      ),
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 14),
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: ink4,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(22, 0, 22, 12),
+            child: Row(
+              children: [
+                Text(eyebrow.toUpperCase(), style: AppTheme.eyebrow(ink3)),
+                const Spacer(),
+                if (trailing != null) trailing!,
+              ],
+            ),
+          ),
+          Flexible(child: child),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategorySheet extends StatelessWidget {
+  const _CategorySheet({
+    required this.mode,
+    required this.controller,
+    required this.submitLabel,
+    required this.onSubmit,
+  });
+  final String mode;
+  final TextEditingController controller;
+  final String submitLabel;
+  final VoidCallback onSubmit;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink = dark ? AppTheme.dInk : AppTheme.lInk;
+    return _SheetShell(
+      eyebrow: mode,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: TextField(
+                controller: controller,
+                autofocus: true,
+                cursorColor: Theme.of(context).colorScheme.primary,
+                textCapitalization: TextCapitalization.sentences,
+                style: AppTheme.display(size: 24, color: ink),
+                decoration: InputDecoration(
+                  labelText: 'NAME',
+                  hintText: 'A new beginning…',
+                ),
+                onSubmitted: (_) => onSubmit(),
+              ),
+            ),
+            const SizedBox(height: 28),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
                   ),
                 ),
-                const PopupMenuDivider(),
-                const PopupMenuItem(
-                  value: 'help',
-                  child: ListTile(
-                    leading: Icon(Icons.help_outline_rounded),
-                    title: Text('Help'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'contact',
-                  child: ListTile(
-                    leading: Icon(Icons.contact_mail_outlined),
-                    title: Text('Contact'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'about',
-                  child: ListTile(
-                    leading: Icon(Icons.info_outline_rounded),
-                    title: Text('About'),
-                    contentPadding: EdgeInsets.zero,
-                  ),
-                ),
-                const PopupMenuItem(
-                  value: 'update',
-                  child: ListTile(
-                    leading: Icon(Icons.system_update_rounded),
-                    title: Text('Check for Updates'),
-                    contentPadding: EdgeInsets.zero,
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onSubmit,
+                    child: Text(submitLabel),
                   ),
                 ),
               ],
             ),
           ],
         ),
-        body: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 300),
-          child: _isLoading
-              ? Center(
-                  key: const ValueKey('loading'),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SizedBox(
-                        width: 48,
-                        height: 48,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 3,
-                          color: AppTheme.primary,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      Text(
-                        'Loading your tasks...',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
+      ),
+    );
+  }
+}
+
+class _TaskSheet extends StatefulWidget {
+  const _TaskSheet({
+    required this.mode,
+    required this.submitLabel,
+    required this.nameCtrl,
+    required this.descCtrl,
+    required this.onSubmit,
+  });
+  final String mode;
+  final String submitLabel;
+  final TextEditingController nameCtrl;
+  final TextEditingController descCtrl;
+  final VoidCallback onSubmit;
+
+  @override
+  State<_TaskSheet> createState() => _TaskSheetState();
+}
+
+class _TaskSheetState extends State<_TaskSheet> {
+  void _insert(String prefix) {
+    final ctrl = widget.descCtrl;
+    final text = ctrl.text;
+    final sel = ctrl.selection;
+    final offset = sel.isValid ? sel.baseOffset : text.length;
+    final needsNl = offset > 0 && text[offset - 1] != '\n';
+    final ins = (needsNl ? '\n' : '') + prefix;
+    final nt = text.substring(0, offset) + ins + text.substring(offset);
+    ctrl.value = TextEditingValue(
+      text: nt,
+      selection: TextSelection.collapsed(offset: offset + ins.length),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink = dark ? AppTheme.dInk : AppTheme.lInk;
+    final ink3 = dark ? AppTheme.dInk3 : AppTheme.lInk3;
+    return _SheetShell(
+      eyebrow: widget.mode,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextField(
+              controller: widget.nameCtrl,
+              autofocus: true,
+              cursorColor: Theme.of(context).colorScheme.primary,
+              textCapitalization: TextCapitalization.sentences,
+              style: AppTheme.display(size: 24, color: ink),
+              decoration: const InputDecoration(
+                labelText: 'NAME',
+                hintText: 'What needs doing?',
+              ),
+            ),
+            const SizedBox(height: 22),
+            Text('DESCRIPTION', style: AppTheme.eyebrow(ink3)),
+            const SizedBox(height: 8),
+            TextField(
+              controller: widget.descCtrl,
+              cursorColor: Theme.of(context).colorScheme.primary,
+              maxLines: 6,
+              minLines: 3,
+              style: AppTheme.body(size: 15, color: ink),
+              decoration: InputDecoration(
+                hintText: 'Add notes, steps, links…',
+                hintStyle: AppTheme.body(size: 15, color: dark ? AppTheme.dInk4 : AppTheme.lInk4),
+                border: UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppTheme.hairline(dark), width: 1),
+                ),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(color: AppTheme.hairline(dark), width: 1),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _FormatTool(
+                  label: 'BULLET',
+                  icon: Icons.format_list_bulleted,
+                  onTap: () => _insert('• '),
+                ),
+                const SizedBox(width: 6),
+                _FormatTool(
+                  label: 'NUMBERED',
+                  icon: Icons.format_list_numbered,
+                  onTap: () => _insert('1. '),
+                ),
+              ],
+            ),
+            const SizedBox(height: 26),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
                   ),
-                )
-              : _categories.isEmpty
-                  ? _buildEmptyState()
-                  : _buildCategoryList(),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: widget.onSubmit,
+                    child: Text(widget.submitLabel),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
-        floatingActionButton: AnimatedScale(
-          scale: _isLoading ? 0.0 : 1.0,
-          duration: const Duration(milliseconds: 300),
-          child: FloatingActionButton.extended(
-            backgroundColor: AppTheme.primary,
-            onPressed: _isLoading ? null : _showAddCategoryDialog,
-            tooltip: 'Add Category',
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('Category'),
+      ),
+    );
+  }
+}
+
+class _FormatTool extends StatelessWidget {
+  const _FormatTool({required this.label, required this.icon, required this.onTap});
+  final String label;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink2 = dark ? AppTheme.dInk2 : AppTheme.lInk2;
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        height: 28,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(color: AppTheme.hairlineStrong(dark), width: 1),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 12, color: ink2),
+            const SizedBox(width: 6),
+            Text(label, style: AppTheme.mono(size: 11, color: ink2)),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Task details sheet
+// ════════════════════════════════════════════════════════════════════
+
+class _TaskDetailsSheet extends StatelessWidget {
+  const _TaskDetailsSheet({
+    required this.category,
+    required this.task,
+    required this.scrollController,
+    required this.onToggle,
+    required this.onEdit,
+  });
+  final Category category;
+  final Task task;
+  final ScrollController scrollController;
+  final VoidCallback onToggle;
+  final VoidCallback onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink = dark ? AppTheme.dInk : AppTheme.lInk;
+    final ink2 = dark ? AppTheme.dInk2 : AppTheme.lInk2;
+    final ink3 = dark ? AppTheme.dInk3 : AppTheme.lInk3;
+    final ink4 = dark ? AppTheme.dInk4 : AppTheme.lInk4;
+    final success = dark ? AppTheme.dSuccess : AppTheme.lSuccess;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 8),
+            child: Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: ink4,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
           ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(22, 4, 14, 6),
+            child: Row(
+              children: [
+                Text(
+                  task.isCompleted ? 'COMPLETED' : 'OPEN',
+                  style: AppTheme.eyebrow(task.isCompleted ? success : ink3),
+                ),
+                const Spacer(),
+                _IconBtn(icon: Icons.edit_outlined, color: ink2, onTap: onEdit),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ListView(
+              controller: scrollController,
+              padding: const EdgeInsets.fromLTRB(22, 4, 22, 24),
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(top: 6, right: 12),
+                      child: _Checkbox(checked: task.isCompleted, onTap: onToggle),
+                    ),
+                    Expanded(
+                      child: Text(
+                        task.name,
+                        style: AppTheme.display(size: 30, color: ink),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                    borderRadius: BorderRadius.circular(AppTheme.rMd),
+                    border: Border.all(color: AppTheme.hairline(dark), width: 1),
+                  ),
+                  child: task.description.trim().isEmpty
+                      ? Text(
+                          'No description.',
+                          style: AppTheme.display(size: 17, color: ink3, style: FontStyle.italic),
+                        )
+                      : FormattedText(
+                          text: task.description,
+                          style: AppTheme.body(size: 14.5, color: ink, weight: FontWeight.w400)
+                              .copyWith(height: 1.55),
+                        ),
+                ),
+                const SizedBox(height: 22),
+                _detailGrid(context, success, ink, ink3),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailGrid(BuildContext context, Color success, Color ink, Color ink3) {
+    final created = _Detail(
+      label: 'CREATED',
+      primary: _fmtDate(task.createdAt),
+      secondary: _fmtTime(task.createdAt),
+      ink: ink,
+      ink3: ink3,
+    );
+    final status = _Detail(
+      label: 'STATUS',
+      primary: task.isCompleted ? 'Done' : 'In progress',
+      primaryColor: task.isCompleted ? success : ink,
+      ink: ink,
+      ink3: ink3,
+    );
+    final completed = task.completedAt == null
+        ? null
+        : _Detail(
+            label: 'COMPLETED',
+            primary: _fmtDate(task.completedAt!),
+            secondary: _fmtTime(task.completedAt!),
+            ink: ink,
+            ink3: ink3,
+          );
+
+    return Wrap(
+      runSpacing: 18,
+      spacing: 18,
+      children: [
+        SizedBox(width: 140, child: status),
+        SizedBox(width: 140, child: created),
+        if (completed != null) SizedBox(width: 140, child: completed),
+      ],
+    );
+  }
+
+  static const _months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
+  String _fmtDate(DateTime d) => '${_months[d.month - 1]} ${d.day}';
+  String _fmtTime(DateTime d) {
+    final h = d.hour == 0 ? 12 : (d.hour > 12 ? d.hour - 12 : d.hour);
+    final m = d.minute.toString().padLeft(2, '0');
+    final ap = d.hour >= 12 ? 'PM' : 'AM';
+    return '$h:$m $ap';
+  }
+}
+
+class _Detail extends StatelessWidget {
+  const _Detail({
+    required this.label,
+    required this.primary,
+    this.secondary,
+    this.primaryColor,
+    required this.ink,
+    required this.ink3,
+  });
+  final String label;
+  final String primary;
+  final String? secondary;
+  final Color? primaryColor;
+  final Color ink;
+  final Color ink3;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: AppTheme.eyebrow(ink3)),
+        const SizedBox(height: 4),
+        Text(primary,
+            style: AppTheme.display(size: 18, color: primaryColor ?? ink)),
+        if (secondary != null) ...[
+          const SizedBox(height: 2),
+          Text(secondary!, style: AppTheme.mono(size: 11, color: ink3)),
+        ],
+      ],
+    );
+  }
+}
+
+// ════════════════════════════════════════════════════════════════════
+// Confirmation dialog
+// ════════════════════════════════════════════════════════════════════
+
+class _ConfirmDialog extends StatelessWidget {
+  const _ConfirmDialog({
+    required this.title,
+    required this.body,
+    required this.confirmLabel,
+    required this.onConfirm,
+  });
+  final String title;
+  final String body;
+  final String confirmLabel;
+  final VoidCallback onConfirm;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final ink2 = dark ? AppTheme.dInk2 : AppTheme.lInk2;
+    return Dialog(
+      insetPadding: const EdgeInsets.symmetric(horizontal: 22),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: AppTheme.display(size: 24)),
+            const SizedBox(height: 10),
+            Text(body, style: AppTheme.body(size: 14, color: ink2).copyWith(height: 1.5)),
+            const SizedBox(height: 18),
+            Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('Cancel'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onConfirm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.error,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: Text(confirmLabel),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
