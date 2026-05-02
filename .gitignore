@@ -47,7 +47,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-
+/dist
 
 # Flutter/Dart specific files
 .dart_tool/

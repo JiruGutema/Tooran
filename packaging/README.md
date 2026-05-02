@@ -96,8 +96,8 @@ build/deb/tooran_<version>_amd64/
     ├── lib/
     │   └── tooran/                                # full Flutter bundle
     ├── share/
-    │   ├── applications/tooran.desktop
-    │   ├── icons/hicolor/256x256/apps/tooran.png
+    │   ├── applications/io.github.jirugutema.tooran.desktop
+    │   ├── icons/hicolor/256x256/apps/io.github.jirugutema.tooran.png
     │   └── doc/tooran/copyright
 ```
 
@@ -123,10 +123,11 @@ install -d \
 cp -a build/linux/x64/release/bundle/. "$STAGE/usr/lib/$PKG/"
 ln -sf "../lib/$PKG/$PKG" "$STAGE/usr/bin/$PKG"
 
-install -m 644 packaging/deb/tooran.desktop \
-  "$STAGE/usr/share/applications/$PKG.desktop"
+APP_ID=io.github.jirugutema.tooran
+install -m 644 "packaging/deb/$APP_ID.desktop" \
+  "$STAGE/usr/share/applications/$APP_ID.desktop"
 install -m 644 assets/icon.png \
-  "$STAGE/usr/share/icons/hicolor/256x256/apps/$PKG.png"
+  "$STAGE/usr/share/icons/hicolor/256x256/apps/$APP_ID.png"
 ```
 
 ### 3.3 Write `DEBIAN/control`
@@ -210,8 +211,8 @@ You should see:
 
 ```
 lrwxrwxrwx  ./usr/bin/tooran -> ../lib/tooran/tooran
--rw-r--r--  ./usr/share/applications/tooran.desktop
--rw-r--r--  ./usr/share/icons/hicolor/256x256/apps/tooran.png
+-rw-r--r--  ./usr/share/applications/io.github.jirugutema.tooran.desktop
+-rw-r--r--  ./usr/share/icons/hicolor/256x256/apps/io.github.jirugutema.tooran.png
 ```
 
 ## 5. Install & test
@@ -241,9 +242,13 @@ Before publishing the `.deb` publicly, consider:
 - **Maintainer line** — set `TOORAN_DEB_MAINTAINER` or edit the default in
   `packaging/deb/build-deb.sh`. Use a real email; some package tooling
   rejects `example.com`.
-- **Application ID** — `linux/CMakeLists.txt` still ships the Flutter
-  scaffold default `com.example.tooran`. Change it to something unique
-  (e.g. `dev.jirugutema.tooran`) so DBus / GTK identify the app correctly.
+- **Application ID** — set to `io.github.jirugutema.tooran` in
+  `linux/CMakeLists.txt` (and macOS / iOS / Android equivalents). The
+  `.desktop` filename, the `Icon=` and `StartupWMClass=` lines inside it,
+  and the installed icon path under `hicolor/<size>/apps/` must all use
+  this same string — otherwise GNOME/KDE can't match the running window
+  to its launcher and you get a generic icon plus the raw app-id in the
+  taskbar tooltip.
 - **Version bumps** — bump `version:` in `pubspec.yaml`. The script picks it
   up automatically.
 - **More icon sizes** — only `256x256` ships today. For sharper icons in
@@ -259,8 +264,8 @@ Before publishing the `.deb` publicly, consider:
 packaging/
 ├── README.md           # this file
 └── deb/
-    ├── build-deb.sh    # one-shot build script (steps 3.1 – 3.5)
-    └── tooran.desktop  # XDG launcher entry installed under /usr/share/applications/
+    ├── build-deb.sh                              # one-shot build script (steps 3.1 – 3.5)
+    └── io.github.jirugutema.tooran.desktop       # XDG launcher entry; basename must match APPLICATION_ID
 ```
 
 Build artifacts land in `dist/` (the final `.deb`) and `build/deb/` (the

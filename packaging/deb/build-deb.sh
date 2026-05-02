@@ -16,6 +16,11 @@ cd "$PROJECT_ROOT"
 
 # ── Metadata ─────────────────────────────────────────────────────────
 PKG=tooran
+# Reverse-DNS app-id. Used as the .desktop filename, the icon filename, and
+# StartupWMClass — all three must match the GTK APPLICATION_ID set in
+# linux/CMakeLists.txt or the desktop environment can't link the running
+# window to its launcher (no icon, raw app-id in tooltip).
+APP_ID=io.github.jirugutema.tooran
 ARCH=amd64
 # Strip the trailing +build from "1.0.0+1" — debian versions can't contain '+'
 # the way pubspec uses it without quoting.
@@ -63,9 +68,10 @@ cp -a "$BUNDLE_DIR/." "$STAGE/usr/lib/$PKG/"
 # work transparently).
 ln -sf "../lib/$PKG/$PKG" "$STAGE/usr/bin/$PKG"
 
-# Desktop entry + icon.
-install -m 644 "$SCRIPT_DIR/tooran.desktop" \
-  "$STAGE/usr/share/applications/$PKG.desktop"
+# Desktop entry + icon. Both filenames must match $APP_ID so GNOME/KDE can
+# link the running window (whose GApplication ID is APP_ID) to the launcher.
+install -m 644 "$SCRIPT_DIR/$APP_ID.desktop" \
+  "$STAGE/usr/share/applications/$APP_ID.desktop"
 
 ICON_SRC=""
 for cand in assets/icon.png assets/logo.png; do
@@ -73,7 +79,7 @@ for cand in assets/icon.png assets/logo.png; do
 done
 if [[ -n "$ICON_SRC" ]]; then
   install -m 644 "$ICON_SRC" \
-    "$STAGE/usr/share/icons/hicolor/256x256/apps/$PKG.png"
+    "$STAGE/usr/share/icons/hicolor/256x256/apps/$APP_ID.png"
 else
   echo "Warning: no icon found in assets/; skipping icon install" >&2
 fi
