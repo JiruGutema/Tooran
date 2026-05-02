@@ -47,7 +47,10 @@ static void my_application_activate(GApplication* application) {
     gtk_window_set_title(window, "tooran");
   }
 
-  gtk_window_set_default_size(window, 400, 600);
+  // Desktop-sized default. WindowService (Dart side) will resize this to
+  // the user's last saved geometry once Flutter is up; this just avoids a
+  // phone-sized first frame before that runs.
+  gtk_window_set_default_size(window, 1200, 800);
   gtk_widget_show(GTK_WIDGET(window));
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();

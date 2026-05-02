@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Tooran
+GenericName=Task Organizer
+Comment=A simple, quiet task organizer
+Exec=tooran
+Icon=tooran
+Terminal=false
+Categories=Office;Utility;ProjectManagement;
+StartupWMClass=tooran
+Keywords=tasks;todo;list;productivity;

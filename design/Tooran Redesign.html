@@ -111,12 +111,36 @@
               </DCArtboard>
             </DCSection>
 
-            <DCSection id="desktop" title="Desktop / Linux — two-pane" subtitle="Master/detail layout: categories on the left, the active category's tasks on the right. Editorial header, segmented progress, keyboard-first.">
-              <DCArtboard id="desk-light" label="A · Light" width={1200} height={780}>
+            <DCSection id="desktop" title="Desktop / Linux" subtitle="Sidebar + main, with an optional task-detail panel for wider windows. Centered modals replace the mobile bottom sheets. Same data model, keyboard-first.">
+              <DCArtboard id="desk-light" label="A · Home — light" width={1200} height={780}>
                 <DesktopApp initialDark={false}/>
               </DCArtboard>
-              <DCArtboard id="desk-dark" label="B · Dark" width={1200} height={780}>
+              <DCArtboard id="desk-dark" label="B · Home — dark" width={1200} height={780}>
                 <DesktopApp initialDark={true}/>
+              </DCArtboard>
+              <DCArtboard id="desk-detail-light" label="C · Three-pane · task detail" width={1200} height={780}>
+                <DesktopApp initialDark={false} detail={true}/>
+              </DCArtboard>
+              <DCArtboard id="desk-detail-dark" label="D · Three-pane · dark" width={1200} height={780}>
+                <DesktopApp initialDark={true} detail={true}/>
+              </DCArtboard>
+              <DCArtboard id="desk-cat-modal" label="E · New category modal" width={1200} height={780}>
+                <DesktopApp initialDark={false} modal="cat"/>
+              </DCArtboard>
+              <DCArtboard id="desk-task-modal" label="F · New task modal" width={1200} height={780}>
+                <DesktopApp initialDark={false} modal="task"/>
+              </DCArtboard>
+              <DCArtboard id="desk-confirm" label="G · Confirm delete" width={1200} height={780}>
+                <DesktopApp initialDark={false} modal="confirm"/>
+              </DCArtboard>
+              <DCArtboard id="desk-history" label="H · History" width={1200} height={780}>
+                <DesktopApp initialDark={false} view="history"/>
+              </DCArtboard>
+              <DCArtboard id="desk-help" label="I · Help" width={1200} height={780}>
+                <DesktopApp initialDark={false} view="help"/>
+              </DCArtboard>
+              <DCArtboard id="desk-empty" label="J · Empty state" width={1200} height={780}>
+                <DesktopApp initialDark={false} view="empty"/>
               </DCArtboard>
             </DCSection>
 

@@ -758,6 +758,18 @@ body {
 }
 .desk-task.completed .nm::after { right: 0; }
 .desk-task.completed .nm { color: var(--ink-3); }
+.desk-task.selected {
+  background: var(--surface);
+  margin: 0 -56px;
+  padding: 14px 56px;
+  border-bottom: 1px solid var(--hairline);
+  position: relative;
+}
+.desk-task.selected::before {
+  content: ""; position: absolute;
+  left: 0; top: 8px; bottom: 8px; width: 2px;
+  background: var(--primary); border-radius: 2px;
+}
 .desk-task .desc { font-size: 13.5px; color: var(--ink-3); margin-top: 4px; line-height: 1.45; }
 .desk-task .when { font-family: var(--font-mono); font-size: 11px; color: var(--ink-4); letter-spacing: 0.04em; white-space: nowrap; }
 
@@ -794,6 +806,289 @@ body {
 }
 .dialog p { color: var(--ink-2); font-size: 14px; line-height: 1.5; margin: 0 0 16px; }
 .dialog .row { display: flex; gap: 10px; }
+
+/* ---------- Desktop · three-pane (with detail) ---------- */
+.desk.three { grid-template-columns: 300px 1fr 420px; }
+.desk-detail {
+  border-left: 1px solid var(--hairline);
+  background: var(--surface);
+  display: flex; flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+.desk-detail-head {
+  padding: 22px 28px 18px;
+  border-bottom: 1px solid var(--hairline);
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 12px;
+}
+.desk-detail-head .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.desk-detail-body { padding: 22px 28px 32px; }
+.desk-detail-body h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 30px;
+  line-height: 1.1;
+  letter-spacing: -0.012em;
+  margin: 10px 0 14px;
+  color: var(--ink);
+}
+.desk-detail-card {
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 16px 18px;
+  margin-bottom: 22px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+.desk-detail-meta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 22px;
+}
+.desk-detail-meta .lbl {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 4px;
+}
+.desk-detail-meta .val {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--ink);
+}
+
+/* ---------- Desktop · centered modal (replaces bottom sheets) ---------- */
+.desk-modal-scrim {
+  position: absolute; inset: 0;
+  background: rgba(15, 12, 8, 0.42);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 50;
+}
+.tooran.dark .desk-modal-scrim { background: rgba(0,0,0,0.55); }
+.desk-modal {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 520px;
+  max-width: calc(100% - 80px);
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.28), 0 2px 6px rgba(0,0,0,0.08);
+  padding: 26px 28px 22px;
+  z-index: 51;
+  display: flex; flex-direction: column;
+}
+.desk-modal.wide { width: 620px; }
+.desk-modal .eyebrow {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.desk-modal h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 26px;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  margin: 0 0 14px;
+}
+.desk-modal .field { padding: 0; margin-bottom: 16px; }
+.desk-modal .field label { margin-bottom: 6px; }
+.desk-modal .input,
+.desk-modal .textarea { font-size: 20px; }
+.desk-modal .textarea { font-size: 14.5px; min-height: 120px; }
+.desk-modal-footer {
+  display: flex; gap: 10px; justify-content: flex-end;
+  margin-top: 14px;
+  padding-top: 16px;
+  border-top: 1px solid var(--hairline);
+}
+.desk-modal-footer .btn {
+  flex: 0;
+  height: 40px;
+  padding: 0 22px;
+  font-size: 14px;
+}
+.desk-modal-footer .hint {
+  margin-right: auto;
+  align-self: center;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+}
+.desk-modal-footer .hint .kbd {
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 1px 6px;
+  margin: 0 2px;
+}
+
+/* ---------- Desktop · history page ---------- */
+.desk-history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 14px;
+}
+.desk-history-card {
+  background: var(--surface);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 18px 18px 14px;
+  display: flex; flex-direction: column; gap: 10px;
+  transition: border-color .15s, transform .15s;
+}
+.desk-history-card:hover { border-color: var(--hairline-strong); }
+.desk-history-card .nm {
+  font-family: var(--font-display);
+  font-size: 22px;
+  letter-spacing: -0.005em;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.desk-history-card .meta {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--ink-3);
+}
+.desk-history-card .actions {
+  display: flex; gap: 8px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+.desk-history-card .actions .btn {
+  flex: 0; height: 34px; font-size: 12px; padding: 0 14px;
+}
+
+/* ---------- Desktop · help page (key-value list) ---------- */
+.desk-help {
+  max-width: 720px;
+}
+.desk-help .row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 22px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.desk-help .row .k {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding-top: 2px;
+}
+.desk-help .row .v {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--ink);
+}
+.desk-help .row .v .kbd {
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+  border-radius: 4px;
+  padding: 2px 6px;
+  margin: 0 2px;
+  color: var(--ink-2);
+}
+.desk-help .footnote {
+  margin-top: 26px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink-3);
+  max-width: 520px;
+}
+
+/* ---------- Desktop · empty state ---------- */
+.desk-empty-hero {
+  display: flex; flex-direction: column; align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  height: 100%;
+  text-align: center;
+  color: var(--ink-3);
+}
+.desk-empty-hero .glyph {
+  width: 84px; height: 84px;
+  border-radius: 22px;
+  border: 1.5px dashed var(--hairline-strong);
+  display: grid; place-items: center;
+  color: var(--ink-3);
+  margin-bottom: 22px;
+}
+.desk-empty-hero h2 {
+  font-family: var(--font-display);
+  font-size: 38px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  margin: 0 0 8px;
+  line-height: 1.1;
+}
+.desk-empty-hero h2 em { font-style: italic; color: var(--primary); }
+.desk-empty-hero p {
+  font-size: 15px;
+  line-height: 1.55;
+  max-width: 380px;
+  margin: 0 0 22px;
+}
+.desk-empty-hero .btn.primary { flex: 0; padding: 0 26px; height: 44px; }
+
+.desk-side .empty-side {
+  padding: 18px 22px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-3);
+  border-top: 1px solid var(--hairline);
+  border-bottom: 1px solid var(--hairline);
+  margin: 4px 0;
+}
+
+/* secondary nav row in sidebar (history/help) */
+.desk-side-nav {
+  display: flex; flex-direction: column;
+  padding: 4px 6px 8px;
+  margin-top: auto;
+  border-top: 1px solid var(--hairline);
+}
+.desk-side-nav .item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  color: var(--ink-2);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+.desk-side-nav .item:hover { background: var(--surface-2); color: var(--ink); }
+.desk-side-nav .item.active { background: var(--surface-2); color: var(--ink); font-weight: 500; }
+.desk-side-nav .item .count {
+  margin-left: auto;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-3);
+}
 
 /* Scrollbars hidden */
 .tooran *, .desk * { scrollbar-width: none; }

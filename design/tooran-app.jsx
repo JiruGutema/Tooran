@@ -380,20 +380,54 @@ function HelpView({ onBack }) {
 }
 
 // ============================================================
-// Desktop two-pane
+// Desktop · two/three-pane with modals
 // ============================================================
-function DesktopApp({ initialDark = false }) {
+//
+// Props matrix (combinable):
+//   initialDark : boolean   — light or dark theme
+//   view        : 'home' | 'history' | 'help' | 'empty'
+//   detail      : boolean   — show right-hand task detail panel (three-pane)
+//   modal       : null | 'cat' | 'task' | 'confirm'   — overlay
+//
+// All variants share the same chrome (sidebar + main) so the artboards read as
+// the same app in different states, not separate apps.
+// ============================================================
+
+const seedHistory = () => {
+  const day = 86400000;
+  const now = Date.now();
+  return [
+    { id: 'h1', name: 'Garden — winter', deletedAt: now - 3*day,  tasks: Array.from({length: 5}, (_, i) => ({ id: 'h1t'+i, done: i < 3 })) },
+    { id: 'h2', name: 'Apartment hunt', deletedAt: now - 9*day,  tasks: Array.from({length: 8}, (_, i) => ({ id: 'h2t'+i, done: i < 8 })) },
+    { id: 'h3', name: 'Reading list — Q1', deletedAt: now - 24*day, tasks: Array.from({length: 12}, (_, i) => ({ id: 'h3t'+i, done: i < 7 })) },
+  ];
+};
+
+function DesktopApp({ initialDark = false, view = 'home', detail = false, modal = null }) {
   const S = useToorState();
   const [dark, setDark] = useS(initialDark);
-  const [activeId, setActive] = useS(S.cats[0]?.id);
-  const active = S.cats.find(c => c.id === activeId) || S.cats[0];
+  const isEmpty = view === 'empty';
+  const cats = isEmpty ? [] : S.cats;
+  const [activeId, setActive] = useS(cats[0]?.id);
+  const active = cats.find(c => c.id === activeId) || cats[0];
   const total = active ? active.tasks.length : 0;
   const done = active ? active.tasks.filter(t => t.done).length : 0;
   const pct = total ? done / total : 0;
 
+  // For the detail-panel artboard, pick the second open task as a
+  // representative selection — it has a description worth rendering.
+  const detailTask = useM(() => {
+    if (!detail || !active) return null;
+    return active.tasks.find(t => !t.done && t.desc) || active.tasks[1] || active.tasks[0];
+  }, [detail, active]);
+
+  const dateStr = useM(() => new Date().toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' }), []);
+  const historyList = view === 'history' ? (S.history.length ? S.history : seedHistory()) : [];
+
   return (
-    <div className={`tooran ${dark ? 'dark' : ''}`} style={{ height: '100%' }}>
-      <div className="desk">
+    <div className={`tooran ${dark ? 'dark' : ''}`} style={{ height: '100%', position: 'relative', overflow: 'hidden' }}>
+      <div className={`desk ${detail ? 'three' : ''}`}>
+        {/* ── Sidebar ─────────────────────────────────────────── */}
         <aside className="desk-side">
           <div className="desk-head">
             <div className="brand">tooran<span className="dot-mark">.</span></div>
@@ -409,61 +443,291 @@ function DesktopApp({ initialDark = false }) {
           <div style={{ padding: '6px 12px 4px', fontFamily: 'var(--font-mono)', fontSize: 10.5, letterSpacing: '0.14em', textTransform: 'uppercase', color: 'var(--ink-3)' }}>
             Categories
           </div>
-          <div style={{ overflow: 'auto', paddingBottom: 14 }}>
-            {S.cats.map(c => {
-              const t = c.tasks.length, d = c.tasks.filter(x => x.done).length;
-              const p = t ? d / t : 0;
-              return (
-                <div key={c.id} className={`desk-cat ${c.id === activeId ? 'active' : ''}`} onClick={() => setActive(c.id)}>
-                  <div style={{ position: 'relative', width: 28, height: 28, display: 'grid', placeItems: 'center' }}>
-                    <CatRing pct={p} size={28} stroke={2.2} color={c.color}/>
-                    <span style={{ position: 'absolute', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-2)' }}>{Math.round(p*100)}</span>
+          {isEmpty ? (
+            <div className="empty-side">No categories yet. Create one to begin.</div>
+          ) : (
+            <div style={{ overflow: 'auto', paddingBottom: 8, flex: 1 }}>
+              {cats.map(c => {
+                const t = c.tasks.length, d = c.tasks.filter(x => x.done).length;
+                const p = t ? d / t : 0;
+                return (
+                  <div key={c.id} className={`desk-cat ${c.id === activeId && view === 'home' ? 'active' : ''}`} onClick={() => setActive(c.id)}>
+                    <div style={{ position: 'relative', width: 28, height: 28, display: 'grid', placeItems: 'center' }}>
+                      <CatRing pct={p} size={28} stroke={2.2} color={c.color}/>
+                      <span style={{ position: 'absolute', fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--ink-2)' }}>{Math.round(p*100)}</span>
+                    </div>
+                    <div className="nm">{c.name}</div>
+                    <div className="ct">{d}/{t}</div>
                   </div>
-                  <div className="nm">{c.name}</div>
-                  <div className="ct">{d}/{t}</div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+          )}
+
+          {/* secondary nav (history / help) */}
+          <div className="desk-side-nav">
+            <div className={`item ${view === 'history' ? 'active' : ''}`}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7a5 5 0 1 0 1.5-3.5L2 5M2 2v3h3" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              History <span className="count">{view === 'history' ? historyList.length : (S.history.length || 3)}</span>
+            </div>
+            <div className={`item ${view === 'help' ? 'active' : ''}`}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <circle cx="7" cy="7" r="5.2" stroke="currentColor" strokeWidth="1.4"/>
+                <path d="M5.5 5.5a1.5 1.5 0 1 1 2.2 1.3c-.5.3-.7.6-.7 1.2M7 10v.01" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
+              </svg>
+              Help
+              <span className="count">⌘?</span>
+            </div>
           </div>
-          <div style={{ marginTop: 'auto', padding: '12px 18px 18px', borderTop: '1px solid var(--hairline)' }}>
-            <button className="btn" style={{ width: '100%', height: 40, fontSize: 13 }}>+ New category</button>
+
+          <div style={{ padding: '10px 14px 14px', borderTop: '1px solid var(--hairline)' }}>
+            <button className="btn" style={{ width: '100%', height: 40, fontSize: 13 }}>
+              + New category
+            </button>
           </div>
         </aside>
 
+        {/* ── Main ────────────────────────────────────────────── */}
         <main className="desk-main">
-          <div className="desk-main-head">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div className="eyebrow">{active ? `${done} of ${total} complete` : '—'}</div>
-              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                <span className="t-meta">{Math.round(pct*100)}%</span>
-                <div className="dseg" style={{ marginLeft: 6 }}>
-                  {active && active.tasks.map((t, i) => <span key={t.id} className={t.done ? 'on' : ''}/>)}
+          {view === 'home' && active && (
+            <>
+              <div className="desk-main-head">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div className="eyebrow">{`${done} of ${total} complete`}</div>
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                    <span className="t-meta">{Math.round(pct*100)}%</span>
+                    <div className="dseg" style={{ marginLeft: 6 }}>
+                      {active.tasks.map((t) => <span key={t.id} className={t.done ? 'on' : ''}/>)}
+                    </div>
+                  </div>
+                </div>
+                <h1>{active.name}</h1>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  <button className="btn" style={{ flex: 0, padding: '0 16px', height: 36, fontSize: 13 }}>+ Add task</button>
+                  <button className="btn" style={{ flex: 0, padding: '0 16px', height: 36, fontSize: 13 }}>Rename</button>
+                  <button className="btn" style={{ flex: 0, padding: '0 16px', height: 36, fontSize: 13, color: 'var(--ink-3)' }}>Archive</button>
                 </div>
               </div>
+              <div className="desk-main-body">
+                {active.tasks.map(t => (
+                  <div key={t.id} className={`desk-task ${t.done ? 'completed' : ''} ${detailTask && t.id === detailTask.id ? 'selected' : ''}`} onClick={() => S.toggleTask(active.id, t.id)}>
+                    <div className={`checkbox ${t.done ? 'checked' : ''}`} style={{ marginLeft: 0, marginTop: 4 }}>
+                      {Icon.check()}
+                    </div>
+                    <div style={{ minWidth: 0 }}>
+                      <div className="nm">{t.name}</div>
+                      {t.desc && <div className="desc">{t.desc.split('\n')[0]}</div>}
+                    </div>
+                    <div className="when">{t.done && t.completedAt ? `done · ${fmtDate(t.completedAt)}` : fmtDate(t.created)}</div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          {view === 'history' && (
+            <>
+              <div className="desk-main-head">
+                <div className="eyebrow">{historyList.length} archived</div>
+                <h1><em style={{ color: 'var(--primary)', fontStyle: 'italic' }}>Things</em> you once kept.</h1>
+                <div style={{ fontSize: 13.5, color: 'var(--ink-3)', maxWidth: 620, marginTop: 4 }}>
+                  Soft-deleted categories live here for thirty days. Restore them, or let them go.
+                </div>
+              </div>
+              <div className="desk-main-body">
+                <div className="desk-history-grid">
+                  {historyList.map(h => {
+                    const t = h.tasks.length, d = h.tasks.filter(x => x.done).length;
+                    return (
+                      <div key={h.id} className="desk-history-card">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: 12 }}>
+                          <div className="nm">{h.name}</div>
+                          <div className="meta">{fmtDate(h.deletedAt)}</div>
+                        </div>
+                        <div className="meta" style={{ color: 'var(--ink-3)' }}>{t} tasks · {d} done</div>
+                        <div className="actions">
+                          <button className="btn">Restore</button>
+                          <button className="btn" style={{ color: 'var(--error)', borderColor: 'var(--hairline-strong)' }}>Delete forever</button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </>
+          )}
+
+          {view === 'help' && (
+            <>
+              <div className="desk-main-head">
+                <div className="eyebrow">How it works</div>
+                <h1>Small <em style={{ color: 'var(--primary)', fontStyle: 'italic' }}>gestures</em>,<br/>quiet results.</h1>
+              </div>
+              <div className="desk-main-body">
+                <div className="desk-help">
+                  {[
+                    { k: 'Click a category', v: 'Selects it in the right pane. Use ↑ ↓ to walk the list.' },
+                    { k: 'Click a circle', v: 'Marks a task complete. Strike-through lands at 350ms.' },
+                    { k: 'Click a row', v: <>Opens the detail panel. <span className="kbd">Space</span> toggles done; <span className="kbd">E</span> to edit.</> },
+                    { k: 'Search', v: <>Press <span className="kbd">⌘</span><span className="kbd">K</span> to jump anywhere by typing.</> },
+                    { k: 'New', v: <><span className="kbd">⌘</span><span className="kbd">N</span> for a category, <span className="kbd">⌘</span><span className="kbd">⇧</span><span className="kbd">N</span> for a task in the active category.</> },
+                    { k: 'Theme', v: <>Toggle with the moon icon, or press <span className="kbd">⌘</span><span className="kbd">⇧</span><span className="kbd">D</span>.</> },
+                  ].map((x, i) => (
+                    <div key={i} className="row">
+                      <div className="k">{x.k}</div>
+                      <div className="v">{x.v}</div>
+                    </div>
+                  ))}
+                  <div className="footnote">
+                    Tooran is local-first. Your lists never leave your device unless you say so. The desktop build keeps the same data model as the mobile build — open the app on either, and the lists agree.
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {view === 'empty' && (
+            <div className="desk-empty-hero">
+              <div className="glyph">
+                <svg width="34" height="34" viewBox="0 0 28 28" fill="none">
+                  <path d="M3 9a2 2 0 012-2h6l3 3h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h2>A <em>blank</em> page, yours.</h2>
+              <p>Categories hold tasks. Tasks hold what they hold. Nothing more — start with a folder for the things you want to keep close.</p>
+              <button className="btn primary">+ Create your first category</button>
+              <div className="t-meta" style={{ marginTop: 16 }}>or press <span style={{ fontFamily: 'var(--font-mono)', background: 'var(--surface-2)', border: '1px solid var(--hairline)', borderRadius: 4, padding: '1px 6px', margin: '0 2px' }}>⌘N</span></div>
             </div>
-            <h1>{active?.name || 'No category'}</h1>
-            <div style={{ display: 'flex', gap: 6 }}>
-              <button className="btn" style={{ flex: 0, padding: '0 16px', height: 36, fontSize: 13 }}>+ Add task</button>
-              <button className="btn" style={{ flex: 0, padding: '0 16px', height: 36, fontSize: 13 }}>Edit</button>
-              <button className="btn" style={{ flex: 0, padding: '0 16px', height: 36, fontSize: 13, color: 'var(--ink-3)' }}>Today</button>
+          )}
+        </main>
+
+        {/* ── Detail panel (three-pane) ───────────────────────── */}
+        {detail && detailTask && active && (
+          <aside className="desk-detail">
+            <div className="desk-detail-head">
+              <div>
+                <div className="eyebrow">{detailTask.done ? 'Completed' : 'Open'}</div>
+                <div className="t-meta" style={{ marginTop: 4 }}>{active.name}</div>
+              </div>
+              <div style={{ display: 'flex', gap: 4 }}>
+                <button className="icon-btn" title="Edit">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M11 2.5l2.5 2.5L5 13.5l-3 .5.5-3L11 2.5z" stroke="currentColor" strokeWidth="1.5" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+                <button className="icon-btn" title="Close">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                    <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                </button>
+              </div>
             </div>
-          </div>
-          <div className="desk-main-body">
-            {active && active.tasks.map(t => (
-              <div key={t.id} className={`desk-task ${t.done ? 'completed' : ''}`} onClick={() => S.toggleTask(active.id, t.id)}>
-                <div className={`checkbox ${t.done ? 'checked' : ''}`} style={{ marginLeft: 0, marginTop: 4 }}>
+            <div className="desk-detail-body">
+              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                <div className={`checkbox ${detailTask.done ? 'checked' : ''}`} style={{ marginLeft: 0, marginTop: 8, width: 24, height: 24 }}>
                   {Icon.check()}
                 </div>
-                <div style={{ minWidth: 0 }}>
-                  <div className="nm">{t.name}</div>
-                  {t.desc && <div className="desc">{t.desc.split('\n')[0]}</div>}
-                </div>
-                <div className="when">{t.done && t.completedAt ? `done · ${fmtDate(t.completedAt)}` : fmtDate(t.created)}</div>
+                <h2 style={{ flex: 1 }}>{detailTask.name}</h2>
               </div>
-            ))}
-          </div>
-        </main>
+              <div className="desk-detail-card">
+                {(detailTask.desc || '').trim()
+                  ? detailTask.desc
+                  : <span style={{ color: 'var(--ink-3)', fontStyle: 'italic', fontFamily: 'var(--font-display)', fontSize: 17 }}>No description.</span>}
+              </div>
+              <div className="desk-detail-meta">
+                <div>
+                  <div className="lbl">Status</div>
+                  <div className="val" style={{ color: detailTask.done ? 'var(--success)' : 'var(--ink)' }}>
+                    {detailTask.done ? 'Done' : 'In progress'}
+                  </div>
+                </div>
+                <div>
+                  <div className="lbl">Created</div>
+                  <div className="val">{fmtDate(detailTask.created)}</div>
+                  <div className="t-meta" style={{ marginTop: 2 }}>{fmtTime(detailTask.created)}</div>
+                </div>
+                <div>
+                  <div className="lbl">Category</div>
+                  <div className="val">{active.name}</div>
+                </div>
+                {detailTask.completedAt && (
+                  <div>
+                    <div className="lbl">Completed</div>
+                    <div className="val">{fmtDate(detailTask.completedAt)}</div>
+                    <div className="t-meta" style={{ marginTop: 2 }}>{fmtTime(detailTask.completedAt)}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </aside>
+        )}
       </div>
+
+      {/* ── Modal overlays ───────────────────────────────────── */}
+      {modal === 'cat' && (
+        <>
+          <div className="desk-modal-scrim"/>
+          <div className="desk-modal">
+            <div className="eyebrow">New category</div>
+            <h3>What are we keeping close?</h3>
+            <div className="field">
+              <label>Name</label>
+              <div className="input" style={{ display: 'block' }}>Reading List</div>
+            </div>
+            <div className="desk-modal-footer">
+              <span className="hint"><span className="kbd">Esc</span> to cancel · <span className="kbd">↵</span> to create</span>
+              <button className="btn">Cancel</button>
+              <button className="btn primary">Create</button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {modal === 'task' && (
+        <>
+          <div className="desk-modal-scrim"/>
+          <div className="desk-modal wide">
+            <div className="eyebrow">New task · in “{active?.name || 'Today'}”</div>
+            <h3>Something to do.</h3>
+            <div className="field">
+              <label>Name</label>
+              <div className="input" style={{ display: 'block' }}>Plan the Lisbon trip</div>
+            </div>
+            <div className="field">
+              <label>Description</label>
+              <div className="textarea" style={{ display: 'block', whiteSpace: 'pre-wrap' }}>{`• Flights from JFK\n• A quiet apartment in Alfama\n• Make a list of bookshops`}</div>
+            </div>
+            <div className="format-toolbar" style={{ padding: 0, marginTop: 6 }}>
+              <button className="tool">{Icon.bullet()} Bullet</button>
+              <button className="tool">{Icon.numlist()} Numbered</button>
+            </div>
+            <div className="desk-modal-footer">
+              <span className="hint"><span className="kbd">⌘</span><span className="kbd">↵</span> to add</span>
+              <button className="btn">Cancel</button>
+              <button className="btn primary">Add task</button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {modal === 'confirm' && (
+        <>
+          <div className="desk-modal-scrim"/>
+          <div className="desk-modal" style={{ width: 460 }}>
+            <div className="eyebrow" style={{ color: 'var(--error)' }}>Delete category</div>
+            <h3>Delete “{active?.name || 'Today'}”?</h3>
+            <p style={{ color: 'var(--ink-2)', fontSize: 14, lineHeight: 1.55, margin: '0 0 4px' }}>
+              It has {total} task{total === 1 ? '' : 's'}. The category and its tasks will move to History — you can restore them within thirty days.
+            </p>
+            <div className="desk-modal-footer">
+              <button className="btn">Cancel</button>
+              <button className="btn danger">Delete</button>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
