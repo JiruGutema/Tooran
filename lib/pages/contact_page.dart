@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../theme/app_theme.dart';
+import '../widgets/common.dart';
 
 class ContactPage extends StatelessWidget {
   const ContactPage({super.key});
@@ -19,7 +20,7 @@ class ContactPage extends StatelessWidget {
     if (ctx.mounted) {
       ScaffoldMessenger.of(ctx)
         ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text('$label copied')));
+        ..showSnackBar(SnackBar(content: Text(ctx.l10n.contactCopied(label))));
     }
   }
 
@@ -45,7 +46,7 @@ class ContactPage extends StatelessWidget {
                     color: ink2,
                     onPressed: () => Navigator.pop(context),
                   ),
-                  Text('CONTACT', style: AppTheme.eyebrow(ink3)),
+                  Text(context.l10n.contactTitle, style: AppTheme.eyebrow(ink3)),
                 ],
               ),
             ),
@@ -55,23 +56,23 @@ class ContactPage extends StatelessWidget {
               child: Column(
                 children: [
                   _LinkRow(
-                    label: 'EMAIL',
+                    label: context.l10n.contactEmail,
                     value: 'jirudagutema@gmail.com',
-                    detail: 'For questions and support',
+                    detail: context.l10n.contactEmailDetail,
                     onTap: () => _open('mailto:jirudagutema@gmail.com?subject=Tooran'),
                     onLongPress: () => _copy(context, 'jirudagutema@gmail.com', 'Email'),
                   ),
                   _LinkRow(
-                    label: 'WEBSITE',
+                    label: context.l10n.contactWebsite,
                     value: 'tooran.vercel.app',
-                    detail: 'Updates and news',
+                    detail: context.l10n.contactWebsiteDetail,
                     onTap: () => _open('https://tooran.vercel.app'),
                     onLongPress: () => _copy(context, 'https://tooran.vercel.app', 'URL'),
                   ),
                   _LinkRow(
-                    label: 'SOURCE',
+                    label: context.l10n.contactSource,
                     value: 'github.com/jirugutema/tooran',
-                    detail: 'Read the code, send a patch',
+                    detail: context.l10n.contactSourceDetail,
                     onTap: () => _open('https://github.com/jirugutema/tooran'),
                     onLongPress: () => _copy(context, 'https://github.com/jirugutema/tooran', 'URL'),
                   ),
@@ -81,7 +82,7 @@ class ContactPage extends StatelessWidget {
             const SizedBox(height: 28),
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 0, 22, 8),
-              child: Text('THE DEVELOPER', style: AppTheme.eyebrow(ink3)),
+              child: Text(context.l10n.contactDeveloper, style: AppTheme.eyebrow(ink3)),
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 8, 22, 36),
@@ -98,18 +99,18 @@ class ContactPage extends StatelessWidget {
                     Text('Jiru Gutema',
                         style: AppTheme.display(size: 24, color: ink)),
                     const SizedBox(height: 2),
-                    Text('Software developer · Addis Ababa University',
+                    Text(context.l10n.contactDeveloperRole,
                         style: AppTheme.body(size: 13, color: ink3)),
                     const SizedBox(height: 14),
                     Text(
-                      'Building tools that feel calm. Open to feedback and collaboration.',
+                      context.l10n.contactDeveloperBio,
                       style: AppTheme.body(size: 14, color: ink2).copyWith(height: 1.5),
                     ),
                     const SizedBox(height: 12),
                     InkWell(
                       onTap: () => _open('https://jirugutema.vercel.app'),
                       child: Text(
-                        'PORTFOLIO →',
+                        context.l10n.contactPortfolio,
                         style: AppTheme.mono(size: 11, color: primary),
                       ),
                     ),

@@ -32,7 +32,7 @@ class CatRing extends StatelessWidget {
         duration: const Duration(milliseconds: 500),
         curve: Curves.easeOutCubic,
         builder: (_, v, __) => CustomPaint(
-          painter: _RingPainter(progress: v, color: c, track: track.withOpacity(0.4), stroke: stroke),
+          painter: _RingPainter(progress: v, color: c, track: track.withValues(alpha: 0.4), stroke: stroke),
         ),
       ),
     );

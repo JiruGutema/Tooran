@@ -1,0 +1,933 @@
+{
+  "@@locale": "en",
+  "appTitle": "Tooran",
+  "commonCancel": "Cancel",
+  "commonSave": "Save",
+  "commonDelete": "Delete",
+  "commonUndo": "Undo",
+  "commonDone": "Done",
+  "commonEdit": "Edit",
+  "commonShare": "Share",
+  "commonClose": "Close",
+  "commonCreate": "Create",
+  "commonRestore": "Restore",
+  "commonShow": "Show",
+  "commonHide": "Hide",
+  "commonApply": "Apply",
+  "commonNone": "None",
+  "commonNameLabel": "NAME",
+  "loading": "Loading…",
+  "errorSave": "Could not save changes",
+  "errorLoad": "Could not load your tasks",
+  "menuSearch": "Search",
+  "menuToday": "Today",
+  "menuPeople": "People",
+  "menuHistory": "History",
+  "menuSettings": "Settings",
+  "menuHelp": "Help",
+  "menuContact": "Contact",
+  "menuAbout": "About",
+  "menuUpdates": "Check for updates",
+  "menuExpandAll": "Expand all",
+  "menuCollapseAll": "Collapse all",
+  "tooltipMore": "More",
+  "tooltipMenu": "Menu",
+  "tooltipTheme": "Theme",
+  "fabCategory": "Category",
+  "emptyTitle": "No categories yet",
+  "emptyBody": "Tap the button below to create your first category. A folder for the things you want to keep close.",
+  "emptyLedgerPreset": "Set up money tracking",
+  "tipsTitle": "Quick tips",
+  "tipsBody": "Tap the box to complete · swipe a task left to delete · long-press to reorder · swipe right on the top bar for the menu.",
+  "tipsGotIt": "Got it",
+  "categoryNew": "New category",
+  "categoryEdit": "Edit category",
+  "categoryNameHint": "A new beginning…",
+  "categoryNameEmpty": "Please enter a category name",
+  "categoryNameDuplicate": "That name already exists",
+  "categoryTypeLabel": "TYPE",
+  "categoryTypeTasks": "Tasks",
+  "categoryCurrencyLabel": "CURRENCY",
+  "categoryIconLabel": "ICON",
+  "categoryColorLabel": "COLOR",
+  "categoryDeleteTitle": "Delete category?",
+  "categoryDeleteBodyTasks": "\"{name}\" and its {count, plural, =1{1 task} other{{count} tasks}} will move to history. You can restore it from there.",
+  "@categoryDeleteBodyTasks": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryDeleteBodyEmpty": "\"{name}\" will move to history. You can restore it from there.",
+  "@categoryDeleteBodyEmpty": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryDeleted": "\"{name}\" deleted",
+  "@categoryDeleted": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "categoryNoTasks": "No tasks yet",
+  "categoryProgress": "{done} of {total} · {left} left",
+  "@categoryProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "left": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryNoTasksHint": "No tasks yet · tap below to add your first",
+  "categoryAddTask": "ADD TASK",
+  "categoryAddEntry": "ADD ENTRY",
+  "categoryPin": "Pin to top",
+  "categoryUnpin": "Unpin",
+  "categoryHideCompleted": "Hide completed",
+  "categoryShowCompleted": "Show completed",
+  "categorySinkCompleted": "Completed to bottom",
+  "categoryClearCompleted": "Clear completed",
+  "categoryClearedCount": "{count, plural, =1{Cleared 1 task} other{Cleared {count} tasks}}",
+  "@categoryClearedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryShareList": "Share list",
+  "categoryConvertToLedger": "Convert to ledger…",
+  "categorySort": "Sort",
+  "categoryHiddenCompleted": "{count, plural, =1{1 completed hidden} other{{count} completed hidden}}",
+  "@categoryHiddenCompleted": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "categoryHiddenSettled": "{count, plural, =1{1 settled hidden} other{{count} settled hidden}}",
+  "@categoryHiddenSettled": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "swipeEdit": "EDIT",
+  "swipeDelete": "DELETE",
+  "swipeDone": "DONE",
+  "sortManual": "Manual",
+  "sortLargest": "Largest amount",
+  "sortOldest": "Oldest",
+  "sortDueSoonest": "Due soonest",
+  "taskNew": "New task",
+  "taskEdit": "Edit task",
+  "taskAdd": "Add task",
+  "taskAddedCount": "{count, plural, =1{1 added} other{{count} added}} · keep typing",
+  "@taskAddedCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taskNameHint": "What needs doing?",
+  "taskNameEmpty": "Please enter a task name",
+  "taskDescriptionLabel": "DESCRIPTION",
+  "taskDeleted": "Task deleted",
+  "taskCompleted": "Completed",
+  "taskReopened": "Reopened",
+  "taskStatusOpen": "OPEN",
+  "taskStatusCompleted": "COMPLETED",
+  "taskNoDescription": "No description.",
+  "taskDetailStatus": "STATUS",
+  "taskDetailCreated": "CREATED",
+  "taskDetailCompleted": "COMPLETED",
+  "taskDetailDue": "DUE",
+  "taskDetailRepeats": "REPEATS",
+  "taskStatusDone": "Done",
+  "taskStatusInProgress": "In progress",
+  "taskDueLabel": "DUE DATE",
+  "taskDueNone": "No due date",
+  "taskDueAddTime": "Add time",
+  "taskDueClear": "Clear",
+  "taskRepeatLabel": "REPEAT",
+  "repeatNone": "Does not repeat",
+  "repeatDaily": "Every day",
+  "repeatWeekly": "Every week",
+  "repeatMonthly": "Every month",
+  "repeatYearly": "Every year",
+  "taskNameLength": "{count}/120",
+  "@taskNameLength": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "taskChecklistProgress": "{done}/{total}",
+  "@taskChecklistProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "taskAutoCompleted": "All items checked — task completed",
+  "taskPromoted": "Added as its own task",
+  "dueOverdue": "Overdue",
+  "dueToday": "Today",
+  "dueTomorrow": "Tomorrow",
+  "dueInDays": "In {days} days",
+  "@dueInDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "richChecklist": "CHECKLIST",
+  "richBullet": "BULLET",
+  "richNumbered": "NUMBERED",
+  "richHeading": "HEADING",
+  "richQuote": "QUOTE",
+  "richIndent": "INDENT",
+  "richOutdent": "OUTDENT",
+  "richClearChecked": "Clear checked",
+  "richMoveToTop": "Move to top",
+  "richMakeOwnTask": "Make it its own task",
+  "richEditItem": "Edit item",
+  "richConvertPrompt": "Convert pasted lines to a checklist?",
+  "richConvert": "Convert",
+  "richDescriptionHint": "Add notes, steps, links…",
+  "richReorder": "Drag to reorder",
+  "ledgerPersonLabel": "PERSON",
+  "ledgerPersonHint": "Who?",
+  "ledgerAmountLabel": "AMOUNT",
+  "ledgerDateGiven": "DATE",
+  "ledgerNoteLabel": "NOTE",
+  "ledgerNewEntry": "New entry",
+  "ledgerEditEntry": "Edit entry",
+  "ledgerAddEntry": "Add entry",
+  "ledgerAmountInvalid": "Enter an amount greater than zero",
+  "ledgerPersonEmpty": "Please enter a name",
+  "ledgerPaidLeft": "paid {paid} · {left} left",
+  "@ledgerPaidLeft": {
+    "placeholders": {
+      "paid": {
+        "type": "String"
+      },
+      "left": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerSettled": "Settled",
+  "ledgerSettledOn": "SETTLED",
+  "ledgerOpen": "OPEN",
+  "ledgerOutstanding": "OUTSTANDING",
+  "ledgerTotal": "TOTAL",
+  "ledgerPaid": "PAID",
+  "ledgerPayments": "PAYMENTS",
+  "ledgerNoPayments": "No payments yet.",
+  "ledgerRecordPayment": "Record payment",
+  "ledgerPaymentAmount": "Payment amount",
+  "ledgerPaymentNote": "Note (optional)",
+  "ledgerPaymentRecorded": "Payment recorded",
+  "ledgerPaymentDeleted": "Payment removed",
+  "ledgerRemind": "Remind",
+  "ledgerRemindMessage": "Hi {person}, just a reminder about the {amount} from {date}. Thanks!",
+  "@ledgerRemindMessage": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerSettle": "Settle",
+  "ledgerSettledToast": "Marked as settled",
+  "ledgerDaysAgo": "{days, plural, =0{today} =1{yesterday} other{{days} days ago}}",
+  "@ledgerDaysAgo": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "ledgerNet": "NET",
+  "ledgerNetLabel": "Net {amount}",
+  "@ledgerNetLabel": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerAllSquare": "all square",
+  "ledgerHidden": "••••",
+  "convertTitle": "Convert to ledger",
+  "convertBody": "Each task becomes an entry. Names like \"Abebe – 500\" are split into person and amount. Check the preview before applying.",
+  "convertNoAmount": "no amount",
+  "peopleTitle": "People",
+  "peopleEmpty": "No money entries yet. Create a Money list to track who owes whom.",
+  "peopleEntries": "{count, plural, =1{1 entry} other{{count} entries}}",
+  "@peopleEntries": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "searchHint": "Search tasks, notes, people…",
+  "searchEmpty": "Nothing matches \"{query}\"",
+  "@searchEmpty": {
+    "placeholders": {
+      "query": {
+        "type": "String"
+      }
+    }
+  },
+  "searchPrompt": "Type to search across every category.",
+  "todayTitle": "Today",
+  "todayEmpty": "Nothing due today. Enjoy the quiet.",
+  "todayCount": "{count, plural, =1{1 due today} other{{count} due today}}",
+  "@todayCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "todayOverdueCount": "{count} overdue",
+  "@todayOverdueCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "historyTitle": "HISTORY",
+  "historyEmptyTitle": "Nothing here",
+  "historyEmptyBody": "Deleted categories will land here. You can restore them, or let them go.",
+  "historyRestored": "\"{name}\" restored",
+  "@historyRestored": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "historyPurged": "\"{name}\" deleted forever",
+  "@historyPurged": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "historyDeleteForever": "Delete forever",
+  "historyDeleteForeverTitle": "Delete forever?",
+  "historyDeleteForeverBody": "This cannot be undone. \"{name}\" and its tasks will be erased.",
+  "@historyDeleteForeverBody": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "historyTaskCount": "{count, plural, =1{1 task} other{{count} tasks}} · {done} done",
+  "@historyTaskCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "done": {
+        "type": "int"
+      }
+    }
+  },
+  "historyDeletedOn": "Deleted {date}",
+  "@historyDeletedOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "historyClearAll": "Clear history",
+  "historyClearAllBody": "Every category in history will be erased. This cannot be undone.",
+  "settingsTitle": "SETTINGS",
+  "settingsAppearance": "APPEARANCE",
+  "settingsTheme": "Theme",
+  "settingsThemeSystem": "System",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsLanguage": "Language",
+  "settingsLanguageSystem": "System default",
+  "settingsEthiopianCalendar": "Ethiopian calendar",
+  "settingsEthiopianCalendarBody": "Show dates as Meskerem 15 instead of Sep 25.",
+  "settingsGestures": "GESTURES & LISTS",
+  "settingsSwipeRight": "Swipe right on a task",
+  "settingsSwipeComplete": "Complete",
+  "settingsSwipeEdit": "Edit",
+  "settingsAutoComplete": "Complete task when checklist is done",
+  "settingsSinkChecked": "Move checked items to the bottom",
+  "settingsMoney": "MONEY",
+  "settingsCurrency": "Default currency",
+  "settingsPrivacy": "Privacy mode",
+  "settingsPrivacyBody": "Hide amounts until tapped.",
+  "settingsReminders": "REMINDERS",
+  "settingsRemindersEnabled": "Due-date reminders",
+  "settingsRemindersBody": "Notify at the due time, or 9:00 for all-day tasks.",
+  "settingsWeeklyDigest": "Weekly money digest",
+  "settingsWeeklyDigestBody": "Monday morning summary of open loans.",
+  "settingsNotificationsDenied": "Notifications are turned off for Tooran in system settings.",
+  "settingsSecurity": "SECURITY",
+  "settingsAppLock": "App lock",
+  "settingsAppLockBody": "Fingerprint, face or device PIN when opening Tooran.",
+  "settingsAppLockUnavailable": "This device has no fingerprint, face or screen lock set up.",
+  "settingsLockAfter": "Lock again after",
+  "settingsLockImmediately": "Immediately",
+  "settingsLockMinutes": "{count, plural, =1{1 minute} other{{count} minutes}}",
+  "@settingsLockMinutes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "settingsWidget": "HOME-SCREEN WIDGET",
+  "settingsWidgetSource": "Widget shows",
+  "settingsWidgetFirst": "First category",
+  "settingsWidgetToday": "Today",
+  "settingsWidgetHint": "Long-press your home screen → Widgets → Tooran to add it.",
+  "settingsBackup": "BACKUP",
+  "settingsExport": "Export backup",
+  "settingsExportBody": "Save a .json file anywhere — Drive, Telegram, Files.",
+  "settingsImport": "Import backup",
+  "settingsImportBody": "Restore from a .json file.",
+  "settingsAutoBackup": "Weekly automatic backup",
+  "settingsAutoBackupBody": "Keeps the last 4 weekly copies on this device.",
+  "settingsAutoBackupLast": "Last backup: {date}",
+  "@settingsAutoBackupLast": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsBackupNow": "Back up now",
+  "settingsBackupDone": "Backup saved",
+  "importPreviewTitle": "Import backup?",
+  "importPreviewBody": "This file has {categories, plural, =1{1 category} other{{categories} categories}} and {tasks, plural, =1{1 task} other{{tasks} tasks}}.",
+  "@importPreviewBody": {
+    "placeholders": {
+      "categories": {
+        "type": "int"
+      },
+      "tasks": {
+        "type": "int"
+      }
+    }
+  },
+  "importMerge": "Merge",
+  "importReplace": "Replace",
+  "importMergeBody": "Merge adds what's missing. Replace deletes your current lists first.",
+  "importDone": "Backup imported",
+  "importInvalid": "That file isn't a Tooran backup",
+  "exportSubject": "Tooran backup",
+  "shareReceivedTitle": "Add shared text",
+  "shareReceivedPick": "Add as task to…",
+  "shareAdded": "Added to \"{name}\"",
+  "@shareAdded": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "shareNoCategories": "Create a category first, then share again.",
+  "lockTitle": "Tooran is locked",
+  "lockUnlock": "Unlock",
+  "lockReason": "Unlock Tooran",
+  "notifChannelName": "Reminders",
+  "notifChannelDescription": "Due-date reminders and the weekly money digest",
+  "notifDueBody": "Due now · {category}",
+  "@notifDueBody": {
+    "placeholders": {
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "notifLedgerDueBody": "{person} · {amount} due today",
+  "@notifLedgerDueBody": {
+    "placeholders": {
+      "person": {
+        "type": "String"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "notifDigestTitle": "Your money this week",
+  "notifDigestBody": "{count, plural, =0{No open loans} =1{1 open loan} other{{count} open loans}} · Net {net}",
+  "@notifDigestBody": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "net": {
+        "type": "String"
+      }
+    }
+  },
+  "widgetLeft": "{count} left",
+  "@widgetLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "widgetEmpty": "All clear ✓",
+  "widgetNoCategories": "Open Tooran to create a category",
+  "helpTitle": "HELP",
+  "helpTroubleshooting": "TROUBLESHOOTING",
+  "helpGestureTapCategory": "Tap a category",
+  "helpGestureTapCategoryBody": "Expands the list of tasks beneath it.",
+  "helpGestureCircle": "Tap the box",
+  "helpGestureCircleBody": "Marks a task complete. In a ledger, settles the entry.",
+  "helpGestureTapTask": "Tap a task",
+  "helpGestureTapTaskBody": "Opens the full description, checklist and details.",
+  "helpGestureLongPress": "Long press",
+  "helpGestureLongPressBody": "Picks up the row to reorder.",
+  "helpGestureSwipe": "Swipe",
+  "helpGestureSwipeBody": "Right to complete (or edit — see Settings). Left to delete, with undo.",
+  "helpGestureChecklist": "Checklists",
+  "helpGestureChecklistBody": "Type [ ] at the start of a line, or use CHECKLIST. Tick items from the task details.",
+  "helpFaqMissing": "My tasks disappeared",
+  "helpFaqMissingBody": "Tasks save automatically. If a category is missing, check History — deleted categories can be restored from there. Settings → Import backup restores an exported file.",
+  "helpFaqTheme": "Theme not switching",
+  "helpFaqThemeBody": "Tap the sun/moon icon in the top bar. Your choice is remembered.",
+  "helpFaqReorder": "Can't reorder",
+  "helpFaqReorderBody": "Long-press a row first, then drag. Categories must be expanded to reorder their tasks. Ledgers sorted by amount or date can't be dragged — switch Sort to Manual.",
+  "helpFaqReminders": "Reminders don't show up",
+  "helpFaqRemindersBody": "Allow notifications for Tooran in system settings, and turn off battery optimisation for it if your phone delays alarms.",
+  "helpLocalFirst": "Tooran is local-first. Your lists never leave your device unless you say so.",
+  "aboutTitle": "ABOUT",
+  "aboutVersion": "VERSION {version}",
+  "@aboutVersion": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "aboutIntro": "Tooran is a local-first task organizer. Categories hold tasks. Tasks have descriptions. Nothing leaves your device. Productivity, in a quieter key.",
+  "aboutWhatItDoes": "WHAT IT DOES",
+  "aboutFeatureCategories": "Categories",
+  "aboutFeatureCategoriesBody": "A folder for the things you keep close.",
+  "aboutFeatureTasks": "Tasks",
+  "aboutFeatureTasksBody": "Names, checklists, due dates, gentle progress.",
+  "aboutFeatureLedger": "Money",
+  "aboutFeatureLedgerBody": "Who owes whom, partial payments, reminders.",
+  "aboutFeatureDrag": "Drag & drop",
+  "aboutFeatureDragBody": "Long-press to lift. Drop anywhere.",
+  "aboutFeatureHistory": "History",
+  "aboutFeatureHistoryBody": "Deleted categories are recoverable.",
+  "aboutFeatureThemes": "Themes",
+  "aboutFeatureThemesBody": "Warm paper by day. Deep ink by night.",
+  "aboutFeatureLocal": "Local-first",
+  "aboutFeatureLocalBody": "No cloud, no sign-in, no telemetry.",
+  "aboutCraftedBy": "CRAFTED BY",
+  "aboutCraftedByBody": "Jiru Gutema, Addis Ababa University. Made with care, in Flutter, on a quiet evening.",
+  "aboutRights": "ALL RIGHTS RESERVED",
+  "contactTitle": "CONTACT",
+  "contactEmail": "EMAIL",
+  "contactEmailDetail": "For questions and support",
+  "contactWebsite": "WEBSITE",
+  "contactWebsiteDetail": "Updates and news",
+  "contactSource": "SOURCE",
+  "contactSourceDetail": "Read the code, send a patch",
+  "contactDeveloper": "THE DEVELOPER",
+  "contactDeveloperRole": "Software developer · Addis Ababa University",
+  "contactDeveloperBio": "Building tools that feel calm. Open to feedback and collaboration.",
+  "contactPortfolio": "PORTFOLIO →",
+  "contactCopied": "{label} copied",
+  "@contactCopied": {
+    "placeholders": {
+      "label": {
+        "type": "String"
+      }
+    }
+  },
+  "desktopCategories": "CATEGORIES",
+  "desktopNoCategories": "No categories yet. Create one to begin.",
+  "desktopNewCategory": "New category",
+  "desktopRename": "Rename",
+  "desktopArchive": "Archive",
+  "desktopNoTasksYet": "NO TASKS YET",
+  "desktopComplete": "{done} OF {total} COMPLETE",
+  "@desktopComplete": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "desktopNothingHere": "Nothing here yet.",
+  "desktopNothingHereBody": "Add a task to fill this category with intent.",
+  "desktopBlankA": "A ",
+  "desktopBlankWord": "blank",
+  "desktopBlankRest": " page, yours.",
+  "desktopBlankBody": "Categories hold tasks. Tasks hold what they hold. Nothing more — start with a folder for the things you want to keep close.",
+  "desktopCreateFirst": "Create your first category",
+  "categoryTypeShopping": "Shopping",
+  "categoryTypeBills": "Bills",
+  "categoryTypeSavings": "Savings goal",
+  "categoryTypeNotes": "Notes",
+  "categoryTypeOther": "Other",
+  "typeTasksDesc": "Things to check off",
+  "typeShoppingDesc": "Items, with optional prices",
+  "typeBillsDesc": "Payments that come back",
+  "typeSavingsDesc": "Save toward a target",
+  "typeNotesDesc": "Notes, no checkboxes",
+  "typeOtherDesc": "Name your own kind of list",
+  "categoryCustomTypeLabel": "TYPE NAME",
+  "categoryCustomTypeHint": "e.g. Recipes, Books, Ideas",
+  "categoryTargetLabel": "TARGET AMOUNT",
+  "categoryLedgerLockedHint": "To turn these tasks into money entries, use ⋮ → Convert to ledger.",
+  "summaryShopping": "{done} of {total} · {amount} left",
+  "@summaryShopping": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryBills": "{count, plural, =0{All paid} =1{1 unpaid} other{{count} unpaid}} · {amount}",
+  "@summaryBills": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "summarySavings": "{saved} of {target}",
+  "@summarySavings": {
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      },
+      "target": {
+        "type": "String"
+      }
+    }
+  },
+  "summarySavingsNoTarget": "{saved} saved",
+  "@summarySavingsNoTarget": {
+    "placeholders": {
+      "saved": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryNotes": "{count, plural, =0{No notes yet} =1{1 note} other{{count} notes}}",
+  "@summaryNotes": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "fieldItem": "ITEM",
+  "fieldItemHint": "What to buy?",
+  "fieldPrice": "PRICE (OPTIONAL)",
+  "fieldBill": "BILL",
+  "fieldBillHint": "Electricity, rent, internet…",
+  "fieldBillAmount": "AMOUNT (OPTIONAL)",
+  "fieldTitle": "TITLE",
+  "fieldTitleHint": "Note title",
+  "fieldNoteBody": "NOTE",
+  "fieldDeposit": "DESCRIPTION",
+  "savingsDepositDefault": "Deposit",
+  "addItem": "ADD ITEM",
+  "addBill": "ADD BILL",
+  "addDeposit": "ADD DEPOSIT",
+  "addNote": "ADD NOTE",
+  "newItem": "New item",
+  "newBill": "New bill",
+  "newDeposit": "New deposit",
+  "newNote": "New note",
+  "editEntry": "Edit",
+  "commonAdd": "Add",
+  "detailAmount": "AMOUNT",
+  "detailPrice": "PRICE",
+  "settingsColorTheme": "Color theme",
+  "settingsCorners": "Corners",
+  "cornersTheme": "Theme default",
+  "cornersSharp": "Sharp",
+  "cornersRounded": "Rounded",
+  "cornersRound": "Extra round",
+  "settingsCardStyle": "Cards",
+  "cardsTheme": "Theme default",
+  "cardsOutlined": "Outlined",
+  "cardsElevated": "Shadow",
+  "cardsFilled": "Filled",
+  "themeHorizon": "Horizon",
+  "themeOcean": "Ocean",
+  "themeForest": "Forest",
+  "themeSunset": "Sunset",
+  "themeLavender": "Lavender",
+  "themeGraphite": "Graphite",
+  "ledgerNewEntryFor": "New entry for {name}",
+  "ledgerEntryOn": "Entry · {date}",
+  "@ledgerNewEntryFor": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@ledgerEntryOn": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "ledgerPlusTotal": "+ TOTAL",
+  "ledgerMinusTotal": "− TOTAL",
+  "categoryTypeMoney": "Money",
+  "typeMoneyDesc": "Who owes whom: + they owe you, − you owe them",
+  "ledgerCaptionOwesYou": "owes you",
+  "ledgerCaptionYouOwe": "you owe",
+  "moneySignPlus": "+ They owe me",
+  "moneySignMinus": "− I owe them",
+  "moneySignHelp": "+ you lent or they borrowed · − you borrowed or they paid you back",
+  "categoryMergeLedgers": "Merge money lists…",
+  "mergeTitle": "Merge into one list",
+  "mergeBody": "The checked lists become one Money list. Each person's entries are joined, and the other lists move to History.",
+  "mergeNameLabel": "LIST NAME",
+  "mergeApply": "Merge",
+  "mergePeopleCount": "{count, plural, =1{1 person} other{{count} people}} after merging",
+  "mergeDone": "Merged into “{name}”",
+  "duplicatePersonHint": "{name} is already in “{category}”.",
+  "duplicatePersonAction": "Add there as {sign} instead",
+  "ledgerPresetMoney": "Money",
+  "@mergePeopleCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "@mergeDone": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "@duplicatePersonHint": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      },
+      "category": {
+        "type": "String"
+      }
+    }
+  },
+  "@duplicatePersonAction": {
+    "placeholders": {
+      "sign": {
+        "type": "String"
+      }
+    }
+  },
+  "taskAddAnother": "Add another",
+  "richBold": "BOLD",
+  "richItalic": "ITALIC",
+  "richCode": "CODE",
+  "richLink": "LINK",
+  "richPreview": "Preview",
+  "richEdit": "Edit",
+  "helpMarkdown": "Markdown",
+  "helpMarkdownBody": "Notes support Markdown: **bold**, *italic*, ~~strike~~, `code`, [link](https://…), # headings, > quotes, ``` code blocks and | tables |. Use Preview to check how it looks.",
+  "categoryTypeSpending": "Spending",
+  "typeSpendingDesc": "What you spend, with an optional budget",
+  "addExpense": "ADD EXPENSE",
+  "newExpense": "New expense",
+  "fieldExpenseFor": "WHAT FOR (OPTIONAL)",
+  "fieldExpenseForHint": "Lunch, taxi, groceries…",
+  "fieldTag": "TAG",
+  "tagFood": "Food",
+  "tagTransport": "Transport",
+  "tagHome": "Home",
+  "tagBills": "Bills",
+  "tagShopping": "Shopping",
+  "tagHealth": "Health",
+  "tagFun": "Fun",
+  "tagFamily": "Family",
+  "tagEducation": "Education",
+  "tagOther": "Other",
+  "categoryBudgetLabel": "MONTHLY BUDGET (OPTIONAL)",
+  "spendToday": "TODAY",
+  "spendWeek": "THIS WEEK",
+  "spendMonth": "THIS MONTH",
+  "spendVsLastMonth": "{percent} vs last month",
+  "spendBudgetLeft": "{amount} left of {budget}",
+  "spendBudgetOver": "{amount} over budget",
+  "summarySpending": "Today {today} · Month {month}",
+  "summarySpendingBudget": "Today {today} · {month} of {budget}",
+  "spendYesterday": "Yesterday",
+  "spendAddAgain": "Add again today",
+  "spendAddedAgain": "Added again for today",
+  "spendBudgetWarn": "You've used {percent} of this month's budget",
+  "spendBudgetOverToast": "Over this month's budget by {amount}",
+  "categoryShareCsv": "Share as CSV",
+  "spendingNoEntries": "No expenses yet · tap below to log one",
+  "settingsSpending": "SPENDING",
+  "settingsSpendingReminder": "Daily spending reminder",
+  "settingsSpendingReminderBody": "Reminds you to log today's spending. Skipped on days you already have.",
+  "settingsSpendingReminderTime": "Reminder time",
+  "notifSpendingTitle": "Log today's spending",
+  "notifSpendingBody": "Tap to add what you spent today.",
+  "@spendVsLastMonth": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "@spendBudgetLeft": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "@spendBudgetOver": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "@summarySpending": {
+    "placeholders": {
+      "today": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "@summarySpendingBudget": {
+    "placeholders": {
+      "today": {
+        "type": "String"
+      },
+      "month": {
+        "type": "String"
+      },
+      "budget": {
+        "type": "String"
+      }
+    }
+  },
+  "@spendBudgetWarn": {
+    "placeholders": {
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "@spendBudgetOverToast": {
+    "placeholders": {
+      "amount": {
+        "type": "String"
+      }
+    }
+  },
+  "overviewTitle": "Overview",
+  "periodWeek": "Week",
+  "periodMonth": "Month",
+  "periodYear": "Year",
+  "periodCustom": "Custom",
+  "kpiTotal": "TOTAL",
+  "kpiDailyAvg": "PER DAY",
+  "kpiCount": "EXPENSES",
+  "kpiVsPrev": "VS PREVIOUS",
+  "chartOverTime": "Spending over time",
+  "chartByTag": "By tag",
+  "calendarTitle": "Calendar",
+  "searchExpenses": "Search expenses…",
+  "clearFilters": "Clear filters",
+  "noMatches": "Nothing matches these filters.",
+  "moneyKpiOwedToYou": "OWED TO YOU",
+  "moneyKpiYouOwe": "YOU OWE",
+  "moneyKpiPeople": "PEOPLE",
+  "chartByPerson": "Balance by person",
+  "chartFlow": "Money flow · last 6 months",
+  "legendPlus": "+ lent / they owe you",
+  "legendMinus": "− borrowed / paid back",
+  "filterOpen": "Open",
+  "filterSettled": "Settled",
+  "filterAll": "All",
+  "sortName": "Name",
+  "searchPeople": "Search people…",
+  "overviewOldest": "Oldest open entry: {date}",
+  "chartTapHint": "Tap a bar to filter the list",
+  "@overviewOldest": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  }
+}

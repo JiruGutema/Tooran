@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Home-screen widget palette (Horizon theme, light). Night overrides in values-night. -->
+    <color name="widget_bg">#FFFFFF</color>
+    <color name="widget_ink">#0F172A</color>
+    <color name="widget_muted">#64748B</color>
+    <color name="widget_accent">#4F46E5</color>
+    <color name="widget_divider">#140F172A</color>
+    <color name="widget_stroke">#1F0F172A</color>
+</resources>

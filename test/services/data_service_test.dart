@@ -1,7 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tooran/models/category.dart';
 import 'package:tooran/models/deleted_category.dart';
+import 'package:tooran/models/payment.dart';
 import 'package:tooran/models/task.dart';
 import 'package:tooran/services/data_service.dart';
 
@@ -10,9 +13,10 @@ void main() {
     late DataService dataService;
 
     setUp(() {
-      dataService = DataService();
-      // Clear SharedPreferences before each test
+      // Clear SharedPreferences and use a fresh in-memory database per test.
       SharedPreferences.setMockInitialValues({});
+      DataService.resetForTesting(dbPath: ':memory:');
+      dataService = DataService();
     });
 
     group('Categories Operations', () {
@@ -50,14 +54,12 @@ void main() {
         expect(categories, isEmpty);
       });
 
-      test('should throw exception on invalid JSON data', () async {
+      test('skips unreadable legacy data and leaves it in place', () async {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('categories', 'invalid json');
 
-        expect(
-          () => dataService.loadCategories(),
-          throwsA(isA<DataServiceException>()),
-        );
+        expect(await dataService.loadCategories(), isEmpty);
+        expect(prefs.getString('categories'), 'invalid json');
       });
     });
 
@@ -174,10 +176,7 @@ void main() {
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('categories', '{"invalid": "structure"}');
 
-        expect(
-          () => dataService.loadCategories(),
-          throwsA(isA<DataServiceException>()),
-        );
+        expect(await dataService.loadCategories(), isEmpty);
       });
 
       test('should recover from errors and return empty list', () async {
@@ -251,5 +250,93 @@ group('Data Integrity', () {
         expect(loadedCategories[2].sortOrder, equals(2));
       });
     });
-  });
+  
+    group('Legacy migration', () {
+      test('copies SharedPreferences data into the database once', () async {
+        final legacy = [
+          Category(name: 'Old', tasks: [Task(name: 'Keep me')]).toJson(),
+        ];
+        SharedPreferences.setMockInitialValues({
+          'categories': jsonEncode(legacy),
+          'deletedCategories': jsonEncode([
+            DeletedCategory(name: 'Gone', tasks: []).toJson(),
+          ]),
+        });
+        DataService.resetForTesting(dbPath: ':memory:');
+        final ds = DataService();
+
+        final cats = await ds.loadCategories();
+        expect(cats.single.name, 'Old');
+        expect(cats.single.tasks.single.name, 'Keep me');
+        expect((await ds.loadDeletedCategories()).single.name, 'Gone');
+
+        // Later changes are not overwritten by the legacy blob again.
+        await ds.saveCategories([]);
+        expect(await ds.loadCategories(), isEmpty);
+        // The legacy blob stays as a safety net.
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString('categories'), isNotNull);
+      });
+    });
+
+    group('Single-category writes', () {
+      test('saveCategory updates one row without touching others', () async {
+        final a = Category(name: 'A', sortOrder: 0);
+        final b = Category(name: 'B', sortOrder: 1);
+        await dataService.saveCategories([a, b]);
+        a.tasks.add(Task(name: 'new'));
+        await dataService.saveCategory(a);
+        await dataService.deleteCategoryRow(b.id);
+        final loaded = await dataService.loadCategories();
+        expect(loaded.map((c) => c.name), ['A']);
+        expect(loaded.single.tasks.single.name, 'new');
+      });
+    });
+
+    group('Backup', () {
+      test('export then import (replace) round-trips everything', () async {
+        final c = Category(
+          name: 'Take back',
+          kind: CategoryKind.money,
+          tasks: [
+            Task(name: 'Abebe', person: 'Abebe', amountMinor: 50000, payments: [
+              Payment(amountMinor: 20000),
+            ]),
+          ],
+        );
+        await dataService.saveCategories([c]);
+        final json = await dataService.exportJson();
+
+        await dataService.saveCategories([]);
+        final backup = dataService.parseBackup(json);
+        expect(backup.categories.length, 1);
+        expect(backup.taskCount, 1);
+        await dataService.importBackup(backup, replace: true);
+
+        final loaded = (await dataService.loadCategories()).single;
+        expect(loaded.kind, CategoryKind.money);
+        expect(loaded.tasks.single.remainingMinor, 30000);
+      });
+
+      test('merge adds missing categories and tasks without duplicates', () async {
+        final shared = Category(name: 'Shared', tasks: [Task(name: 'one')]);
+        await dataService.saveCategories([shared]);
+        final incoming = shared.copyWith(tasks: [...shared.tasks, Task(name: 'two')]);
+        final other = Category(name: 'Other', sortOrder: 1);
+        await dataService.importBackup(
+          BackupContents(categories: [incoming, other], deletedCategories: const []),
+          replace: false,
+        );
+        final loaded = await dataService.loadCategories();
+        expect(loaded.map((c) => c.name), ['Shared', 'Other']);
+        expect(loaded.first.tasks.map((t) => t.name), ['one', 'two']);
+      });
+
+      test('accepts the legacy bare-list format and rejects junk', () {
+        final list = jsonEncode([Category(name: 'X').toJson()]);
+        expect(dataService.parseBackup(list).categories.single.name, 'X');
+        expect(() => dataService.parseBackup('{"hello": 1}'), throwsFormatException);
+      });
+    });
+});
 }

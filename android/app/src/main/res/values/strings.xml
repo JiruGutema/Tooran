@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- app_name is generated per build type via resValue in app/build.gradle. -->
+    <string name="widget_label">Tooran tasks</string>
+    <string name="widget_description">Your open tasks at a glance. Tick them off right from the home screen.</string>
+    <string name="widget_default_title">Tooran</string>
+    <string name="widget_default_empty">Nothing to do. Enjoy the calm.</string>
+    <string name="widget_add">Add task</string>
+    <string name="widget_mark_done">Mark done: %1$s</string>
+    <string name="widget_mark_not_done">Mark not done: %1$s</string>
+    <!-- Sample content for the widget picker preview (Android 12+). -->
+    <string name="widget_preview_title">Today</string>
+    <string name="widget_preview_subtitle">3 left · Net +2,050 ETB</string>
+    <string name="widget_preview_item_1">Buy teff and berbere</string>
+    <string name="widget_preview_item_2">Pay electricity bill</string>
+    <string name="widget_preview_item_3">Call Selam</string>
+    <string name="widget_preview_meta_1">Today</string>
+    <string name="widget_preview_meta_2">500 ETB</string>
+</resources>

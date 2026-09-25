@@ -82,17 +82,16 @@ void main() {
       // Start with system theme
       expect(themeProvider.themeMode, equals(ThemeMode.system));
 
-      // Toggle to light
-      await themeProvider.toggleTheme();
-      expect(themeProvider.themeMode, equals(ThemeMode.light));
-
-      // Toggle to dark
+      // The sun/moon button switches between dark and light; from "system"
+      // the first tap picks dark (System mode is chosen in Settings).
       await themeProvider.toggleTheme();
       expect(themeProvider.themeMode, equals(ThemeMode.dark));
 
-      // Toggle back to system
       await themeProvider.toggleTheme();
-      expect(themeProvider.themeMode, equals(ThemeMode.system));
+      expect(themeProvider.themeMode, equals(ThemeMode.light));
+
+      await themeProvider.toggleTheme();
+      expect(themeProvider.themeMode, equals(ThemeMode.dark));
     });
 
     test('should return correct theme mode strings', () {

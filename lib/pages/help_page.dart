@@ -1,32 +1,33 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import '../widgets/common.dart';
 
 class HelpPage extends StatelessWidget {
   const HelpPage({super.key});
 
-  static const _gestures = [
-    ['Tap a category', 'Expands the list of tasks beneath it.'],
-    ['Tap the circle', 'Marks a task complete. The line strikes through.'],
-    ['Tap a task', 'Opens the full description and details.'],
-    ['Long press', 'Picks up the row to reorder.'],
-    ['Swipe right', 'Edit. Swipe left to delete.'],
-  ];
+  List<List<String>> _gestures(BuildContext context) {
+    final l = context.l10n;
+    return [
+      [l.helpGestureTapCategory, l.helpGestureTapCategoryBody],
+      [l.helpGestureCircle, l.helpGestureCircleBody],
+      [l.helpGestureTapTask, l.helpGestureTapTaskBody],
+      [l.helpGestureLongPress, l.helpGestureLongPressBody],
+      [l.helpGestureSwipe, l.helpGestureSwipeBody],
+      [l.helpGestureChecklist, l.helpGestureChecklistBody],
+      [l.helpMarkdown, l.helpMarkdownBody],
+    ];
+  }
 
-  static const _faq = [
-    [
-      'My tasks disappeared',
-      'Tasks save automatically. If a category is missing, check History — deleted categories can be restored from there.',
-    ],
-    [
-      'Theme not switching',
-      'Tap the sun/moon icon in the top bar. Your choice is remembered.',
-    ],
-    [
-      'Can\'t reorder',
-      'Long-press a row first, then drag. Categories must be expanded to reorder their tasks.',
-    ],
-  ];
+  List<List<String>> _faq(BuildContext context) {
+    final l = context.l10n;
+    return [
+      [l.helpFaqMissing, l.helpFaqMissingBody],
+      [l.helpFaqTheme, l.helpFaqThemeBody],
+      [l.helpFaqReorder, l.helpFaqReorderBody],
+      [l.helpFaqReminders, l.helpFaqRemindersBody],
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +49,7 @@ class HelpPage extends StatelessWidget {
                     color: ink2,
                     onPressed: () => Navigator.pop(context),
                   ),
-                  Text('HELP', style: AppTheme.eyebrow(ink3)),
+                  Text(context.l10n.helpTitle, style: AppTheme.eyebrow(ink3)),
                 ],
               ),
             ),
@@ -57,20 +58,20 @@ class HelpPage extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 22),
               child: Column(
                 children: [
-                  for (final row in _gestures) _kvRow(context, row[0], row[1]),
+                  for (final row in _gestures(context)) _kvRow(context, row[0], row[1]),
                 ],
               ),
             ),
             const SizedBox(height: 28),
             Padding(
               padding: const EdgeInsets.fromLTRB(22, 0, 22, 8),
-              child: Text('TROUBLESHOOTING', style: AppTheme.eyebrow(ink3)),
+              child: Text(context.l10n.helpTroubleshooting, style: AppTheme.eyebrow(ink3)),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 22),
               child: Column(
                 children: [
-                  for (final row in _faq) _kvRow(context, row[0], row[1]),
+                  for (final row in _faq(context)) _kvRow(context, row[0], row[1]),
                 ],
               ),
             ),
@@ -84,7 +85,7 @@ class HelpPage extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  'Tooran is local-first. Your lists never leave your device unless you say so.',
+                  context.l10n.helpLocalFirst,
                   style: AppTheme.body(size: 13, color: ink3).copyWith(height: 1.6),
                 ),
               ),

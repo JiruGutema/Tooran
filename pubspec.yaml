@@ -16,7 +16,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 # In Windows, build-name is used as the major, minor, and patch parts
 # of the product and file versions while build-number is used as the build suffix.
-version: 1.0.0+1
+version: 2.1.0+1
 
 environment:
   sdk: ^3.6.0
@@ -41,10 +41,23 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
   url_launcher: ^6.3.1
-  intl: ^0.19.0
+  intl: ^0.20.3
   uuid: ^4.5.1
   provider: ^6.1.2
   google_fonts: ^8.0.2
+  sqlite3: ^3.6.0
+  path: ^1.9.1
+  path_provider: ^2.1.6
+  share_plus: ^13.3.0
+  file_picker: ^13.1.0
+  local_auth: ^3.0.2
+  home_widget: ^0.10.0
+  flutter_local_notifications: ^22.3.1
+  timezone: ^0.11.1
+  flutter_timezone: ^5.1.0
+  flutter_localizations:
+    sdk: flutter
+  fl_chart: ^1.2.0
 
 
 dev_dependencies:
@@ -57,14 +70,14 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/icon.png"
-  adaptive_icon_background: "#F5F1E8"
+  adaptive_icon_background: "#F4F6FB"
   adaptive_icon_foreground: "assets/logo.png"
   min_sdk_android: 21
   web:
     generate: true
     image_path: "assets/icon.png"
-    background_color: "#F5F1E8"
-    theme_color: "#C8553D"
+    background_color: "#F4F6FB"
+    theme_color: "#4F46E5"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -76,6 +89,7 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  generate: true
 
   # To add assets to your application, add an assets section, like this:
   assets:
@@ -84,11 +98,6 @@ flutter:
     - assets/icon.png
 
   fonts:
-    - family: InstrumentSerif
-      fonts:
-        - asset: assets/fonts/InstrumentSerif-Regular.ttf
-        - asset: assets/fonts/InstrumentSerif-Italic.ttf
-          style: italic
     - family: Inter
       fonts:
         - asset: assets/fonts/Inter-Regular.ttf
@@ -96,11 +105,6 @@ flutter:
           weight: 500
         - asset: assets/fonts/Inter-SemiBold.ttf
           weight: 600
-    - family: JetBrainsMono
-      fonts:
-        - asset: assets/fonts/JetBrainsMono-Regular.ttf
-        - asset: assets/fonts/JetBrainsMono-Medium.ttf
-          weight: 500
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -128,12 +132,12 @@ flutter:
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
 flutter_native_splash:
-  color: "#F5F1E8"
+  color: "#F4F6FB"
   image: assets/logo.png
-  color_dark: "#0E0C09"
+  color_dark: "#0B0F19"
   image_dark: assets/logo_dark.png
   android_12:
     image: assets/logo.png
-    icon_background_color: "#F5F1E8"
+    icon_background_color: "#F4F6FB"
     image_dark: assets/logo_dark.png
-    icon_background_color_dark: "#0E0C09"
+    icon_background_color_dark: "#0B0F19"
