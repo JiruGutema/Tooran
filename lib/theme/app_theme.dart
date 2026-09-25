@@ -206,6 +206,11 @@ class AppTheme {
   static CardStyle _cards = themePresets.first.cards;
 
   static ThemePreset get preset => _preset;
+
+  /// Extra font families to try for glyphs Inter lacks (emoji). Empty in the
+  /// app — phones fall back to their system fonts; the screenshot tool sets
+  /// it because the test renderer has no system fallback.
+  static List<String>? fontFallback;
   static CardStyle get cards => _cards;
 
   /// Sets the active look. Call before building [lightTheme]/[darkTheme].
@@ -302,6 +307,7 @@ class AppTheme {
     final s = size * 0.8;
     return TextStyle(
       fontFamily: fBody,
+      fontFamilyFallback: fontFallback,
       fontSize: s,
       fontWeight: FontWeight.w600,
       letterSpacing: -s * 0.02,
@@ -314,6 +320,7 @@ class AppTheme {
   static TextStyle body({double size = 15, Color? color, FontWeight? weight}) =>
       TextStyle(
         fontFamily: fBody,
+        fontFamilyFallback: fontFallback,
         fontSize: size,
         fontWeight: weight ?? FontWeight.w400,
         letterSpacing: -size * 0.005,
@@ -325,6 +332,7 @@ class AppTheme {
   static TextStyle mono({double size = 11, Color? color, double letter = 0}) =>
       TextStyle(
         fontFamily: fBody,
+        fontFamilyFallback: fontFallback,
         fontSize: size + 1,
         fontWeight: FontWeight.w500,
         letterSpacing: letter,
@@ -335,6 +343,7 @@ class AppTheme {
   /// Section labels.
   static TextStyle eyebrow(Color color) => TextStyle(
         fontFamily: fBody,
+        fontFamilyFallback: fontFallback,
         fontSize: 12,
         fontWeight: FontWeight.w600,
         letterSpacing: 0.4,
@@ -377,6 +386,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       fontFamily: fBody,
+      fontFamilyFallback: fontFallback,
       scaffoldBackgroundColor: bg,
       canvasColor: bg,
       dividerColor: hl,

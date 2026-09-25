@@ -488,5 +488,6 @@
   "sortName": "Maqaa",
   "searchPeople": "Namoota barbaadi…",
   "overviewOldest": "Galmee banaa dulloomaa: {date}",
-  "chartTapHint": "Tarree calaluuf utubaa tuqi"
+  "chartTapHint": "Tarree calaluuf utubaa tuqi",
+  "overviewBudget": "BAAJATA JI'AA"
 }

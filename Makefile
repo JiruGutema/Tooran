@@ -30,7 +30,7 @@ BUILD_FLAGS  := --build-name=$(VERSION) --build-number=$(BUILD) \
 APK_DIR      := build/app/outputs/flutter-apk
 AAB          := build/app/outputs/bundle/release/app-release.aab
 
-.PHONY: help setup doctor l10n analyze test check run run-linux \
+.PHONY: help setup doctor l10n analyze test check run run-linux screenshots \
         apk-debug apk aab linux deb release checksums version keystore \
         check-signing tag publish clean
 
@@ -65,6 +65,9 @@ run: ## Run on the connected phone (debug)
 
 run-linux: ## Run the desktop app (debug)
 	$(FLUTTER) run -d linux
+
+screenshots: ## Re-render README/screens/*.png from the app with demo data
+	$(FLUTTER) test tool/screenshots --update-goldens
 
 apk-debug: ## Debug APK (installs as "Tooran Dev" next to the real app)
 	$(FLUTTER) build apk --debug

@@ -929,5 +929,6 @@
         "type": "String"
       }
     }
-  }
+  },
+  "overviewBudget": "MONTHLY BUDGET"
 }

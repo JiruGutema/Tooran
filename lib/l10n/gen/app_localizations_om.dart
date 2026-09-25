@@ -1738,4 +1738,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get chartTapHint => 'Tarree calaluuf utubaa tuqi';
+
+  @override
+  String get overviewBudget => 'BAAJATA JI\'AA';
 }

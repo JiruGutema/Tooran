@@ -1724,4 +1724,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get chartTapHint => 'Tap a bar to filter the list';
+
+  @override
+  String get overviewBudget => 'MONTHLY BUDGET';
 }

@@ -488,5 +488,6 @@
   "sortName": "ስም",
   "searchPeople": "ሰዎችን ፈልግ…",
   "overviewOldest": "በጣም የቆየ ክፍት ግቤት፦ {date}",
-  "chartTapHint": "ዝርዝሩን ለማጣራት አምድ ይንኩ"
+  "chartTapHint": "ዝርዝሩን ለማጣራት አምድ ይንኩ",
+  "overviewBudget": "ወርሃዊ በጀት"
 }

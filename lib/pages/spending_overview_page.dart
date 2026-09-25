@@ -383,7 +383,7 @@ class _BudgetMeter extends StatelessWidget {
         children: [
           Row(
             children: [
-              Expanded(child: Text(l.categoryBudgetLabel, style: AppTheme.eyebrow(context.ink3))),
+              Expanded(child: Text(l.overviewBudget, style: AppTheme.eyebrow(context.ink3))),
               Text('${(ratio * 100).round()}%', style: AppTheme.mono(size: 12, color: color)),
             ],
           ),

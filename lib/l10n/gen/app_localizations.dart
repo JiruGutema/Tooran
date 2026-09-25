@@ -3033,6 +3033,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap a bar to filter the list'**
   String get chartTapHint;
+
+  /// No description provided for @overviewBudget.
+  ///
+  /// In en, this message translates to:
+  /// **'MONTHLY BUDGET'**
+  String get overviewBudget;
 }
 
 class _AppLocalizationsDelegate

@@ -1711,4 +1711,7 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get chartTapHint => 'ዝርዝሩን ለማጣራት አምድ ይንኩ';
+
+  @override
+  String get overviewBudget => 'ወርሃዊ በጀት';
 }

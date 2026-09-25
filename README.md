@@ -8,9 +8,22 @@ Everything stays on your device. Available in English, Amharic and Afaan Oromoo.
 [Download](https://tooran.vercel.app) ·
 [Releases](https://github.com/JiruGutema/Tooran/releases)
 
-![Tooran](README/image.png)
-![Tooran](README/image-1.png)
-![Tooran](README/image-2.png)
+<table>
+  <tr>
+    <td align="center"><img src="README/screens/01-home.png" width="200" alt="Home: categories and tasks"><br><sub>Tasks, due dates, checklists</sub></td>
+    <td align="center"><img src="README/screens/02-task.png" width="200" alt="Task with a checklist"><br><sub>Checklists &amp; Markdown notes</sub></td>
+    <td align="center"><img src="README/screens/03-money.png" width="200" alt="Money list, dark theme"><br><sub>Money: who owes whom</sub></td>
+    <td align="center"><img src="README/screens/04-person.png" width="200" alt="A person's entries"><br><sub>One page per person</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="README/screens/05-spending.png" width="200" alt="Spending with a budget"><br><sub>Spending &amp; budget</sub></td>
+    <td align="center"><img src="README/screens/06-overview.png" width="200" alt="Spending overview charts"><br><sub>Overview, charts, calendar</sub></td>
+    <td align="center"><img src="README/screens/07-menu.png" width="200" alt="Side menu"><br><sub>Side menu</sub></td>
+    <td align="center"><img src="README/screens/08-themes.png" width="200" alt="Theme settings"><br><sub>Six themes, light &amp; dark</sub></td>
+  </tr>
+</table>
+
+<sub>Screenshots use demo data. Regenerate with `make screenshots`.</sub>
 
 ---
 
