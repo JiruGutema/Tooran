@@ -4,7 +4,6 @@ A calm, local-first organizer: to-do lists with checklists and Markdown notes,
 money (who owes whom), spending with budgets, bills, savings goals and notes.
 Everything stays on your device. Available in English, Amharic and Afaan Oromoo.
 
-[Demo video](https://www.youtube.com/watch?v=kX6OZsZcpO4) ·
 [Download](https://tooran.vercel.app) ·
 [Releases](https://github.com/JiruGutema/Tooran/releases)
 
