@@ -1794,4 +1794,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsTextReset => 'Reset text & layout';
+
+  @override
+  String get commonShowLess => 'Show less';
+
+  @override
+  String listShowMore(int count) {
+    return 'Show all · $count more';
+  }
+
+  @override
+  String listShowEarlier(int count) {
+    return 'Show $count earlier';
+  }
+
+  @override
+  String get menuSectionView => 'View';
+
+  @override
+  String get menuSectionMore => 'More';
+
+  @override
+  String get spendViewList => 'List';
+
+  @override
+  String get spendTapDay => 'Tap a day to see what you spent';
+
+  @override
+  String get spendDayEmpty => 'Nothing spent this day';
 }

@@ -511,5 +511,13 @@
   "settingsDensity": "የአቀማመጥ ጥግግት",
   "densityCompact": "የታመቀ",
   "densitySpacious": "ሰፊ",
-  "settingsTextReset": "ጽሑፍ እና አቀማመጥን ዳግም አስጀምር"
+  "settingsTextReset": "ጽሑፍ እና አቀማመጥን ዳግም አስጀምር",
+  "commonShowLess": "ያነሰ አሳይ",
+  "listShowMore": "ሁሉንም አሳይ · {count} ተጨማሪ",
+  "listShowEarlier": "ቀደም ያሉ {count} አሳይ",
+  "menuSectionView": "እይታ",
+  "menuSectionMore": "ተጨማሪ",
+  "spendViewList": "ዝርዝር",
+  "spendTapDay": "ያወጡትን ለማየት ቀን ይንኩ",
+  "spendDayEmpty": "በዚህ ቀን ወጪ የለም"
 }

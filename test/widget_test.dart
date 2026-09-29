@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tooran/main.dart';
 import 'package:tooran/models/category.dart';
@@ -10,6 +11,7 @@ import 'package:tooran/providers/settings_provider.dart';
 import 'package:tooran/services/app_intents.dart';
 import 'package:tooran/services/data_service.dart';
 import 'package:tooran/theme/app_theme.dart';
+import 'package:tooran/utils/ethiopian_calendar.dart';
 import 'package:tooran/widgets/category_card.dart';
 
 Future<CategoriesProvider> pumpApp(WidgetTester tester, {List<Category> seed = const []}) async {
@@ -395,5 +397,100 @@ void main() {
     await tester.scrollUntilVisible(find.text('Kebede'), 300, scrollable: find.byType(Scrollable).first);
     expect(find.text('Kebede'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('long lists show 8 rows with show all / show less', (tester) async {
+    final provider = await pumpApp(tester, seed: [
+      Category(name: 'Home', tasks: [for (var i = 1; i <= 12; i++) Task(name: 'Task $i')]),
+    ]);
+    await tester.tap(find.text('Home'));
+    await tester.pumpAndSettle();
+    expect(find.text('Task 8'), findsOneWidget);
+    expect(find.text('Task 9'), findsNothing);
+    await tester.ensureVisible(find.text('Show all · 4 more'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Show all · 4 more'));
+    await tester.pumpAndSettle();
+    expect(find.text('Task 12'), findsOneWidget);
+    await tester.ensureVisible(find.text('Show less'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Show less'));
+    await tester.pumpAndSettle();
+    expect(find.text('Task 9'), findsNothing);
+
+    // A new task at the end opens the full list so it doesn't vanish.
+    final home = provider.categories.firstWhere((c) => c.name == 'Home');
+    await tester.runAsync(() => provider.addTask(home.id, Task(name: 'Task 13')));
+    await tester.pumpAndSettle();
+    expect(find.text('Task 13'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('long savings lists keep the newest deposits', (tester) async {
+    await pumpApp(tester, seed: [
+      Category(name: 'Trip', kind: CategoryKind.savings, tasks: [
+        for (var i = 1; i <= 12; i++) Task(name: 'Deposit $i', amountMinor: 100),
+      ]),
+    ]);
+    await tester.tap(find.text('Trip'));
+    await tester.pumpAndSettle();
+    expect(find.text('Deposit 12'), findsOneWidget);
+    expect(find.text('Deposit 4'), findsNothing);
+    expect(find.text('Show 4 earlier'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('the ⋮ menu opens as a grouped sheet on phones', (tester) async {
+    final provider = await pumpApp(tester, seed: [
+      Category(name: 'Home', tasks: [Task(name: 'Keep me')]),
+    ]);
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    expect(find.text('VIEW'), findsOneWidget);
+    expect(find.text('Hide completed'), findsOneWidget);
+    await tester.tap(find.text('Pin to top'));
+    await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+    expect(find.text('VIEW'), findsNothing);
+    expect(provider.categories.single.pinned, isTrue);
+
+    await tester.tap(find.byTooltip('More'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Delete'));
+    await tester.pumpAndSettle();
+    // Delete still asks first.
+    expect(provider.categories, hasLength(1));
+    expect(find.byType(Dialog), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
+  });
+
+  testWidgets('spending card switches to a calendar that follows the setting', (tester) async {
+    final now = DateTime.now();
+    final provider = await pumpApp(tester, seed: [
+      Category(name: 'Spending', kind: CategoryKind.spending, tasks: [
+        Task(name: 'Lunch', amountMinor: 20000, tag: 'food', createdAt: now),
+      ]),
+    ]);
+    await tester.tap(find.text('Spending'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Calendar'));
+    await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+    await tester.pumpAndSettle();
+    expect(provider.categories.single.spendingCalendar, isTrue);
+    // Today is picked, so its expenses show under the grid.
+    expect(find.text('Lunch'), findsOneWidget);
+
+    await tester.tap(find.byIcon(Icons.chevron_left));
+    await tester.pumpAndSettle();
+    expect(find.text('Tap a day to see what you spent'), findsOneWidget);
+
+    final settings = Provider.of<SettingsProvider>(
+        tester.element(find.byType(CategoryCard)),
+        listen: false);
+    settings.ethiopianCalendar = true;
+    await tester.pumpAndSettle();
+    final e = toEthiopian(now);
+    expect(find.text('${ethiopianMonthsLatin[e.month - 1]} ${e.year}'), findsOneWidget);
+    await tester.pump(const Duration(seconds: 1));
   });
 }

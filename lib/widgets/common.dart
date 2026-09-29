@@ -48,6 +48,16 @@ String fmtDate(BuildContext context, DateTime d, {bool withYear = false}) {
   return (withYear ? DateFormat.yMMMd(loc) : DateFormat.MMMd(loc)).format(d);
 }
 
+/// "September 2026", or "Meskerem 2019" for an Ethiopian month.
+String fmtMonth(BuildContext context, CalMonth m) {
+  if (m.ethiopian) {
+    final am = Localizations.localeOf(context).languageCode == 'am';
+    final names = am ? ethiopianMonthsAm : ethiopianMonthsLatin;
+    return '${names[m.month - 1]} ${m.year}';
+  }
+  return DateFormat.yMMMM(intlLocale(context)).format(m.first);
+}
+
 String fmtTime(BuildContext context, DateTime d) =>
     DateFormat.jm(intlLocale(context)).format(d);
 

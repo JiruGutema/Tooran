@@ -952,5 +952,27 @@
   "settingsDensity": "Layout density",
   "densityCompact": "Compact",
   "densitySpacious": "Spacious",
-  "settingsTextReset": "Reset text & layout"
+  "settingsTextReset": "Reset text & layout",
+  "commonShowLess": "Show less",
+  "listShowMore": "Show all · {count} more",
+  "@listShowMore": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "listShowEarlier": "Show {count} earlier",
+  "@listShowEarlier": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "menuSectionView": "View",
+  "menuSectionMore": "More",
+  "spendViewList": "List",
+  "spendTapDay": "Tap a day to see what you spent",
+  "spendDayEmpty": "Nothing spent this day"
 }

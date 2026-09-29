@@ -49,6 +49,9 @@ class Category {
   bool sinkCompleted;
   LedgerSort ledgerSort;
 
+  /// Spending lists: show expenses as a month calendar instead of by day.
+  bool spendingCalendar;
+
   Category({
     String? id,
     required this.name,
@@ -65,6 +68,7 @@ class Category {
     this.hideCompleted = false,
     this.sinkCompleted = false,
     this.ledgerSort = LedgerSort.manual,
+    this.spendingCalendar = false,
   }) : id = id ?? const Uuid().v4(),
        tasks = tasks ?? [],
        createdAt = createdAt ?? DateTime.now();
@@ -169,6 +173,7 @@ class Category {
       hideCompleted: json['hideCompleted'] ?? false,
       sinkCompleted: json['sinkCompleted'] ?? false,
       ledgerSort: ledgerSortFromString(json['ledgerSort'] as String?),
+      spendingCalendar: json['spendingView'] == 'calendar',
     );
   }
 
@@ -189,6 +194,7 @@ class Category {
       'hideCompleted': hideCompleted,
       'sinkCompleted': sinkCompleted,
       'ledgerSort': ledgerSort.name,
+      if (spendingCalendar) 'spendingView': 'calendar',
     };
   }
 
@@ -208,6 +214,7 @@ class Category {
     bool? hideCompleted,
     bool? sinkCompleted,
     LedgerSort? ledgerSort,
+    bool? spendingCalendar,
   }) {
     return Category(
       id: id ?? this.id,
@@ -226,6 +233,7 @@ class Category {
       hideCompleted: hideCompleted ?? this.hideCompleted,
       sinkCompleted: sinkCompleted ?? this.sinkCompleted,
       ledgerSort: ledgerSort ?? this.ledgerSort,
+      spendingCalendar: spendingCalendar ?? this.spendingCalendar,
     );
   }
 

@@ -53,6 +53,98 @@ class _CategoryCardState extends State<CategoryCard> {
   List<String>? _frozenPeople;
   Timer? _unfreeze;
 
+  /// Rows a long list shows until "Show all" is tapped.
+  static const _cap = 8;
+  bool _showAll = false;
+
+  /// Task ids seen at the last update, to spot newly added ones.
+  Set<String> _knownIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _knownIds = {for (final t in widget.category.tasks) t.id};
+    if (_isCut(widget.highlightTaskId)) _showAll = true;
+  }
+
+  @override
+  void didUpdateWidget(covariant CategoryCard old) {
+    super.didUpdateWidget(old);
+    // Collapsing the card also shortens its list again.
+    if (!widget.expanded) _showAll = false;
+    // Categories are updated in place, so compare ids rather than widgets:
+    // a just-added entry, or one opened from search, must not be cut off.
+    final ids = {for (final t in widget.category.tasks) t.id};
+    if (widget.expanded && ids.difference(_knownIds).any(_isCut) ||
+        (widget.highlightTaskId != old.highlightTaskId &&
+            _isCut(widget.highlightTaskId))) {
+      _showAll = true;
+    }
+    _knownIds = ids;
+  }
+
+  /// Savings in stored order are oldest first; the card keeps the newest.
+  bool _keepsLast(Category c) =>
+      c.kind == CategoryKind.savings &&
+      (c.ledgerSort == LedgerSort.manual || c.ledgerSort == LedgerSort.oldest);
+
+  /// Whether [c] has more rows than a card shows at once. Lists only a
+  /// couple of rows over the cap are always shown whole.
+  bool _isLong(Category c) =>
+      !c.isSpending &&
+      (c.isLedger ? _peopleRows(c).length : _rows(c).length) > _cap + 2;
+
+  /// The part of [all] a card shows, and how many rows it leaves out.
+  (List<T>, int) _limit<T>(Category c, List<T> all) {
+    if (_showAll || !_isLong(c)) return (all, 0);
+    final cut = all.length - _cap;
+    return _keepsLast(c)
+        ? (all.sublist(cut), cut)
+        : (all.sublist(0, _cap), cut);
+  }
+
+  /// Whether task [id] is in a row the card is currently leaving out.
+  bool _isCut(String? id) {
+    final c = widget.category;
+    if (id == null || c.isSpending) return false;
+    if (c.isLedger) {
+      final (shown, cut) = _limit(c, _peopleRows(c));
+      return cut > 0 && !shown.any((g) => g.entries.any((t) => t.id == id));
+    }
+    final (shown, cut) = _limit(c, _rows(c));
+    return cut > 0 && !shown.any((t) => t.id == id);
+  }
+
+  /// "Show all · N more" (or "Show N earlier") while cut, "Show less" after.
+  Widget _moreRow(BuildContext context, Category c, int cut) {
+    final l = context.l10n;
+    return InkWell(
+      onTap: () => setState(() => _showAll = !_showAll),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(56, 12, 22, 12),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                _showAll
+                    ? l.commonShowLess
+                    : _keepsLast(c)
+                        ? l.listShowEarlier(cut)
+                        : l.listShowMore(cut),
+                style: AppTheme.mono(size: 11, color: context.primary),
+              ),
+            ),
+            Icon(
+              _showAll == _keepsLast(c) ? Icons.expand_more : Icons.expand_less,
+              size: 16,
+              color: context.primary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _unfreeze?.cancel();
@@ -110,7 +202,7 @@ class _CategoryCardState extends State<CategoryCard> {
         c.colorValue == null ? context.primary : Color(c.colorValue!);
     final total = c.totalCount;
     final pct = c.progress;
-    final rows = _rows(c);
+    final (rows, cutRows) = _limit(c, _rows(c));
     final hiddenCount = !c.hideCompleted
         ? 0
         : c.isLedger
@@ -118,7 +210,11 @@ class _CategoryCardState extends State<CategoryCard> {
                 .where((g) => g.allSettled)
                 .length
             : c.tasks.where((t) => t.isCompleted).length;
-    final people = c.isLedger ? _peopleRows(c) : const <PersonGroup>[];
+    final (people, cutPeople) =
+        c.isLedger ? _limit(c, _peopleRows(c)) : (const <PersonGroup>[], 0);
+    final cut = c.isLedger ? cutPeople : cutRows;
+    final more = _isLong(c);
+    final moreOnTop = more && _keepsLast(c);
     final canDrag = !c.tracksMoney || c.ledgerSort == LedgerSort.manual;
 
     return Dismissible(
@@ -240,69 +336,77 @@ class _CategoryCardState extends State<CategoryCard> {
                     )
                   else if (c.isSpending)
                     SpendingView(category: c)
-                  else if (c.isLedger)
-                    ReorderableListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      buildDefaultDragHandles: false,
-                      itemCount: people.length,
-                      onReorderStart: (_) => HapticFeedback.mediumImpact(),
-                      onReorder: (a, b) => context
-                          .read<CategoriesProvider>()
-                          .reorderPeople(
-                              c.id, people.map((g) => g.key).toList(), a, b),
-                      proxyDecorator: (child, _, __) =>
-                          Material(color: Colors.transparent, child: child),
-                      itemBuilder: (ctx, i) {
-                        final g = people[i];
-                        final row = PersonRow(
-                          category: c,
-                          group: g,
-                          isLast: i == people.length - 1 && hiddenCount == 0,
-                          highlighted: g.entries
-                              .any((t) => t.id == widget.highlightTaskId),
-                          onBeforeToggle: () => _freezePeople(people),
-                        );
-                        return canDrag
-                            ? ReorderableDelayedDragStartListener(
-                                key: ValueKey('person_${g.key}'),
-                                index: i,
-                                child: row)
-                            : KeyedSubtree(
-                                key: ValueKey('person_${g.key}'), child: row);
-                      },
-                    )
-                  else
-                    ReorderableListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      buildDefaultDragHandles: false,
-                      itemCount: rows.length,
-                      onReorderStart: (_) => HapticFeedback.mediumImpact(),
-                      onReorder: (a, b) => context
-                          .read<CategoriesProvider>()
-                          .reorderVisibleTasks(
-                              c.id, rows.map((t) => t.id).toList(), a, b),
-                      proxyDecorator: (child, _, __) =>
-                          Material(color: Colors.transparent, child: child),
-                      itemBuilder: (ctx, i) {
-                        final t = rows[i];
-                        final row = TaskRow(
-                          category: c,
-                          task: t,
-                          isLast: i == rows.length - 1 && hiddenCount == 0,
-                          highlighted: t.id == widget.highlightTaskId,
-                          onToggle: () => _toggle(c, t),
-                        );
-                        return canDrag
-                            ? ReorderableDelayedDragStartListener(
-                                key: ValueKey('task_${t.id}'),
-                                index: i,
-                                child: row)
-                            : KeyedSubtree(
-                                key: ValueKey('task_${t.id}'), child: row);
-                      },
-                    ),
+                  else ...[
+                    if (moreOnTop) _moreRow(context, c, cut),
+                    if (c.isLedger)
+                      ReorderableListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        buildDefaultDragHandles: false,
+                        itemCount: people.length,
+                        onReorderStart: (_) => HapticFeedback.mediumImpact(),
+                        onReorder: (a, b) => context
+                            .read<CategoriesProvider>()
+                            .reorderPeople(
+                                c.id, people.map((g) => g.key).toList(), a, b),
+                        proxyDecorator: (child, _, __) =>
+                            Material(color: Colors.transparent, child: child),
+                        itemBuilder: (ctx, i) {
+                          final g = people[i];
+                          final row = PersonRow(
+                            category: c,
+                            group: g,
+                            isLast: i == people.length - 1 &&
+                                hiddenCount == 0 &&
+                                !(more && !moreOnTop),
+                            highlighted: g.entries
+                                .any((t) => t.id == widget.highlightTaskId),
+                            onBeforeToggle: () => _freezePeople(people),
+                          );
+                          return canDrag
+                              ? ReorderableDelayedDragStartListener(
+                                  key: ValueKey('person_${g.key}'),
+                                  index: i,
+                                  child: row)
+                              : KeyedSubtree(
+                                  key: ValueKey('person_${g.key}'), child: row);
+                        },
+                      )
+                    else
+                      ReorderableListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        buildDefaultDragHandles: false,
+                        itemCount: rows.length,
+                        onReorderStart: (_) => HapticFeedback.mediumImpact(),
+                        onReorder: (a, b) => context
+                            .read<CategoriesProvider>()
+                            .reorderVisibleTasks(
+                                c.id, rows.map((t) => t.id).toList(), a, b),
+                        proxyDecorator: (child, _, __) =>
+                            Material(color: Colors.transparent, child: child),
+                        itemBuilder: (ctx, i) {
+                          final t = rows[i];
+                          final row = TaskRow(
+                            category: c,
+                            task: t,
+                            isLast: i == rows.length - 1 &&
+                                hiddenCount == 0 &&
+                                !(more && !moreOnTop),
+                            highlighted: t.id == widget.highlightTaskId,
+                            onToggle: () => _toggle(c, t),
+                          );
+                          return canDrag
+                              ? ReorderableDelayedDragStartListener(
+                                  key: ValueKey('task_${t.id}'),
+                                  index: i,
+                                  child: row)
+                              : KeyedSubtree(
+                                  key: ValueKey('task_${t.id}'), child: row);
+                        },
+                      ),
+                    if (more && !moreOnTop) _moreRow(context, c, cut),
+                  ],
                   if (hiddenCount > 0)
                     InkWell(
                       onTap: () => handleCategoryMenu(context, c, 'hide'),
@@ -529,7 +633,73 @@ class _GlyphState extends State<_Glyph> with SingleTickerProviderStateMixin {
   }
 }
 
+/// Where an item sits in [CategoryMenu]; also the order of the groups.
+enum _MenuGroup { quick, view, sort, more, danger }
+
+class _MenuEntry {
+  const _MenuEntry(this.value, this.icon, this.label, this.group,
+      {this.checked = false});
+  final String value;
+  final IconData icon;
+  final String label;
+  final _MenuGroup group;
+
+  /// On for toggles and the current sort.
+  final bool checked;
+}
+
+/// Everything the ⋮ menu offers for [c], grouped and in display order.
+List<_MenuEntry> _menuEntries(BuildContext context, Category c) {
+  final l = context.l10n;
+  return [
+    if (c.isSpending || c.isLedger)
+      _MenuEntry('overview', Icons.insights_outlined, l.overviewTitle,
+          _MenuGroup.quick),
+    _MenuEntry('pin', c.pinned ? Icons.push_pin : Icons.push_pin_outlined,
+        c.pinned ? l.categoryUnpin : l.categoryPin, _MenuGroup.quick,
+        checked: c.pinned),
+    _MenuEntry('share', Icons.ios_share, l.commonShare, _MenuGroup.quick),
+    _MenuEntry('edit', Icons.edit_outlined, l.commonEdit, _MenuGroup.quick),
+    if (c.hasCheckboxes)
+      _MenuEntry('hide', Icons.visibility_off_outlined, l.categoryHideCompleted,
+          _MenuGroup.view,
+          checked: c.hideCompleted),
+    if (!c.tracksMoney && c.hasCheckboxes)
+      _MenuEntry('sink', Icons.vertical_align_bottom, l.categorySinkCompleted,
+          _MenuGroup.view,
+          checked: c.sinkCompleted),
+    if (c.tracksMoney && !c.isSpending) ...[
+      _MenuEntry(
+          'sort_manual', Icons.drag_handle, l.sortManual, _MenuGroup.sort,
+          checked: c.ledgerSort == LedgerSort.manual),
+      _MenuEntry(
+          'sort_largest', Icons.trending_down, l.sortLargest, _MenuGroup.sort,
+          checked: c.ledgerSort == LedgerSort.largest),
+      _MenuEntry('sort_oldest', Icons.history, l.sortOldest, _MenuGroup.sort,
+          checked: c.ledgerSort == LedgerSort.oldest),
+      _MenuEntry('sort_due', Icons.event, l.sortDueSoonest, _MenuGroup.sort,
+          checked: c.ledgerSort == LedgerSort.dueSoonest),
+    ],
+    if (c.completedCount > 0)
+      _MenuEntry('clear', Icons.cleaning_services_outlined,
+          l.categoryClearCompleted, _MenuGroup.more),
+    if (c.isSpending)
+      _MenuEntry('csv', Icons.table_view_outlined, l.categoryShareCsv,
+          _MenuGroup.more),
+    if (c.isLedger &&
+        context.read<CategoriesProvider>().mergeCandidates(c).isNotEmpty)
+      _MenuEntry(
+          'merge', Icons.merge_type, l.categoryMergeLedgers, _MenuGroup.more),
+    if (c.kind == CategoryKind.tasks && c.tasks.isNotEmpty)
+      _MenuEntry('convert', Icons.account_balance_wallet_outlined,
+          l.categoryConvertToLedger, _MenuGroup.more),
+    _MenuEntry(
+        'delete', Icons.delete_outline, l.commonDelete, _MenuGroup.danger),
+  ];
+}
+
 /// The ⋮ menu on a category: pin, hide/sink completed, sort, share, convert…
+/// A popup on wide screens, a grouped bottom sheet on phones.
 class CategoryMenu extends StatelessWidget {
   const CategoryMenu(
       {super.key, required this.category, required this.onSelected});
@@ -539,72 +709,200 @@ class CategoryMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = context.l10n;
-    final c = category;
-    PopupMenuItem<String> item(String v, IconData icon, String label,
-            {bool checked = false}) =>
-        PopupMenuItem(
-          value: v,
-          child: Row(
-            children: [
-              Icon(icon, size: 18, color: context.ink2),
-              const SizedBox(width: 12),
-              Expanded(child: Text(label)),
-              if (checked) Icon(Icons.check, size: 16, color: context.primary),
-            ],
-          ),
-        );
+    final icon = Icon(Icons.more_vert, size: 20, color: context.ink3);
+    if (MediaQuery.sizeOf(context).width < 900) {
+      return IconButton(
+        icon: icon,
+        tooltip: l.tooltipMore,
+        onPressed: () async {
+          // The sheet only picks; the action runs from here once it's closed,
+          // so actions that open their own sheet or dialog aren't stacked on it.
+          final v = await openSheet<String>(
+              context, _CategoryMenuSheet(category: category));
+          if (v != null && context.mounted) onSelected(v);
+        },
+      );
+    }
     return PopupMenuButton<String>(
-      icon: Icon(Icons.more_vert, size: 20, color: context.ink3),
+      icon: icon,
       tooltip: l.tooltipMore,
       position: PopupMenuPosition.under,
       onSelected: onSelected,
-      itemBuilder: (_) => [
-        if (c.isSpending || c.isLedger) ...[
-          item('overview', Icons.insights_outlined, l.overviewTitle),
-          const PopupMenuDivider(),
-        ],
-        item('pin', c.pinned ? Icons.push_pin_outlined : Icons.push_pin,
-            c.pinned ? l.categoryUnpin : l.categoryPin),
-        if (c.hasCheckboxes)
-          item(
-              'hide',
-              c.hideCompleted
-                  ? Icons.visibility_outlined
-                  : Icons.visibility_off_outlined,
-              c.hideCompleted
-                  ? l.categoryShowCompleted
-                  : l.categoryHideCompleted),
-        if (!c.tracksMoney && c.hasCheckboxes)
-          item('sink', Icons.vertical_align_bottom, l.categorySinkCompleted,
-              checked: c.sinkCompleted),
-        if (c.tracksMoney && !c.isSpending) ...[
-          const PopupMenuDivider(),
-          item('sort_manual', Icons.drag_handle, l.sortManual,
-              checked: c.ledgerSort == LedgerSort.manual),
-          item('sort_largest', Icons.trending_down, l.sortLargest,
-              checked: c.ledgerSort == LedgerSort.largest),
-          item('sort_oldest', Icons.history, l.sortOldest,
-              checked: c.ledgerSort == LedgerSort.oldest),
-          item('sort_due', Icons.event, l.sortDueSoonest,
-              checked: c.ledgerSort == LedgerSort.dueSoonest),
-          const PopupMenuDivider(),
-        ],
-        if (c.completedCount > 0)
-          item('clear', Icons.cleaning_services_outlined,
-              l.categoryClearCompleted),
-        item('share', Icons.ios_share, l.categoryShareList),
-        if (c.isSpending)
-          item('csv', Icons.table_view_outlined, l.categoryShareCsv),
-        if (c.isLedger &&
-            context.read<CategoriesProvider>().mergeCandidates(c).isNotEmpty)
-          item('merge', Icons.merge_type, l.categoryMergeLedgers),
-        if (c.kind == CategoryKind.tasks && c.tasks.isNotEmpty)
-          item('convert', Icons.account_balance_wallet_outlined,
-              l.categoryConvertToLedger),
-        const PopupMenuDivider(),
-        item('edit', Icons.edit_outlined, l.commonEdit),
-        item('delete', Icons.delete_outline, l.commonDelete),
-      ],
+      itemBuilder: (_) {
+        final items = <PopupMenuEntry<String>>[];
+        _MenuGroup? group;
+        for (final e in _menuEntries(context, category)) {
+          if (group != null && e.group != group) {
+            items.add(const PopupMenuDivider());
+          }
+          group = e.group;
+          final color =
+              e.group == _MenuGroup.danger ? context.danger : context.ink2;
+          items.add(PopupMenuItem(
+            value: e.value,
+            child: Row(
+              children: [
+                Icon(e.icon, size: 18, color: color),
+                const SizedBox(width: 12),
+                Expanded(
+                    child: Text(e.label,
+                        style: e.group == _MenuGroup.danger
+                            ? TextStyle(color: context.danger)
+                            : null)),
+                if (e.checked && e.group != _MenuGroup.quick)
+                  Icon(Icons.check, size: 16, color: context.primary),
+              ],
+            ),
+          ));
+        }
+        return items;
+      },
+    );
+  }
+}
+
+/// Phone version of [CategoryMenu]: quick-action tiles, then toggles, sort
+/// chips and less common actions, with Delete set apart at the bottom.
+/// Pops with the picked action's value.
+class _CategoryMenuSheet extends StatelessWidget {
+  const _CategoryMenuSheet({required this.category});
+  final Category category;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    final c = category;
+    final entries = _menuEntries(context, c);
+    List<_MenuEntry> of(_MenuGroup g) =>
+        entries.where((e) => e.group == g).toList();
+    final quick = of(_MenuGroup.quick);
+    final view = of(_MenuGroup.view);
+    final sort = of(_MenuGroup.sort);
+    final more = of(_MenuGroup.more);
+    void pick(String v) => Navigator.of(context).pop(v);
+
+    Widget header(String text) => Padding(
+          padding: const EdgeInsets.fromLTRB(22, 18, 22, 6),
+          child:
+              Text(text.toUpperCase(), style: AppTheme.eyebrow(context.ink3)),
+        );
+
+    Widget row(_MenuEntry e, {Widget? trailing, Color? color}) => InkWell(
+          onTap: () => pick(e.value),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(22, 12, 18, 12),
+            child: Row(
+              children: [
+                Icon(e.icon, size: 20, color: color ?? context.ink2),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(e.label,
+                      style:
+                          AppTheme.body(size: 15, color: color ?? context.ink)),
+                ),
+                if (trailing != null) trailing,
+              ],
+            ),
+          ),
+        );
+
+    return SheetShell(
+      eyebrow: c.emoji == null ? c.name : '${c.emoji} ${c.name}',
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  for (final e in quick)
+                    Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4),
+                        child: _QuickTile(entry: e, onTap: () => pick(e.value)),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            if (view.isNotEmpty) ...[
+              header(l.menuSectionView),
+              for (final e in view)
+                row(e,
+                    trailing: IgnorePointer(
+                      child: Switch(value: e.checked, onChanged: (_) {}),
+                    )),
+            ],
+            if (sort.isNotEmpty) ...[
+              header(l.categorySort),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 22),
+                child: Wrap(
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    for (final e in sort)
+                      ChoiceChip(
+                        avatar: Icon(e.icon, size: 16),
+                        label: Text(e.label),
+                        selected: e.checked,
+                        showCheckmark: false,
+                        onSelected: (_) => pick(e.value),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+            if (more.isNotEmpty) ...[
+              header(l.menuSectionMore),
+              for (final e in more) row(e),
+            ],
+            const SizedBox(height: 10),
+            Container(height: 1, color: AppTheme.hairline(context.dark)),
+            for (final e in of(_MenuGroup.danger))
+              row(e, color: context.danger),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _QuickTile extends StatelessWidget {
+  const _QuickTile({required this.entry, required this.onTap});
+  final _MenuEntry entry;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final on = entry.checked;
+    return Material(
+      color: on
+          ? context.primary.withValues(alpha: 0.14)
+          : context.ink4.withValues(alpha: 0.18),
+      borderRadius: BorderRadius.circular(AppTheme.rMd),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppTheme.rMd),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 4),
+          child: Column(
+            children: [
+              Icon(entry.icon,
+                  size: 22, color: on ? context.primary : context.ink2),
+              const SizedBox(height: 6),
+              Text(
+                entry.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style: AppTheme.body(size: 12, color: context.ink2),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

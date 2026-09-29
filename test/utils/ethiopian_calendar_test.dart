@@ -137,4 +137,41 @@ void main() {
       expect(ethiopianMonthsLatin, hasLength(13));
     });
   });
+
+  group('CalMonth', () {
+    test('Ethiopian month from a date', () {
+      final m = CalMonth.of(DateTime(2026, 9, 25), ethiopian: true);
+      expect(m, const CalMonth(2019, 1, ethiopian: true));
+      expect(m.first, DateTime(2026, 9, 11));
+      expect(m.first.weekday, DateTime.friday);
+      expect(m.length, 30);
+      expect(m.day(15), DateTime(2026, 9, 25));
+      expect(m.contains(DateTime(2026, 10, 10)), isTrue);
+      expect(m.contains(DateTime(2026, 10, 11)), isFalse);
+    });
+
+    test('Pagume has 5 or 6 days', () {
+      expect(const CalMonth(2015, 13, ethiopian: true).length, 6);
+      expect(const CalMonth(2018, 13, ethiopian: true).length, 5);
+      expect(const CalMonth(2015, 13, ethiopian: true).day(6),
+          DateTime(2023, 9, 11));
+    });
+
+    test('Ethiopian months wrap through Pagume', () {
+      const pagume = CalMonth(2018, 13, ethiopian: true);
+      expect(pagume.shift(1), const CalMonth(2019, 1, ethiopian: true));
+      expect(const CalMonth(2019, 1, ethiopian: true).shift(-1), pagume);
+      expect(const CalMonth(2019, 1, ethiopian: true).shift(-14),
+          const CalMonth(2017, 13, ethiopian: true));
+    });
+
+    test('Gregorian months', () {
+      final m = CalMonth.of(DateTime(2024, 2, 10));
+      expect(m, const CalMonth(2024, 2));
+      expect(m.length, 29);
+      expect(m.first, DateTime(2024, 2, 1));
+      expect(m.shift(-2), const CalMonth(2023, 12));
+      expect(m.shift(11), const CalMonth(2025, 1));
+    });
+  });
 }

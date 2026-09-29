@@ -511,5 +511,13 @@
   "settingsDensity": "Hamma qindaa'inaa",
   "densityCompact": "Walitti qabamaa",
   "densitySpacious": "Bal'aa",
-  "settingsTextReset": "Barreeffamaa fi qindaa'ina deebisi"
+  "settingsTextReset": "Barreeffamaa fi qindaa'ina deebisi",
+  "commonShowLess": "Xiqqeessi",
+  "listShowMore": "Hunda agarsiisi · {count} dabalata",
+  "listShowEarlier": "Kan duraa {count} agarsiisi",
+  "menuSectionView": "Mul'ata",
+  "menuSectionMore": "Dabalata",
+  "spendViewList": "Tarree",
+  "spendTapDay": "Waan baasite ilaaluuf guyyaa tuqi",
+  "spendDayEmpty": "Guyyaa kana baasiin hin jiru"
 }

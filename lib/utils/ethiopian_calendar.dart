@@ -105,3 +105,53 @@ String formatEthiopian(
   final base = '${names[e.month - 1]} ${e.day}';
   return withYear ? '$base, ${e.year}' : base;
 }
+
+/// One month of either calendar, for month grids: which day it starts on,
+/// how long it is, and stepping to the months around it.
+class CalMonth {
+  final int year, month;
+
+  /// Ethiopian months are 1..13 (13 = Pagume); Gregorian months are 1..12.
+  final bool ethiopian;
+  const CalMonth(this.year, this.month, {this.ethiopian = false});
+
+  /// The month that contains [d].
+  factory CalMonth.of(DateTime d, {bool ethiopian = false}) {
+    if (!ethiopian) return CalMonth(d.year, d.month);
+    final e = toEthiopian(d);
+    return CalMonth(e.year, e.month, ethiopian: true);
+  }
+
+  /// Local midnight of the month's first day.
+  DateTime get first =>
+      ethiopian ? fromEthiopian(year, month, 1) : DateTime(year, month);
+
+  int get length => ethiopian
+      ? ethiopianDaysInMonth(year, month)
+      : DateTime(year, month + 1, 0).day;
+
+  /// Local midnight of day [n] (1-based) of this month.
+  DateTime day(int n) {
+    final f = first;
+    return DateTime(f.year, f.month, f.day + n - 1);
+  }
+
+  /// The month [delta] months away (negative for earlier).
+  CalMonth shift(int delta) {
+    final perYear = ethiopian ? 13 : 12;
+    final i = year * perYear + (month - 1) + delta;
+    return CalMonth(i ~/ perYear, i % perYear + 1, ethiopian: ethiopian);
+  }
+
+  bool contains(DateTime d) => CalMonth.of(d, ethiopian: ethiopian) == this;
+
+  @override
+  bool operator ==(Object other) =>
+      other is CalMonth &&
+      other.year == year &&
+      other.month == month &&
+      other.ethiopian == ethiopian;
+
+  @override
+  int get hashCode => Object.hash(year, month, ethiopian);
+}

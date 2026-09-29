@@ -3171,6 +3171,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset text & layout'**
   String get settingsTextReset;
+
+  /// No description provided for @commonShowLess.
+  ///
+  /// In en, this message translates to:
+  /// **'Show less'**
+  String get commonShowLess;
+
+  /// No description provided for @listShowMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all · {count} more'**
+  String listShowMore(int count);
+
+  /// No description provided for @listShowEarlier.
+  ///
+  /// In en, this message translates to:
+  /// **'Show {count} earlier'**
+  String listShowEarlier(int count);
+
+  /// No description provided for @menuSectionView.
+  ///
+  /// In en, this message translates to:
+  /// **'View'**
+  String get menuSectionView;
+
+  /// No description provided for @menuSectionMore.
+  ///
+  /// In en, this message translates to:
+  /// **'More'**
+  String get menuSectionMore;
+
+  /// No description provided for @spendViewList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get spendViewList;
+
+  /// No description provided for @spendTapDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap a day to see what you spent'**
+  String get spendTapDay;
+
+  /// No description provided for @spendDayEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing spent this day'**
+  String get spendDayEmpty;
 }
 
 class _AppLocalizationsDelegate

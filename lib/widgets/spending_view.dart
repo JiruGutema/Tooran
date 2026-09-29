@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 
 import '../models/category.dart';
 import '../models/task.dart';
+import '../providers/categories_provider.dart';
+import '../providers/settings_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_labels.dart';
+import '../utils/ethiopian_calendar.dart';
 import '../utils/rich_text.dart';
 import '../utils/spending.dart';
+import 'charts.dart';
 import 'common.dart';
 import 'kind_info.dart';
 import '../pages/spending_overview_page.dart';
 import 'task_actions.dart';
 
 /// The body of a Spending list: totals, budget, a breakdown by tag, and
-/// expenses grouped by day (newest first).
+/// expenses either grouped by day (newest first) or on a month calendar.
 class SpendingView extends StatefulWidget {
   const SpendingView(
       {super.key, required this.category, this.onOpen, this.padding = 18});
@@ -32,6 +38,16 @@ class _SpendingViewState extends State<SpendingView> {
   static const _daysShown = 7;
   bool _showAll = false;
 
+  /// Month shown in calendar mode; null for the current one.
+  CalMonth? _month;
+
+  /// Day picked on the calendar, whose expenses are listed below it.
+  DateTime? _day = startOfDay(DateTime.now());
+
+  void _setCalendar(bool on) => context
+      .read<CategoriesProvider>()
+      .updateCategory(widget.category.copyWith(spendingCalendar: on));
+
   @override
   Widget build(BuildContext context) {
     final c = widget.category;
@@ -39,7 +55,6 @@ class _SpendingViewState extends State<SpendingView> {
     final now = DateTime.now();
     final st = spendingStats(c.tasks, now);
     final days = spendingByDay(c.tasks);
-    final shown = _showAll ? days : days.take(_daysShown).toList();
     final pad = widget.padding;
 
     return Column(
@@ -106,41 +121,160 @@ class _SpendingViewState extends State<SpendingView> {
             padding: EdgeInsets.fromLTRB(pad + 38, 12, pad, 14),
             child: Text(l.spendingNoEntries,
                 style: AppTheme.body(size: 13, color: context.ink3)),
-          ),
-        for (final (day, entries, total) in shown) ...[
-          Container(
-            color: Theme.of(context)
-                .colorScheme
-                .surfaceContainerHighest
-                .withValues(alpha: 0.6),
-            padding: EdgeInsets.fromLTRB(pad, 7, pad, 7),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    isSameDay(day, now)
-                        ? l.dueToday
-                        : isSameDay(day, now.subtract(const Duration(days: 1)))
-                            ? l.spendYesterday
-                            : fmtDate(context, day,
-                                withYear: day.year != now.year),
-                    style: AppTheme.eyebrow(context.ink3),
-                  ),
-                ),
-                MoneyText(total, c.currency,
-                    style: AppTheme.mono(size: 11.5, color: context.ink2)),
+          )
+        else ...[
+          Padding(
+            padding: EdgeInsets.fromLTRB(pad, 4, pad, 10),
+            child: SegmentedButton<bool>(
+              showSelectedIcon: false,
+              style: const ButtonStyle(visualDensity: VisualDensity.compact),
+              segments: [
+                ButtonSegment(
+                    value: false,
+                    icon: const Icon(Icons.view_agenda_outlined, size: 16),
+                    label: Text(l.spendViewList)),
+                ButtonSegment(
+                    value: true,
+                    icon: const Icon(Icons.calendar_month_outlined, size: 16),
+                    label: Text(l.calendarTitle)),
               ],
+              selected: {c.spendingCalendar},
+              onSelectionChanged: (v) => _setCalendar(v.first),
             ),
           ),
-          for (final e in entries)
-            ExpenseRow(category: c, entry: e, pad: pad, onOpen: widget.onOpen),
+          if (c.spendingCalendar)
+            ..._calendar(context, days, now)
+          else
+            ..._list(context, days, now),
         ],
-        if (!_showAll && days.length > _daysShown)
-          TextButton(
-            onPressed: () => setState(() => _showAll = true),
-            child: Text('${l.commonShow} +${days.length - _daysShown}'),
-          ),
       ],
+    );
+  }
+
+  /// Expenses grouped by day, the latest [_daysShown] days unless expanded.
+  List<Widget> _list(BuildContext context,
+      List<(DateTime, List<Task>, int)> days, DateTime now) {
+    final l = context.l10n;
+    final shown = _showAll ? days : days.take(_daysShown).toList();
+    return [
+      for (final (day, entries, total) in shown) ...[
+        _dayHeader(context, day, total, now),
+        for (final e in entries)
+          ExpenseRow(
+              category: widget.category,
+              entry: e,
+              pad: widget.padding,
+              onOpen: widget.onOpen),
+      ],
+      if (days.length > _daysShown)
+        TextButton(
+          onPressed: () => setState(() => _showAll = !_showAll),
+          child: Text(_showAll
+              ? l.commonShowLess
+              : l.listShowMore(days.length - _daysShown)),
+        ),
+    ];
+  }
+
+  /// A month grid shaded by daily totals; the picked day's expenses below.
+  List<Widget> _calendar(BuildContext context,
+      List<(DateTime, List<Task>, int)> days, DateTime now) {
+    final l = context.l10n;
+    final c = widget.category;
+    final pad = widget.padding;
+    final ethiopian = context.watch<SettingsProvider>().ethiopianCalendar;
+    final thisMonth = CalMonth.of(now, ethiopian: ethiopian);
+    // Flipping the calendar setting starts over at the current month.
+    final month = _month?.ethiopian == ethiopian ? _month! : thisMonth;
+    final day = _day != null && month.contains(_day!) ? _day : null;
+    final picked = day == null
+        ? null
+        : days.where((d) => isSameDay(d.$1, day)).firstOrNull;
+    final loc = intlLocale(context);
+    final weekdays = [
+      for (var i = 0; i < 7; i++)
+        DateFormat.E(loc).format(DateTime(2024, 1, 1 + i))
+    ];
+    void step(int delta) => setState(() {
+          _month = month.shift(delta);
+          _day = null;
+        });
+
+    return [
+      Padding(
+        padding: EdgeInsets.symmetric(horizontal: pad - 12),
+        child: Row(
+          children: [
+            IconBtn(icon: Icons.chevron_left, onTap: () => step(-1)),
+            Expanded(
+              child: Text(fmtMonth(context, month),
+                  textAlign: TextAlign.center,
+                  style: AppTheme.body(
+                      size: 15, color: context.ink, weight: FontWeight.w600)),
+            ),
+            IconBtn(icon: Icons.chevron_right, onTap: () => step(1)),
+          ],
+        ),
+      ),
+      Padding(
+        padding: EdgeInsets.fromLTRB(pad, 4, pad, 12),
+        child: SpendCalendar(
+          month: month,
+          totals: dailyTotals(c.tasks),
+          weekdayLabels: weekdays,
+          selected: day,
+          onTap: (d) => setState(
+              () => _day = day != null && isSameDay(d, day) ? null : d),
+        ),
+      ),
+      if (day == null)
+        Padding(
+          padding: EdgeInsets.fromLTRB(pad, 0, pad, 14),
+          child: Text(l.spendTapDay,
+              textAlign: TextAlign.center,
+              style: AppTheme.body(size: 13, color: context.ink3)),
+        )
+      else ...[
+        _dayHeader(context, day, picked?.$3 ?? 0, now),
+        if (picked == null)
+          Padding(
+            padding: EdgeInsets.fromLTRB(pad, 12, pad, 14),
+            child: Text(l.spendDayEmpty,
+                style: AppTheme.body(size: 13, color: context.ink3)),
+          )
+        else
+          for (final e in picked.$2)
+            ExpenseRow(
+                category: c, entry: e, pad: pad, onOpen: widget.onOpen),
+      ],
+    ];
+  }
+
+  Widget _dayHeader(BuildContext context, DateTime day, int total, DateTime now) {
+    final l = context.l10n;
+    final pad = widget.padding;
+    return Container(
+      color: Theme.of(context)
+          .colorScheme
+          .surfaceContainerHighest
+          .withValues(alpha: 0.6),
+      padding: EdgeInsets.fromLTRB(pad, 7, pad, 7),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              isSameDay(day, now)
+                  ? l.dueToday
+                  : isSameDay(day, now.subtract(const Duration(days: 1)))
+                      ? l.spendYesterday
+                      : fmtDate(context, day, withYear: day.year != now.year),
+              style: AppTheme.eyebrow(context.ink3),
+            ),
+          ),
+          MoneyText(total, widget.category.currency,
+              style: AppTheme.mono(size: 11.5, color: context.ink2)),
+        ],
+      ),
     );
   }
 }

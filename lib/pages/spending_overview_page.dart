@@ -6,6 +6,7 @@ import 'package:share_plus/share_plus.dart';
 import '../providers/categories_provider.dart';
 import '../theme/app_theme.dart';
 import '../utils/date_labels.dart';
+import '../utils/ethiopian_calendar.dart';
 import '../utils/spending.dart';
 import '../widgets/charts.dart';
 import '../widgets/common.dart';
@@ -298,7 +299,8 @@ class _SpendingOverviewPageState extends State<SpendingOverviewPage> {
                 trailing: Text(DateFormat.yMMMM(loc).format(calendarMonth),
                     style: AppTheme.body(size: 12.5, color: context.ink3)),
                 child: SpendCalendar(
-                  month: calendarMonth,
+                  // The overview's periods are Gregorian, so its calendar is too.
+                  month: CalMonth(calendarMonth.year, calendarMonth.month),
                   totals: dailyTotals(filterExpenses(c.tasks, tags: _tags, query: q)),
                   weekdayLabels: weekdays,
                   selected: _drill != null && _drill!.days == 1 ? _drill!.start : null,

@@ -4,6 +4,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
+import '../utils/ethiopian_calendar.dart';
 import '../utils/money.dart';
 import 'common.dart';
 
@@ -531,7 +532,8 @@ class SpendCalendar extends StatelessWidget {
     this.onTap,
   });
 
-  final DateTime month;
+  /// Gregorian or Ethiopian, per the user's calendar setting.
+  final CalMonth month;
   final Map<DateTime, int> totals;
 
   /// Monday-first short weekday names.
@@ -541,11 +543,10 @@ class SpendCalendar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final first = DateTime(month.year, month.month);
-    final daysInMonth = DateTime(month.year, month.month + 1, 0).day;
-    final lead = first.weekday - 1;
+    final daysInMonth = month.length;
+    final lead = month.first.weekday - 1;
     final maxV = [
-      for (var d = 1; d <= daysInMonth; d++) totals[DateTime(month.year, month.month, d)] ?? 0
+      for (var d = 1; d <= daysInMonth; d++) totals[month.day(d)] ?? 0
     ].fold<int>(0, math.max);
     final today = DateTime.now();
     final cells = lead + daysInMonth;
@@ -572,7 +573,7 @@ class SpendCalendar extends StatelessWidget {
                     child: Builder(builder: (context) {
                       final n = r * 7 + c - lead + 1;
                       if (n < 1 || n > daysInMonth) return const SizedBox.shrink();
-                      final day = DateTime(month.year, month.month, n);
+                      final day = month.day(n);
                       final v = totals[day] ?? 0;
                       final t = maxV == 0 ? 0.0 : v / maxV;
                       final isSel = selected != null &&

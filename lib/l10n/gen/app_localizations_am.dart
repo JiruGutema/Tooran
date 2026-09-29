@@ -1780,4 +1780,32 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get settingsTextReset => 'ጽሑፍ እና አቀማመጥን ዳግም አስጀምር';
+
+  @override
+  String get commonShowLess => 'ያነሰ አሳይ';
+
+  @override
+  String listShowMore(int count) {
+    return 'ሁሉንም አሳይ · $count ተጨማሪ';
+  }
+
+  @override
+  String listShowEarlier(int count) {
+    return 'ቀደም ያሉ $count አሳይ';
+  }
+
+  @override
+  String get menuSectionView => 'እይታ';
+
+  @override
+  String get menuSectionMore => 'ተጨማሪ';
+
+  @override
+  String get spendViewList => 'ዝርዝር';
+
+  @override
+  String get spendTapDay => 'ያወጡትን ለማየት ቀን ይንኩ';
+
+  @override
+  String get spendDayEmpty => 'በዚህ ቀን ወጪ የለም';
 }

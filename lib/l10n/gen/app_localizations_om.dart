@@ -1808,4 +1808,32 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get settingsTextReset => 'Barreeffamaa fi qindaa\'ina deebisi';
+
+  @override
+  String get commonShowLess => 'Xiqqeessi';
+
+  @override
+  String listShowMore(int count) {
+    return 'Hunda agarsiisi · $count dabalata';
+  }
+
+  @override
+  String listShowEarlier(int count) {
+    return 'Kan duraa $count agarsiisi';
+  }
+
+  @override
+  String get menuSectionView => 'Mul\'ata';
+
+  @override
+  String get menuSectionMore => 'Dabalata';
+
+  @override
+  String get spendViewList => 'Tarree';
+
+  @override
+  String get spendTapDay => 'Waan baasite ilaaluuf guyyaa tuqi';
+
+  @override
+  String get spendDayEmpty => 'Guyyaa kana baasiin hin jiru';
 }
