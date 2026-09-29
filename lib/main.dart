@@ -220,6 +220,10 @@ class _TaskManagerAppState extends State<TaskManagerApp> with WidgetsBindingObse
             presetId: settings.themePreset,
             corners: settings.corners,
             cardStyle: settings.cardStyle,
+            font: settings.font,
+            weight: settings.textWeight,
+            spacing: settings.lineSpacing,
+            density: settings.density,
           );
           return MaterialApp(
             title: 'Tooran',
@@ -237,7 +241,13 @@ class _TaskManagerAppState extends State<TaskManagerApp> with WidgetsBindingObse
               _EnglishFallbackMaterial(),
               _EnglishFallbackCupertino(),
             ],
-            builder: (context, child) => _ErrorListener(child: LockGate(child: child!)),
+            builder: (context, child) {
+              final mq = MediaQuery.of(context);
+              return MediaQuery(
+                data: mq.copyWith(textScaler: _ScaledTextScaler(mq.textScaler, settings.textScale)),
+                child: _ErrorListener(child: LockGate(child: child!)),
+              );
+            },
             initialRoute: '/',
             routes: {
               '/': (context) => const ResponsiveHome(),
@@ -255,6 +265,28 @@ class _TaskManagerAppState extends State<TaskManagerApp> with WidgetsBindingObse
       ),
     );
   }
+}
+
+/// The system text scaler with the reader's own text size on top, so
+/// Android's nonlinear large-font scaling still applies.
+class _ScaledTextScaler extends TextScaler {
+  const _ScaledTextScaler(this.system, this.factor);
+  final TextScaler system;
+  final double factor;
+
+  @override
+  double scale(double fontSize) => system.scale(fontSize * factor);
+
+  @override
+  // ignore: deprecated_member_use
+  double get textScaleFactor => system.textScaleFactor * factor;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _ScaledTextScaler && other.system == system && other.factor == factor;
+
+  @override
+  int get hashCode => Object.hash(system, factor);
 }
 
 /// Shows a snackbar when saving fails anywhere in the app.

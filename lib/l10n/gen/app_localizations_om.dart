@@ -1741,4 +1741,71 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get overviewBudget => 'BAAJATA JI\'AA';
+
+  @override
+  String get settingsText => 'BARREEFFAMA FI QINDAA\'INA';
+
+  @override
+  String get settingsTextPreviewTitle => 'Meeshaa nyaataa bitadhu';
+
+  @override
+  String get settingsTextPreviewBody =>
+      'Aannan, buddeena fi buna. Jimaata Abbabaaf deebisi.';
+
+  @override
+  String get settingsFont => 'Akaakuu qubee';
+
+  @override
+  String get fontInterHint => 'Qulqulluu';
+
+  @override
+  String get fontNunitoHint => 'Geengoo';
+
+  @override
+  String get fontLoraHint => 'Durii';
+
+  @override
+  String get fontAtkinsonHint => 'Dubbisuuf salphaa';
+
+  @override
+  String get fontSystemHint => 'Qubee meeshaa keessanii';
+
+  @override
+  String get settingsTextSize => 'Hamma barreeffamaa';
+
+  @override
+  String get settingsBoldness => 'Furdina';
+
+  @override
+  String get weightLight => 'Qal\'aa';
+
+  @override
+  String get optionNormal => 'Idilee';
+
+  @override
+  String get weightMedium => 'Giddugaleessa';
+
+  @override
+  String get weightBold => 'Furdaa';
+
+  @override
+  String get settingsLineSpacing => 'Iddoo sararootaa';
+
+  @override
+  String get spacingCompact => 'Dhiphaa';
+
+  @override
+  String get spacingRelaxed => 'Bal\'aa';
+
+  @override
+  String get settingsDensity => 'Hamma qindaa\'inaa';
+
+  @override
+  String get densityCompact => 'Walitti qabamaa';
+
+  @override
+  String get densitySpacious => 'Bal\'aa';
+
+  @override
+  String get settingsTextReset => 'Barreeffamaa fi qindaa\'ina deebisi';
 }

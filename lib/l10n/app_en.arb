@@ -930,5 +930,27 @@
       }
     }
   },
-  "overviewBudget": "MONTHLY BUDGET"
+  "overviewBudget": "MONTHLY BUDGET",
+  "settingsText": "TEXT & LAYOUT",
+  "settingsTextPreviewTitle": "Buy groceries",
+  "settingsTextPreviewBody": "Milk, bread and coffee. Pay Abebe back on Friday.",
+  "settingsFont": "Font",
+  "fontInterHint": "Clean",
+  "fontNunitoHint": "Rounded",
+  "fontLoraHint": "Classic serif",
+  "fontAtkinsonHint": "Easy to read",
+  "fontSystemHint": "Your device's font",
+  "settingsTextSize": "Text size",
+  "settingsBoldness": "Boldness",
+  "weightLight": "Light",
+  "optionNormal": "Normal",
+  "weightMedium": "Medium",
+  "weightBold": "Bold",
+  "settingsLineSpacing": "Line spacing",
+  "spacingCompact": "Tight",
+  "spacingRelaxed": "Relaxed",
+  "settingsDensity": "Layout density",
+  "densityCompact": "Compact",
+  "densitySpacious": "Spacious",
+  "settingsTextReset": "Reset text & layout"
 }

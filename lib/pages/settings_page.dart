@@ -202,6 +202,79 @@ class _SettingsPageState extends State<SettingsPage> {
               onChanged: (v) => s.ethiopianCalendar = v,
             ),
 
+            _Section(l.settingsText),
+            const _TextPreview(),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+              child: Text(l.settingsFont, style: AppTheme.body(size: 15, color: context.ink)),
+            ),
+            SizedBox(
+              // Grow with the text so larger sizes don't crowd the cards.
+              height: MediaQuery.textScalerOf(context).scale(104).clamp(104, 150),
+              child: ListView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                children: [
+                  for (final f in FontChoice.values)
+                    _FontCard(
+                      font: f,
+                      name: f == FontChoice.system ? l.settingsThemeSystem : _fontName(f),
+                      hint: _fontHint(l, f),
+                      selected: s.font == f,
+                      onTap: () => s.font = f,
+                    ),
+                ],
+              ),
+            ),
+            _TextSizeTile(value: s.textScale, onChanged: (v) => s.textScale = v),
+            _SegmentTile<TextWeight>(
+              title: l.settingsBoldness,
+              value: s.textWeight,
+              options: {
+                TextWeight.light: l.weightLight,
+                TextWeight.normal: l.optionNormal,
+                TextWeight.medium: l.weightMedium,
+                TextWeight.bold: l.weightBold,
+              },
+              onChanged: (v) => s.textWeight = v,
+            ),
+            _SegmentTile<LineSpacing>(
+              title: l.settingsLineSpacing,
+              value: s.lineSpacing,
+              options: {
+                LineSpacing.compact: l.spacingCompact,
+                LineSpacing.normal: l.optionNormal,
+                LineSpacing.relaxed: l.spacingRelaxed,
+              },
+              onChanged: (v) => s.lineSpacing = v,
+            ),
+            _SegmentTile<Density>(
+              title: l.settingsDensity,
+              value: s.density,
+              options: {
+                Density.compact: l.densityCompact,
+                Density.normal: l.optionNormal,
+                Density.spacious: l.densitySpacious,
+              },
+              onChanged: (v) => s.density = v,
+            ),
+            if (s.font != FontChoice.inter ||
+                s.textWeight != TextWeight.normal ||
+                s.textScale != 1.0 ||
+                s.lineSpacing != LineSpacing.normal ||
+                s.density != Density.normal)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TextButton.icon(
+                    onPressed: s.resetText,
+                    icon: const Icon(Icons.restart_alt, size: 18),
+                    label: Text(l.settingsTextReset),
+                  ),
+                ),
+              ),
+
             _Section(l.settingsGestures),
             _ChoiceTile<SwipeRightAction>(
               title: l.settingsSwipeRight,
@@ -434,6 +507,232 @@ class _ChoiceTile<T> extends StatelessWidget {
         );
         if (picked != null) onChanged(picked.$1);
       },
+    );
+  }
+}
+
+/// Shows a task-like card in the current text settings, so changes are
+/// visible right where they are made.
+class _TextPreview extends StatelessWidget {
+  const _TextPreview();
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 2, 16, 0),
+      padding: const EdgeInsets.all(16),
+      decoration: AppTheme.card(context.dark),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 2),
+            child: Icon(Icons.check_circle_outline, color: context.primary, size: 22),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(l.settingsTextPreviewTitle, style: AppTheme.display(size: 22, color: context.ink)),
+                const SizedBox(height: 4),
+                Text(l.settingsTextPreviewBody, style: AppTheme.body(size: 14, color: context.ink2)),
+                const SizedBox(height: 8),
+                Text('250.00 ETB', style: AppTheme.mono(size: 12, color: context.ink3)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+String _fontName(FontChoice f) => switch (f) {
+      FontChoice.inter => 'Inter',
+      FontChoice.nunito => 'Nunito',
+      FontChoice.lora => 'Lora',
+      FontChoice.atkinson => 'Atkinson',
+      FontChoice.system => '',
+    };
+
+String _fontHint(AppLocalizations l, FontChoice f) => switch (f) {
+      FontChoice.inter => l.fontInterHint,
+      FontChoice.nunito => l.fontNunitoHint,
+      FontChoice.lora => l.fontLoraHint,
+      FontChoice.atkinson => l.fontAtkinsonHint,
+      FontChoice.system => l.fontSystemHint,
+    };
+
+/// A font sample: "Aa" and the font's name, drawn in that font.
+class _FontCard extends StatelessWidget {
+  const _FontCard({
+    required this.font,
+    required this.name,
+    required this.hint,
+    required this.selected,
+    required this.onTap,
+  });
+  final FontChoice font;
+  final String name;
+  final String hint;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    // The platform's own font, not whatever the app is using right now.
+    final system = Typography.material2021(platform: Theme.of(context).platform).black.bodyMedium!;
+    final family = font.family ?? system.fontFamily;
+    final fallback = font.family == null ? system.fontFamilyFallback : AppTheme.fontFallback;
+    TextStyle sample(double size, FontWeight weight, Color color) => TextStyle(
+          fontFamily: family,
+          fontFamilyFallback: fallback,
+          fontSize: size,
+          fontWeight: weight,
+          color: color,
+          height: 1.2,
+        );
+
+    return Padding(
+      padding: const EdgeInsets.all(4),
+      child: Semantics(
+        selected: selected,
+        button: true,
+        label: name,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(AppTheme.rMd),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            width: MediaQuery.textScalerOf(context).scale(104).clamp(104, 150),
+            padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
+            decoration: BoxDecoration(
+              color: selected ? Theme.of(context).colorScheme.primaryContainer : Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(AppTheme.rMd),
+              border: Border.all(
+                color: selected ? context.primary : AppTheme.hairlineStrong(context.dark),
+                width: selected ? 2 : 1,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text('Aa', style: sample(26, FontWeight.w600, context.ink)),
+                    const Spacer(),
+                    if (selected) Icon(Icons.check_circle, size: 16, color: context.primary),
+                  ],
+                ),
+                const Spacer(),
+                Text(name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: sample(13, FontWeight.w600, context.ink)),
+                Text(hint,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTheme.body(size: 11.5, color: context.ink3)),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+const _textScales = [0.85, 0.92, 1.0, 1.1, 1.2, 1.35];
+
+/// Text size as a stepped slider between a small and a large "A".
+class _TextSizeTile extends StatelessWidget {
+  const _TextSizeTile({required this.value, required this.onChanged});
+  final double value;
+  final ValueChanged<double> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = context.l10n;
+    var index = _textScales.indexOf(value);
+    if (index < 0) index = _textScales.indexOf(1.0);
+    // Fixed sizes: the "A"s show the range, they shouldn't grow with it.
+    const noScale = TextScaler.noScaling;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: Text(l.settingsTextSize, style: AppTheme.body(size: 15, color: context.ink))),
+              Text('${(_textScales[index] * 100).round()}%',
+                  style: AppTheme.mono(size: 12, color: context.ink2)),
+            ],
+          ),
+          Row(
+            children: [
+              Text('A', textScaler: noScale, style: AppTheme.body(size: 13, color: context.ink3)),
+              Expanded(
+                child: Slider(
+                  value: index.toDouble(),
+                  min: 0,
+                  max: (_textScales.length - 1).toDouble(),
+                  divisions: _textScales.length - 1,
+                  label: '${(_textScales[index] * 100).round()}%',
+                  onChanged: (v) {
+                    final next = _textScales[v.round()];
+                    if (next != value) onChanged(next);
+                  },
+                ),
+              ),
+              Text('A', textScaler: noScale, style: AppTheme.body(size: 22, color: context.ink3)),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A setting with a few short options, shown as a segmented control.
+class _SegmentTile<T> extends StatelessWidget {
+  const _SegmentTile({
+    required this.title,
+    required this.value,
+    required this.options,
+    required this.onChanged,
+  });
+  final String title;
+  final T value;
+  final Map<T, String> options;
+  final ValueChanged<T> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 10, 16, 6),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(title, style: AppTheme.body(size: 15, color: context.ink)),
+          const SizedBox(height: 8),
+          SegmentedButton<T>(
+            showSelectedIcon: false,
+            segments: [
+              for (final e in options.entries)
+                ButtonSegment(
+                  value: e.key,
+                  // Shrink long labels (large text, Amharic) instead of cutting them.
+                  label: FittedBox(fit: BoxFit.scaleDown, child: Text(e.value, maxLines: 1)),
+                ),
+            ],
+            selected: {value},
+            onSelectionChanged: (s) => onChanged(s.first),
+          ),
+        ],
+      ),
     );
   }
 }

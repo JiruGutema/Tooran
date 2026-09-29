@@ -60,6 +60,43 @@ class ThemePreset {
 /// Corner overrides chosen in Settings (null = the theme's own radius).
 enum CornerStyle { theme, sharp, rounded, round }
 
+/// Typefaces the reader can pick in Settings. All but [system] are bundled,
+/// so they work offline; [system] uses the phone's own font.
+enum FontChoice {
+  inter('Inter'),
+  nunito('Nunito'),
+  lora('Lora'),
+  atkinson('AtkinsonHyperlegible'),
+  system(null);
+
+  const FontChoice(this.family);
+  final String? family;
+}
+
+/// Shifts every weight in the app lighter or bolder, in 100-steps.
+enum TextWeight {
+  light(-1),
+  normal(0),
+  medium(1),
+  bold(2);
+
+  const TextWeight(this.shift);
+  final int shift;
+}
+
+/// Space between lines of text.
+enum LineSpacing {
+  compact(0.88),
+  normal(1),
+  relaxed(1.15);
+
+  const LineSpacing(this.factor);
+  final double factor;
+}
+
+/// Spacing around list rows, buttons and other controls.
+enum Density { compact, normal, spacious }
+
 const _success = Color(0xFF16A34A);
 const _successDark = Color(0xFF4ADE80);
 const _warning = Color(0xFFD97706);
@@ -182,7 +219,10 @@ class TooranStyle extends ThemeExtension<TooranStyle> {
   final String presetId;
   final double radius;
   final CardStyle cards;
-  const TooranStyle(this.presetId, this.radius, this.cards);
+  final FontChoice font;
+  final TextWeight weight;
+  final LineSpacing spacing;
+  const TooranStyle(this.presetId, this.radius, this.cards, this.font, this.weight, this.spacing);
 
   @override
   TooranStyle copyWith() => this;
@@ -192,18 +232,28 @@ class TooranStyle extends ThemeExtension<TooranStyle> {
 
   @override
   bool operator ==(Object other) =>
-      other is TooranStyle && other.presetId == presetId && other.radius == radius && other.cards == cards;
+      other is TooranStyle &&
+      other.presetId == presetId &&
+      other.radius == radius &&
+      other.cards == cards &&
+      other.font == font &&
+      other.weight == weight &&
+      other.spacing == spacing;
 
   @override
-  int get hashCode => Object.hash(presetId, radius, cards);
+  int get hashCode => Object.hash(presetId, radius, cards, font, weight, spacing);
 }
 
 /// Tooran design tokens. Colors, radii and card style follow the active
-/// [ThemePreset] (see [apply]); text styles are shared by every theme.
+/// [ThemePreset] (see [apply]); text styles follow the typography settings.
 class AppTheme {
   static ThemePreset _preset = themePresets.first;
   static double _radius = themePresets.first.radius;
   static CardStyle _cards = themePresets.first.cards;
+  static FontChoice _font = FontChoice.inter;
+  static TextWeight _weight = TextWeight.normal;
+  static LineSpacing _spacing = LineSpacing.normal;
+  static Density _density = Density.normal;
 
   static ThemePreset get preset => _preset;
 
@@ -214,7 +264,15 @@ class AppTheme {
   static CardStyle get cards => _cards;
 
   /// Sets the active look. Call before building [lightTheme]/[darkTheme].
-  static void apply({String? presetId, CornerStyle corners = CornerStyle.theme, CardStyle? cardStyle}) {
+  static void apply({
+    String? presetId,
+    CornerStyle corners = CornerStyle.theme,
+    CardStyle? cardStyle,
+    FontChoice font = FontChoice.inter,
+    TextWeight weight = TextWeight.normal,
+    LineSpacing spacing = LineSpacing.normal,
+    Density density = Density.normal,
+  }) {
     _preset = presetById(presetId);
     _radius = switch (corners) {
       CornerStyle.theme => _preset.radius,
@@ -223,6 +281,10 @@ class AppTheme {
       CornerStyle.round => 24,
     };
     _cards = cardStyle ?? _preset.cards;
+    _font = font;
+    _weight = weight;
+    _spacing = spacing;
+    _density = density;
   }
 
   static Palette palette(bool dark) => dark ? _preset.dark : _preset.light;
@@ -296,10 +358,14 @@ class AppTheme {
     }
   }
 
-  // ── Typography (Inter everywhere) ───────────────────────────────────
-  static const String fBody = 'Inter';
-  static const String fDisplay = fBody;
-  static const String fMono = fBody;
+  // ── Typography (one family everywhere, chosen in Settings) ──────────
+  static String? get fBody => _font.family;
+  static String? get fDisplay => fBody;
+  static String? get fMono => fBody;
+
+  /// [base] moved lighter or bolder by the reader's weight setting.
+  static FontWeight w(FontWeight base) =>
+      FontWeight((base.value + _weight.shift * 100).clamp(100, 900));
 
   /// Headings. Sizes passed in are "visual" sizes from the original
   /// design scale; they're mapped to a tighter sans-serif size here.
@@ -309,9 +375,9 @@ class AppTheme {
       fontFamily: fBody,
       fontFamilyFallback: fontFallback,
       fontSize: s,
-      fontWeight: FontWeight.w600,
+      fontWeight: w(FontWeight.w600),
       letterSpacing: -s * 0.02,
-      height: 1.2,
+      height: 1.2 * _spacing.factor,
       color: color,
       fontStyle: style == FontStyle.italic ? FontStyle.normal : style,
     );
@@ -322,9 +388,9 @@ class AppTheme {
         fontFamily: fBody,
         fontFamilyFallback: fontFallback,
         fontSize: size,
-        fontWeight: weight ?? FontWeight.w400,
+        fontWeight: w(weight ?? FontWeight.w400),
         letterSpacing: -size * 0.005,
-        height: 1.45,
+        height: 1.45 * _spacing.factor,
         color: color,
       );
 
@@ -334,7 +400,7 @@ class AppTheme {
         fontFamily: fBody,
         fontFamilyFallback: fontFallback,
         fontSize: size + 1,
-        fontWeight: FontWeight.w500,
+        fontWeight: w(FontWeight.w500),
         letterSpacing: letter,
         color: color,
         fontFeatures: const [FontFeature.tabularFigures()],
@@ -345,7 +411,7 @@ class AppTheme {
         fontFamily: fBody,
         fontFamilyFallback: fontFallback,
         fontSize: 12,
-        fontWeight: FontWeight.w600,
+        fontWeight: w(FontWeight.w600),
         letterSpacing: 0.4,
         color: color,
       );
@@ -390,7 +456,12 @@ class AppTheme {
       scaffoldBackgroundColor: bg,
       canvasColor: bg,
       dividerColor: hl,
-      extensions: [TooranStyle(_preset.id, _radius, _cards)],
+      visualDensity: switch (_density) {
+        Density.compact => VisualDensity.compact,
+        Density.normal => VisualDensity.adaptivePlatformDensity,
+        Density.spacious => const VisualDensity(horizontal: 1, vertical: 2),
+      },
+      extensions: [TooranStyle(_preset.id, _radius, _cards, _font, _weight, _spacing)],
       colorScheme: ColorScheme(
         brightness: brightness,
         primary: primary,

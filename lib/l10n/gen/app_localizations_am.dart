@@ -1714,4 +1714,70 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get overviewBudget => 'ወርሃዊ በጀት';
+
+  @override
+  String get settingsText => 'ጽሑፍ እና አቀማመጥ';
+
+  @override
+  String get settingsTextPreviewTitle => 'ሸቀጣሸቀጥ ግዛ';
+
+  @override
+  String get settingsTextPreviewBody => 'ወተት፣ ዳቦ እና ቡና። አርብ ለአበበ መልስ።';
+
+  @override
+  String get settingsFont => 'የፊደል አይነት';
+
+  @override
+  String get fontInterHint => 'ንጹህ';
+
+  @override
+  String get fontNunitoHint => 'የተጠጋጋ';
+
+  @override
+  String get fontLoraHint => 'ክላሲክ';
+
+  @override
+  String get fontAtkinsonHint => 'ለማንበብ ቀላል';
+
+  @override
+  String get fontSystemHint => 'የመሳሪያዎ ፊደል';
+
+  @override
+  String get settingsTextSize => 'የጽሑፍ መጠን';
+
+  @override
+  String get settingsBoldness => 'ውፍረት';
+
+  @override
+  String get weightLight => 'ቀጭን';
+
+  @override
+  String get optionNormal => 'መደበኛ';
+
+  @override
+  String get weightMedium => 'መካከለኛ';
+
+  @override
+  String get weightBold => 'ወፍራም';
+
+  @override
+  String get settingsLineSpacing => 'የመስመር ክፍተት';
+
+  @override
+  String get spacingCompact => 'ጠባብ';
+
+  @override
+  String get spacingRelaxed => 'ሰፊ';
+
+  @override
+  String get settingsDensity => 'የአቀማመጥ ጥግግት';
+
+  @override
+  String get densityCompact => 'የታመቀ';
+
+  @override
+  String get densitySpacious => 'ሰፊ';
+
+  @override
+  String get settingsTextReset => 'ጽሑፍ እና አቀማመጥን ዳግም አስጀምር';
 }

@@ -35,11 +35,16 @@ Future<void> _loadFont(String family, List<String> paths) async {
 
 Future<void> _loadFonts() async {
   final sdk = '${Platform.environment['HOME']}/development/flutter/bin/cache/artifacts/material_fonts';
-  await _loadFont('Inter', [
-    'assets/fonts/Inter-Regular.ttf',
-    'assets/fonts/Inter-Medium.ttf',
-    'assets/fonts/Inter-SemiBold.ttf',
-  ]);
+  // Every family bundled in pubspec.yaml, all weights (Settings shows each font).
+  final bundled = <String, List<String>>{};
+  for (final f in Directory('assets/fonts').listSync().whereType<File>()) {
+    final name = f.uri.pathSegments.last;
+    final family = name.substring(0, name.indexOf('-'));
+    (bundled[family] ??= []).add(f.path);
+  }
+  for (final e in bundled.entries) {
+    await _loadFont(e.key, e.value);
+  }
   await _loadFont('MaterialIcons', ['$sdk/MaterialIcons-Regular.otf']);
   if (File(_emojiFont).existsSync()) {
     await _loadFont('NotoColorEmoji', [_emojiFont]);

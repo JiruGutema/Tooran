@@ -1727,4 +1727,71 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get overviewBudget => 'MONTHLY BUDGET';
+
+  @override
+  String get settingsText => 'TEXT & LAYOUT';
+
+  @override
+  String get settingsTextPreviewTitle => 'Buy groceries';
+
+  @override
+  String get settingsTextPreviewBody =>
+      'Milk, bread and coffee. Pay Abebe back on Friday.';
+
+  @override
+  String get settingsFont => 'Font';
+
+  @override
+  String get fontInterHint => 'Clean';
+
+  @override
+  String get fontNunitoHint => 'Rounded';
+
+  @override
+  String get fontLoraHint => 'Classic serif';
+
+  @override
+  String get fontAtkinsonHint => 'Easy to read';
+
+  @override
+  String get fontSystemHint => 'Your device\'s font';
+
+  @override
+  String get settingsTextSize => 'Text size';
+
+  @override
+  String get settingsBoldness => 'Boldness';
+
+  @override
+  String get weightLight => 'Light';
+
+  @override
+  String get optionNormal => 'Normal';
+
+  @override
+  String get weightMedium => 'Medium';
+
+  @override
+  String get weightBold => 'Bold';
+
+  @override
+  String get settingsLineSpacing => 'Line spacing';
+
+  @override
+  String get spacingCompact => 'Tight';
+
+  @override
+  String get spacingRelaxed => 'Relaxed';
+
+  @override
+  String get settingsDensity => 'Layout density';
+
+  @override
+  String get densityCompact => 'Compact';
+
+  @override
+  String get densitySpacious => 'Spacious';
+
+  @override
+  String get settingsTextReset => 'Reset text & layout';
 }

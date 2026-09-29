@@ -67,6 +67,37 @@ class SettingsProvider extends ChangeNotifier {
 
   set cardStyle(CardStyle? v) => _set('cardStyle', v?.name);
 
+  // ── Text ────────────────────────────────────────────────────────────
+  FontChoice get font => _byName(FontChoice.values, _s['font'], FontChoice.inter);
+  set font(FontChoice v) => _set('font', v.name);
+
+  TextWeight get textWeight => _byName(TextWeight.values, _s['textWeight'], TextWeight.normal);
+  set textWeight(TextWeight v) => _set('textWeight', v.name);
+
+  /// Multiplies the system text size; 1.0 leaves it as is.
+  double get textScale => (_s['textScale'] as num?)?.toDouble() ?? 1.0;
+  set textScale(double v) => _set('textScale', v);
+
+  LineSpacing get lineSpacing => _byName(LineSpacing.values, _s['lineSpacing'], LineSpacing.normal);
+  set lineSpacing(LineSpacing v) => _set('lineSpacing', v.name);
+
+  Density get density => _byName(Density.values, _s['density'], Density.normal);
+  set density(Density v) => _set('density', v.name);
+
+  /// Puts every text and layout setting back to its default.
+  Future<void> resetText() async {
+    const keys = {'font', 'textWeight', 'textScale', 'lineSpacing', 'density'};
+    _s.removeWhere((k, _) => keys.contains(k));
+    notifyListeners();
+    try {
+      final current = await _data.loadSettings();
+      current.removeWhere((k, _) => keys.contains(k));
+      await _data.saveSettings(current);
+    } catch (e) {
+      debugPrint('Failed to reset text settings: $e');
+    }
+  }
+
   // ── Gestures ────────────────────────────────────────────────────────
   SwipeRightAction get swipeRight =>
       _s['swipeRight'] == 'edit' ? SwipeRightAction.edit : SwipeRightAction.complete;
@@ -144,4 +175,7 @@ class SettingsProvider extends ChangeNotifier {
 
   bool get tipsDismissed => _s['tipsDismissed'] == true;
   set tipsDismissed(bool v) => _set('tipsDismissed', v);
+
+  static T _byName<T extends Enum>(List<T> values, Object? name, T fallback) =>
+      values.firstWhere((v) => v.name == name, orElse: () => fallback);
 }

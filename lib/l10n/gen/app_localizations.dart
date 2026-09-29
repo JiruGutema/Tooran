@@ -3039,6 +3039,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'MONTHLY BUDGET'**
   String get overviewBudget;
+
+  /// No description provided for @settingsText.
+  ///
+  /// In en, this message translates to:
+  /// **'TEXT & LAYOUT'**
+  String get settingsText;
+
+  /// No description provided for @settingsTextPreviewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy groceries'**
+  String get settingsTextPreviewTitle;
+
+  /// No description provided for @settingsTextPreviewBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Milk, bread and coffee. Pay Abebe back on Friday.'**
+  String get settingsTextPreviewBody;
+
+  /// No description provided for @settingsFont.
+  ///
+  /// In en, this message translates to:
+  /// **'Font'**
+  String get settingsFont;
+
+  /// No description provided for @fontInterHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean'**
+  String get fontInterHint;
+
+  /// No description provided for @fontNunitoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Rounded'**
+  String get fontNunitoHint;
+
+  /// No description provided for @fontLoraHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic serif'**
+  String get fontLoraHint;
+
+  /// No description provided for @fontAtkinsonHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy to read'**
+  String get fontAtkinsonHint;
+
+  /// No description provided for @fontSystemHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your device\'s font'**
+  String get fontSystemHint;
+
+  /// No description provided for @settingsTextSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Text size'**
+  String get settingsTextSize;
+
+  /// No description provided for @settingsBoldness.
+  ///
+  /// In en, this message translates to:
+  /// **'Boldness'**
+  String get settingsBoldness;
+
+  /// No description provided for @weightLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get weightLight;
+
+  /// No description provided for @optionNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get optionNormal;
+
+  /// No description provided for @weightMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get weightMedium;
+
+  /// No description provided for @weightBold.
+  ///
+  /// In en, this message translates to:
+  /// **'Bold'**
+  String get weightBold;
+
+  /// No description provided for @settingsLineSpacing.
+  ///
+  /// In en, this message translates to:
+  /// **'Line spacing'**
+  String get settingsLineSpacing;
+
+  /// No description provided for @spacingCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Tight'**
+  String get spacingCompact;
+
+  /// No description provided for @spacingRelaxed.
+  ///
+  /// In en, this message translates to:
+  /// **'Relaxed'**
+  String get spacingRelaxed;
+
+  /// No description provided for @settingsDensity.
+  ///
+  /// In en, this message translates to:
+  /// **'Layout density'**
+  String get settingsDensity;
+
+  /// No description provided for @densityCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'Compact'**
+  String get densityCompact;
+
+  /// No description provided for @densitySpacious.
+  ///
+  /// In en, this message translates to:
+  /// **'Spacious'**
+  String get densitySpacious;
+
+  /// No description provided for @settingsTextReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset text & layout'**
+  String get settingsTextReset;
 }
 
 class _AppLocalizationsDelegate
