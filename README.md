@@ -135,7 +135,7 @@ Install `dist/tooran-<v>-arm64-v8a.apk` on your phone and go through
 ### 4. Commit, tag, publish
 
 ```bash
-git add -A && git commit -m "Release 2.1.0"
+git add -A && git commit -m "Release 2.1.1"
 make tag                  # creates v2.1.0
 make publish              # pushes the tag, creates the GitHub release with dist/*
 ```
