@@ -16,11 +16,15 @@ export JAVA_HOME ?= $(HOME)/development/jdk-17
 export ANDROID_HOME ?= $(HOME)/Android/Sdk
 KEYTOOL      ?= $(JAVA_HOME)/bin/keytool
 
-# Version: "x.y.z" from pubspec.yaml. The Android build number (versionCode)
-# is date-based so every release is higher than the last one.
-VERSION      := $(shell awk '/^version:/ {print $$2}' pubspec.yaml | cut -d'+' -f1)
+# Version: pass it on the command line — `make release V=2.1.1`,
+# `make tag V=2.1.1`, `make publish V=2.1.1` — or it is read from
+# pubspec.yaml. The tag defaults to v<version>; override with TAG=...
+# The Android build number (versionCode) is date-based so every release is
+# higher than the last one.
+PUBSPEC_VERSION := $(shell awk '/^version:/ {print $$2}' pubspec.yaml | cut -d'+' -f1)
+VERSION      := $(or $(V),$(PUBSPEC_VERSION))
 BUILD        ?= $(shell date +%Y%m%d%H | cut -c3-)
-TAG          := v$(VERSION)
+TAG          ?= v$(VERSION)
 DIST         := dist
 REPO         ?= JiruGutema/Tooran
 
@@ -92,7 +96,7 @@ linux: ## Release desktop bundle (build/linux/x64/release/bundle)
 	$(FLUTTER) build linux --release $(BUILD_FLAGS)
 
 deb: linux ## Debian package → dist/tooran_<version>_amd64.deb
-	./packaging/deb/build-deb.sh --no-flutter-build
+	VERSION=$(VERSION) ./packaging/deb/build-deb.sh --no-flutter-build
 
 release: check apk aab deb checksums ## Everything above, tested, into dist/
 	@echo
@@ -104,7 +108,7 @@ checksums: ## SHA-256 sums for everything in dist/
 
 # ── Versioning & signing ─────────────────────────────────────────────
 
-version: ## Set the version: make version V=2.1.0
+version: ## Set the version in pubspec.yaml: make version V=x.y.z
 	@test -n "$(V)" || (echo "usage: make version V=x.y.z" && exit 1)
 	sed -i -E 's/^version: .*/version: $(V)+1/' pubspec.yaml
 	@echo "pubspec.yaml → $(V)"
@@ -133,12 +137,12 @@ check-signing:
 
 # ── Publishing ───────────────────────────────────────────────────────
 
-tag: ## Create the git tag v<version> (requires a clean, committed tree)
+tag: ## Create the git tag (make tag V=x.y.z, or TAG=...; clean tree required)
 	@git diff --quiet && git diff --cached --quiet || (echo "Commit your changes first." && exit 1)
 	git tag -a $(TAG) -m "Tooran $(VERSION)"
 	@echo "Tagged $(TAG). Push with: git push origin $(TAG)"
 
-publish: ## Push the tag and create a GitHub release with dist/ attached
+publish: ## Push the tag and create a GitHub release (make publish V=x.y.z)
 	@test -f android/key.properties || (echo "Refusing to publish debug-signed builds (no android/key.properties)." && exit 1)
 	@command -v gh >/dev/null || (echo "Install the GitHub CLI (gh) and run 'gh auth login' first." && exit 1)
 	@test -n "$$(ls $(DIST)/*.apk 2>/dev/null)" || (echo "Nothing in $(DIST)/ — run 'make release' first." && exit 1)

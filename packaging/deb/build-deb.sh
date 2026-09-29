@@ -23,12 +23,12 @@ PKG=tooran
 APP_ID=io.github.jirugutema.tooran
 ARCH=amd64
 # Strip the trailing +build from "1.0.0+1" — debian versions can't contain '+'
-# the way pubspec uses it without quoting.
-VERSION=$(awk '/^version:/ {print $2}' pubspec.yaml | cut -d'+' -f1)
+# the way pubspec uses it without quoting. `make deb V=x.y.z` passes VERSION.
+VERSION="${VERSION:-$(awk '/^version:/ {print $2}' pubspec.yaml | cut -d'+' -f1)}"
 MAINTAINER="${TOORAN_DEB_MAINTAINER:-Jiru Gutema <jirudagutema@gmail.com>}"
-DESCRIPTION_SHORT="A simple, quiet task organizer"
-DESCRIPTION_LONG=" Tooran lets you keep small lists of things you want to keep close.
- Categories hold tasks. Tasks hold what they hold. Nothing more.
+DESCRIPTION_SHORT="A local-first organizer for tasks, money and spending"
+DESCRIPTION_LONG=" Tooran keeps tasks, shopping lists, money you lend and borrow,
+ spending, bills, savings goals and notes in one quiet app.
  .
  Local-first: your lists never leave your device unless you say so."
 

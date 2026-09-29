@@ -963,8 +963,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get helpGestureTapCategory => 'Tap a category';
 
   @override
-  String get helpGestureTapCategoryBody =>
-      'Expands the list of tasks beneath it.';
+  String get helpGestureTapCategoryBody => 'Expands the list beneath it.';
 
   @override
   String get helpGestureCircle => 'Tap the box';
@@ -1001,6 +1000,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Type [ ] at the start of a line, or use CHECKLIST. Tick items from the task details.';
 
   @override
+  String get helpGestureMenu => 'Side menu';
+
+  @override
+  String get helpGestureMenuBody =>
+      'Tap the menu button or swipe right on the top bar for Today, Search, People, History and Settings.';
+
+  @override
   String get helpFaqMissing => 'My tasks disappeared';
 
   @override
@@ -1012,7 +1018,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpFaqThemeBody =>
-      'Tap the sun/moon icon in the top bar. Your choice is remembered.';
+      'Tap the sun/moon icon in the top bar or side menu to switch light and dark. Pick a color theme, corners and cards in Settings → Appearance.';
 
   @override
   String get helpFaqReorder => 'Can\'t reorder';
@@ -1029,6 +1035,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Allow notifications for Tooran in system settings, and turn off battery optimisation for it if your phone delays alarms.';
 
   @override
+  String get helpFaqText => 'Text too small or too big';
+
+  @override
+  String get helpFaqTextBody =>
+      'Settings → Text & layout changes the font, text size, boldness, line spacing and density. Reset puts everything back.';
+
+  @override
+  String get helpFaqWidget => 'Adding the widget';
+
+  @override
+  String get helpFaqWidgetBody =>
+      'Long-press your home screen → Widgets → Tooran. Choose what it shows in Settings → Home-screen widget.';
+
+  @override
   String get helpLocalFirst =>
       'Tooran is local-first. Your lists never leave your device unless you say so.';
 
@@ -1042,7 +1062,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutIntro =>
-      'Tooran is a local-first task organizer. Categories hold tasks. Tasks have descriptions. Nothing leaves your device. Productivity, in a quieter key.';
+      'Tooran is a local-first organizer for tasks, shopping lists, money you lend and borrow, spending, bills, savings and notes. Everything stays on your device.';
 
   @override
   String get aboutWhatItDoes => 'WHAT IT DOES';
@@ -1052,21 +1072,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get aboutFeatureCategoriesBody =>
-      'A folder for the things you keep close.';
+      'Tasks, Shopping, Money, Spending, Bills, Savings goal, Notes — or name your own.';
 
   @override
   String get aboutFeatureTasks => 'Tasks';
 
   @override
   String get aboutFeatureTasksBody =>
-      'Names, checklists, due dates, gentle progress.';
+      'Checklists, due dates, repeats, reminders and a Today view.';
 
   @override
   String get aboutFeatureLedger => 'Money';
 
   @override
   String get aboutFeatureLedgerBody =>
-      'Who owes whom, partial payments, reminders.';
+      'Who owes whom, partial payments, reminders, a People page and charts.';
+
+  @override
+  String get aboutFeatureSpending => 'Spending';
+
+  @override
+  String get aboutFeatureSpendingBody =>
+      'Tags, a monthly budget, daily totals, charts and CSV export.';
 
   @override
   String get aboutFeatureDrag => 'Drag & drop';
@@ -1084,13 +1111,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get aboutFeatureThemes => 'Themes';
 
   @override
-  String get aboutFeatureThemesBody => 'Warm paper by day. Deep ink by night.';
+  String get aboutFeatureThemesBody =>
+      'Six color themes in light and dark, with your choice of font, text size and layout.';
+
+  @override
+  String get aboutFeatureLanguages => 'Languages';
+
+  @override
+  String get aboutFeatureLanguagesBody =>
+      'English, Amharic and Afaan Oromoo, with Ethiopian calendar dates.';
 
   @override
   String get aboutFeatureLocal => 'Local-first';
 
   @override
-  String get aboutFeatureLocalBody => 'No cloud, no sign-in, no telemetry.';
+  String get aboutFeatureLocalBody =>
+      'No cloud, no sign-in, no telemetry. Backups, app lock and privacy mode built in.';
 
   @override
   String get aboutCraftedBy => 'CRAFTED BY';
@@ -1098,6 +1134,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get aboutCraftedByBody =>
       'Jiru Gutema, Addis Ababa University. Made with care, in Flutter, on a quiet evening.';
+
+  @override
+  String aboutCopyright(String years) {
+    return '© $years TOORAN';
+  }
 
   @override
   String get aboutRights => 'ALL RIGHTS RESERVED';

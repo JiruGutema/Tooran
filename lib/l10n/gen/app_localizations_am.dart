@@ -958,7 +958,7 @@ class AppLocalizationsAm extends AppLocalizations {
   String get helpGestureTapCategory => 'ምድብ ይንኩ';
 
   @override
-  String get helpGestureTapCategoryBody => 'ከሥሩ ያሉትን ተግባሮች ይዘረጋል።';
+  String get helpGestureTapCategoryBody => 'ከሥሩ ያለውን ዝርዝር ይዘረጋል።';
 
   @override
   String get helpGestureCircle => 'ሳጥኑን ይንኩ';
@@ -995,6 +995,13 @@ class AppLocalizationsAm extends AppLocalizations {
       'በመስመር መጀመሪያ ላይ [ ] ይጻፉ፣ ወይም «ማረጋገጫ ዝርዝር»ን ይጠቀሙ። ንጥሎችን ከተግባሩ ዝርዝሮች ላይ ምልክት ያድርጉ።';
 
   @override
+  String get helpGestureMenu => 'የጎን ምናሌ';
+
+  @override
+  String get helpGestureMenuBody =>
+      'ዛሬ፣ ፍለጋ፣ ሰዎች፣ ታሪክ እና ቅንብሮችን ለማግኘት የምናሌ ቁልፉን ይንኩ ወይም ከላይ ባለው አሞሌ ላይ ወደ ቀኝ ያንሸራቱ።';
+
+  @override
   String get helpFaqMissing => 'ተግባሮቼ ጠፍተዋል';
 
   @override
@@ -1005,7 +1012,8 @@ class AppLocalizationsAm extends AppLocalizations {
   String get helpFaqTheme => 'ገጽታው አይቀየርም';
 
   @override
-  String get helpFaqThemeBody => 'ከላይ ባለው አሞሌ የፀሐይ/ጨረቃ ምልክቱን ይንኩ። ምርጫዎ ይታወሳል።';
+  String get helpFaqThemeBody =>
+      'ብርሃን እና ጨለማን ለመቀየር ከላይ ባለው አሞሌ ወይም በጎን ምናሌው ላይ የፀሐይ/ጨረቃ ምልክቱን ይንኩ። የቀለም ገጽታ፣ ጠርዞች እና ካርዶችን በቅንብሮች → መልክ ውስጥ ይምረጡ።';
 
   @override
   String get helpFaqReorder => 'ቅደም ተከተል መቀየር አልተቻለም';
@@ -1022,6 +1030,20 @@ class AppLocalizationsAm extends AppLocalizations {
       'በስርዓት ቅንብሮች ውስጥ ለTooran ማሳወቂያዎችን ይፍቀዱ፤ ስልክዎ ማንቂያዎችን የሚያዘገይ ከሆነም ለTooran የባትሪ ማመቻቸትን ያጥፉ።';
 
   @override
+  String get helpFaqText => 'ጽሑፉ በጣም ትንሽ ወይም በጣም ትልቅ ነው';
+
+  @override
+  String get helpFaqTextBody =>
+      'ቅንብሮች → ጽሑፍ እና አቀማመጥ ፊደሉን፣ የጽሑፍ መጠኑን፣ ድምቀቱን፣ የመስመር ክፍተቱን እና ጥግግቱን ይቀይራል። ዳግም ማስጀመር ሁሉንም ይመልሳል።';
+
+  @override
+  String get helpFaqWidget => 'ዊጀቱን ማከል';
+
+  @override
+  String get helpFaqWidgetBody =>
+      'መነሻ ገጽዎን በረጅሙ ይጫኑ → ዊጀቶች → Tooran። የሚያሳየውን በቅንብሮች → የመነሻ ገጽ ዊጀት ውስጥ ይምረጡ።';
+
+  @override
   String get helpLocalFirst =>
       'Tooran በመሣሪያዎ ላይ ይሠራል። እርስዎ ካልፈቀዱ በስተቀር ዝርዝሮችዎ ከመሣሪያዎ አይወጡም።';
 
@@ -1035,7 +1057,7 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get aboutIntro =>
-      'Tooran በመሣሪያዎ ላይ የሚሠራ የተግባር አደራጅ ነው። ምድቦች ተግባሮችን ይይዛሉ። ተግባሮች መግለጫ አላቸው። ምንም ነገር ከመሣሪያዎ አይወጣም። ምርታማነት፣ በእርጋታ።';
+      'Tooran በመሣሪያዎ ላይ የሚሠራ አደራጅ ነው — ለተግባሮች፣ ለግብይት ዝርዝሮች፣ ለሚያበድሩት እና ለሚበደሩት ገንዘብ፣ ለወጪ፣ ለሂሳቦች፣ ለቁጠባ እና ለማስታወሻዎች። ሁሉም ነገር በመሣሪያዎ ላይ ይቆያል።';
 
   @override
   String get aboutWhatItDoes => 'ምን ይሠራል';
@@ -1044,19 +1066,29 @@ class AppLocalizationsAm extends AppLocalizations {
   String get aboutFeatureCategories => 'ምድቦች';
 
   @override
-  String get aboutFeatureCategoriesBody => 'ቅርብ ለሚያደርጓቸው ነገሮች የሚሆን አቃፊ።';
+  String get aboutFeatureCategoriesBody =>
+      'ተግባሮች፣ ግብይት፣ ገንዘብ፣ ወጪ፣ ሂሳቦች፣ የቁጠባ ግብ፣ ማስታወሻዎች — ወይም የራስዎን ስም ይስጡ።';
 
   @override
   String get aboutFeatureTasks => 'ተግባሮች';
 
   @override
-  String get aboutFeatureTasksBody => 'ስሞች፣ ማረጋገጫ ዝርዝሮች፣ ቀነ ገደቦች፣ ረጋ ያለ እድገት።';
+  String get aboutFeatureTasksBody =>
+      'ማረጋገጫ ዝርዝሮች፣ ቀነ ገደቦች፣ ድግግሞሽ፣ አስታዋሾች እና የዛሬ እይታ።';
 
   @override
   String get aboutFeatureLedger => 'ገንዘብ';
 
   @override
-  String get aboutFeatureLedgerBody => 'ማን ለማን ዕዳ እንዳለበት፣ ከፊል ክፍያዎች፣ አስታዋሾች።';
+  String get aboutFeatureLedgerBody =>
+      'ማን ለማን ዕዳ እንዳለበት፣ ከፊል ክፍያዎች፣ አስታዋሾች፣ የሰዎች ገጽ እና ገበታዎች።';
+
+  @override
+  String get aboutFeatureSpending => 'ወጪ';
+
+  @override
+  String get aboutFeatureSpendingBody =>
+      'መለያዎች፣ ወርሃዊ በጀት፣ የዕለት ድምሮች፣ ገበታዎች እና ወደ CSV መላክ።';
 
   @override
   String get aboutFeatureDrag => 'ጎትቶ ማስቀመጥ';
@@ -1074,13 +1106,22 @@ class AppLocalizationsAm extends AppLocalizations {
   String get aboutFeatureThemes => 'ገጽታዎች';
 
   @override
-  String get aboutFeatureThemesBody => 'ቀን ሞቅ ያለ ወረቀት። ማታ ጥቁር ቀለም።';
+  String get aboutFeatureThemesBody =>
+      'ስድስት የቀለም ገጽታዎች በብርሃን እና በጨለማ፣ ከሚመርጡት ፊደል፣ የጽሑፍ መጠን እና አቀማመጥ ጋር።';
+
+  @override
+  String get aboutFeatureLanguages => 'ቋንቋዎች';
+
+  @override
+  String get aboutFeatureLanguagesBody =>
+      'እንግሊዝኛ፣ አማርኛ እና አፋን ኦሮሞ፣ ከኢትዮጵያ ቀን መቁጠሪያ ጋር።';
 
   @override
   String get aboutFeatureLocal => 'በመሣሪያዎ ላይ';
 
   @override
-  String get aboutFeatureLocalBody => 'ክላውድ የለም፣ መግቢያ የለም፣ ክትትል የለም።';
+  String get aboutFeatureLocalBody =>
+      'ክላውድ የለም፣ መግቢያ የለም፣ ክትትል የለም። ምትኬ፣ የመተግበሪያ መቆለፊያ እና የግላዊነት ሁነታ አብሮ ይመጣል።';
 
   @override
   String get aboutCraftedBy => 'የሠራው';
@@ -1088,6 +1129,11 @@ class AppLocalizationsAm extends AppLocalizations {
   @override
   String get aboutCraftedByBody =>
       'Jiru Gutema፣ አዲስ አበባ ዩኒቨርሲቲ። በጥንቃቄ፣ በFlutter፣ በአንድ ጸጥ ያለ ምሽት የተሠራ።';
+
+  @override
+  String aboutCopyright(String years) {
+    return '© $years TOORAN';
+  }
 
   @override
   String get aboutRights => 'መብቱ በሕግ የተጠበቀ ነው';

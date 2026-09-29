@@ -12,11 +12,20 @@ class AboutPage extends StatelessWidget {
       [l.aboutFeatureCategories, l.aboutFeatureCategoriesBody],
       [l.aboutFeatureTasks, l.aboutFeatureTasksBody],
       [l.aboutFeatureLedger, l.aboutFeatureLedgerBody],
+      [l.aboutFeatureSpending, l.aboutFeatureSpendingBody],
       [l.aboutFeatureDrag, l.aboutFeatureDragBody],
       [l.aboutFeatureHistory, l.aboutFeatureHistoryBody],
       [l.aboutFeatureThemes, l.aboutFeatureThemesBody],
+      [l.aboutFeatureLanguages, l.aboutFeatureLanguagesBody],
       [l.aboutFeatureLocal, l.aboutFeatureLocalBody],
     ];
+  }
+
+  /// "2025–2026": from the first release to the current year.
+  static String _years() {
+    const first = 2025;
+    final now = DateTime.now().year;
+    return now > first ? '$first–$now' : '$first';
   }
 
   @override
@@ -63,7 +72,7 @@ class AboutPage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 6),
-                  Text(context.l10n.aboutVersion(const String.fromEnvironment('APP_VERSION', defaultValue: '2.1.0')), style: AppTheme.eyebrow(ink3)),
+                  Text(context.l10n.aboutVersion(const String.fromEnvironment('APP_VERSION', defaultValue: '2.1.1')), style: AppTheme.eyebrow(ink3)),
                 ],
               ),
             ),
@@ -110,7 +119,7 @@ class AboutPage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('© 2025 TOORAN', style: AppTheme.mono(size: 11, color: ink3)),
+                    Text(context.l10n.aboutCopyright(_years()), style: AppTheme.mono(size: 11, color: ink3)),
                     Text(context.l10n.aboutRights, style: AppTheme.mono(size: 11, color: ink3)),
                   ],
                 ),

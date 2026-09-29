@@ -968,8 +968,7 @@ class AppLocalizationsOm extends AppLocalizations {
   String get helpGestureTapCategory => 'Ramaddii tuqi';
 
   @override
-  String get helpGestureTapCategoryBody =>
-      'Tarree hojiiwwan jala jiranii bal\'isa.';
+  String get helpGestureTapCategoryBody => 'Tarree jala jiru bal\'isa.';
 
   @override
   String get helpGestureCircle => 'Saanduqa tuqi';
@@ -1007,6 +1006,13 @@ class AppLocalizationsOm extends AppLocalizations {
       'Jalqaba sararaa irratti [ ] barreessi, ykn TARREE MIRKANEESSAA fayyadami. Wantoota odeeffannoo hojii keessaa mallatteessi.';
 
   @override
+  String get helpGestureMenu => 'Baafata cinaa';
+
+  @override
+  String get helpGestureMenuBody =>
+      'Har\'a, Barbaacha, Namoota, Seenaa fi Qindaa\'inaaf qabduu baafataa tuqi ykn gubbaa irratti mirgatti harkisi.';
+
+  @override
   String get helpFaqMissing => 'Hojiiwwan koo badan';
 
   @override
@@ -1018,7 +1024,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get helpFaqThemeBody =>
-      'Mallattoo aduu/ji\'aa gubbaa irratti jiru tuqi. Filannoon kee ni yaadatama.';
+      'Ifaa fi dukkana jijjiiruuf mallattoo aduu/ji\'aa gubbaa ykn baafata cinaa irratti tuqi. Bifa halluu, golee fi kaardii Qindaa\'ina → Bifa keessatti filadhu.';
 
   @override
   String get helpFaqReorder => 'Tartiiba jijjiiruu hin danda\'u';
@@ -1035,6 +1041,20 @@ class AppLocalizationsOm extends AppLocalizations {
       'Qindaa\'ina sirnaa keessatti beeksisa Tooran hayyami; bilbilli kee yoo yaadachiisa turse, qusannaa baatirii Tooran dhaamsi.';
 
   @override
+  String get helpFaqText => 'Barreeffamni baay\'ee xiqqaa ykn guddaa dha';
+
+  @override
+  String get helpFaqTextBody =>
+      'Qindaa\'ina → Barreeffamaa fi qindoomina qubee, hamma barreeffamaa, cimina, fageenya sararaa fi ijjannoo jijjiira. Haaromsuun hunda deebisa.';
+
+  @override
+  String get helpFaqWidget => 'Wijjeetii dabaluu';
+
+  @override
+  String get helpFaqWidgetBody =>
+      'Fuula jalqabaa dheeressii tuqi → Wijjeetota → Tooran. Waan agarsiisu Qindaa\'ina → Wijjeetii fuula jalqabaa keessatti filadhu.';
+
+  @override
   String get helpLocalFirst =>
       'Tooran meeshaa kee irratti hojjeta. Ati yoo hin heyyamne malee tarreewwan kee meeshaa kee irraa hin bahan.';
 
@@ -1048,7 +1068,7 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get aboutIntro =>
-      'Tooran qindeessaa hojii meeshaa kee irratti hojjetudha. Ramaddiiwwan hojiiwwan qabatu. Hojiiwwan ibsa qabu. Wanti tokkollee meeshaa kee irraa hin bahu. Oomishtummaa, tasgabbiin.';
+      'Tooran qindeessaa meeshaa kee irratti hojjetudha — hojiiwwaniif, tarree bittaa, maallaqa liqeessitu fi liqeeffattu, baasii, kaffaltii, qusannaa fi yaadannoof. Wanti hundi meeshaa kee irra tura.';
 
   @override
   String get aboutWhatItDoes => 'MAAL HOJJETA';
@@ -1058,21 +1078,28 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get aboutFeatureCategoriesBody =>
-      'Bakka wantoota siif dhihoo ta\'aniif.';
+      'Hojiiwwan, Bittaa, Maallaqa, Baasii, Kaffaltii, Galma qusannaa, Yaadannoo — ykn maqaa mataa keetii kenni.';
 
   @override
   String get aboutFeatureTasks => 'Hojiiwwan';
 
   @override
   String get aboutFeatureTasksBody =>
-      'Maqaa, tarree mirkaneessaa, guyyaa dhumaa, guddina suuta.';
+      'Tarree mirkaneessaa, guyyaa dhumaa, irra deddeebii, yaadachiisa fi mul\'ata Har\'aa.';
 
   @override
   String get aboutFeatureLedger => 'Maallaqa';
 
   @override
   String get aboutFeatureLedgerBody =>
-      'Eenyutu eenyuuf idaa qaba, kaffaltii gartokkee, yaadachiisa.';
+      'Eenyutu eenyuuf idaa qaba, kaffaltii gartokkee, yaadachiisa, fuula Namootaa fi chaartii.';
+
+  @override
+  String get aboutFeatureSpending => 'Baasii';
+
+  @override
+  String get aboutFeatureSpendingBody =>
+      'Mallattoo, baajata ji\'aa, ida\'ama guyyaa, chaartii fi CSV-tti erguu.';
 
   @override
   String get aboutFeatureDrag => 'Harkisii kaa\'i';
@@ -1093,14 +1120,21 @@ class AppLocalizationsOm extends AppLocalizations {
 
   @override
   String get aboutFeatureThemesBody =>
-      'Guyyaa waraqaa ho\'aa. Halkan qalama gadi fagoo.';
+      'Bifoota halluu jaha ifaa fi dukkanaa\'aa keessatti, qubee, hamma barreeffamaa fi qindoomina filattu waliin.';
+
+  @override
+  String get aboutFeatureLanguages => 'Afaanota';
+
+  @override
+  String get aboutFeatureLanguagesBody =>
+      'Ingiliffa, Amaariffa fi Afaan Oromoo, guyyaa dhiheessa Itoophiyaa waliin.';
 
   @override
   String get aboutFeatureLocal => 'Meeshaa kee irratti';
 
   @override
   String get aboutFeatureLocalBody =>
-      'Duumessa hin qabu, seensa hin qabu, hordoffii hin qabu.';
+      'Duumessa hin qabu, seensa hin qabu, hordoffii hin qabu. Kuusaa duubaa, cufaa appii fi haala dhuunfaa of keessaa qaba.';
 
   @override
   String get aboutCraftedBy => 'KAN HOJJETE';
@@ -1108,6 +1142,11 @@ class AppLocalizationsOm extends AppLocalizations {
   @override
   String get aboutCraftedByBody =>
       'Jiru Gutema, Yuunivarsiitii Finfinnee. Of eeggannoon, Flutter-iin, galgala tasgabbaa\'aa tokko irratti hojjetame.';
+
+  @override
+  String aboutCopyright(String years) {
+    return '© $years TOORAN';
+  }
 
   @override
   String get aboutRights => 'MIRGI HUNDI SEERAAN EEGAMAADHA';

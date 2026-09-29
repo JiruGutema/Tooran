@@ -15,6 +15,7 @@ class HelpPage extends StatelessWidget {
       [l.helpGestureLongPress, l.helpGestureLongPressBody],
       [l.helpGestureSwipe, l.helpGestureSwipeBody],
       [l.helpGestureChecklist, l.helpGestureChecklistBody],
+      [l.helpGestureMenu, l.helpGestureMenuBody],
       [l.helpMarkdown, l.helpMarkdownBody],
     ];
   }
@@ -26,6 +27,8 @@ class HelpPage extends StatelessWidget {
       [l.helpFaqTheme, l.helpFaqThemeBody],
       [l.helpFaqReorder, l.helpFaqReorderBody],
       [l.helpFaqReminders, l.helpFaqRemindersBody],
+      [l.helpFaqText, l.helpFaqTextBody],
+      [l.helpFaqWidget, l.helpFaqWidgetBody],
     ];
   }
 

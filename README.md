@@ -106,7 +106,7 @@ apk` builds a debug-signed APK for testing only.
 ### 2. Version
 
 ```bash
-make version V=2.1.0      # updates pubspec.yaml
+make version V=2.1.1      # updates pubspec.yaml
 ```
 
 The Android build number is generated from the date, so it always increases.
@@ -115,7 +115,7 @@ Update `docs/RELEASE_NOTES.md` — it becomes the GitHub release text.
 ### 3. Build and test
 
 ```bash
-make release
+make release              # or: make release V=2.1.1 (overrides pubspec.yaml)
 ```
 
 Runs analyze + tests, then writes to `dist/`:
@@ -136,12 +136,12 @@ Install `dist/tooran-<v>-arm64-v8a.apk` on your phone and go through
 
 ```bash
 git add -A && git commit -m "Release 2.1.1"
-make tag                  # creates v2.1.0
-make publish              # pushes the tag, creates the GitHub release with dist/*
+make tag V=2.1.1           # creates v2.1.1 (without V: version from pubspec.yaml)
+make publish V=2.1.1       # pushes the tag, creates the GitHub release with dist/*
 ```
 
 `make publish` needs the [GitHub CLI](https://cli.github.com/)
-(`gh auth login` once). Without it: `git push origin v2.1.0`, then on GitHub
+(`gh auth login` once). Without it: `git push origin v2.1.1`, then on GitHub
 → Releases → *Draft a new release* → pick the tag, paste
 `docs/RELEASE_NOTES.md`, attach the files from `dist/`.
 

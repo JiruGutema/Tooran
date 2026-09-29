@@ -1687,7 +1687,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpGestureTapCategoryBody.
   ///
   /// In en, this message translates to:
-  /// **'Expands the list of tasks beneath it.'**
+  /// **'Expands the list beneath it.'**
   String get helpGestureTapCategoryBody;
 
   /// No description provided for @helpGestureCircle.
@@ -1750,6 +1750,18 @@ abstract class AppLocalizations {
   /// **'Type [ ] at the start of a line, or use CHECKLIST. Tick items from the task details.'**
   String get helpGestureChecklistBody;
 
+  /// No description provided for @helpGestureMenu.
+  ///
+  /// In en, this message translates to:
+  /// **'Side menu'**
+  String get helpGestureMenu;
+
+  /// No description provided for @helpGestureMenuBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap the menu button or swipe right on the top bar for Today, Search, People, History and Settings.'**
+  String get helpGestureMenuBody;
+
   /// No description provided for @helpFaqMissing.
   ///
   /// In en, this message translates to:
@@ -1771,7 +1783,7 @@ abstract class AppLocalizations {
   /// No description provided for @helpFaqThemeBody.
   ///
   /// In en, this message translates to:
-  /// **'Tap the sun/moon icon in the top bar. Your choice is remembered.'**
+  /// **'Tap the sun/moon icon in the top bar or side menu to switch light and dark. Pick a color theme, corners and cards in Settings → Appearance.'**
   String get helpFaqThemeBody;
 
   /// No description provided for @helpFaqReorder.
@@ -1798,6 +1810,30 @@ abstract class AppLocalizations {
   /// **'Allow notifications for Tooran in system settings, and turn off battery optimisation for it if your phone delays alarms.'**
   String get helpFaqRemindersBody;
 
+  /// No description provided for @helpFaqText.
+  ///
+  /// In en, this message translates to:
+  /// **'Text too small or too big'**
+  String get helpFaqText;
+
+  /// No description provided for @helpFaqTextBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings → Text & layout changes the font, text size, boldness, line spacing and density. Reset puts everything back.'**
+  String get helpFaqTextBody;
+
+  /// No description provided for @helpFaqWidget.
+  ///
+  /// In en, this message translates to:
+  /// **'Adding the widget'**
+  String get helpFaqWidget;
+
+  /// No description provided for @helpFaqWidgetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Long-press your home screen → Widgets → Tooran. Choose what it shows in Settings → Home-screen widget.'**
+  String get helpFaqWidgetBody;
+
   /// No description provided for @helpLocalFirst.
   ///
   /// In en, this message translates to:
@@ -1819,7 +1855,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutIntro.
   ///
   /// In en, this message translates to:
-  /// **'Tooran is a local-first task organizer. Categories hold tasks. Tasks have descriptions. Nothing leaves your device. Productivity, in a quieter key.'**
+  /// **'Tooran is a local-first organizer for tasks, shopping lists, money you lend and borrow, spending, bills, savings and notes. Everything stays on your device.'**
   String get aboutIntro;
 
   /// No description provided for @aboutWhatItDoes.
@@ -1837,7 +1873,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutFeatureCategoriesBody.
   ///
   /// In en, this message translates to:
-  /// **'A folder for the things you keep close.'**
+  /// **'Tasks, Shopping, Money, Spending, Bills, Savings goal, Notes — or name your own.'**
   String get aboutFeatureCategoriesBody;
 
   /// No description provided for @aboutFeatureTasks.
@@ -1849,7 +1885,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutFeatureTasksBody.
   ///
   /// In en, this message translates to:
-  /// **'Names, checklists, due dates, gentle progress.'**
+  /// **'Checklists, due dates, repeats, reminders and a Today view.'**
   String get aboutFeatureTasksBody;
 
   /// No description provided for @aboutFeatureLedger.
@@ -1861,8 +1897,20 @@ abstract class AppLocalizations {
   /// No description provided for @aboutFeatureLedgerBody.
   ///
   /// In en, this message translates to:
-  /// **'Who owes whom, partial payments, reminders.'**
+  /// **'Who owes whom, partial payments, reminders, a People page and charts.'**
   String get aboutFeatureLedgerBody;
+
+  /// No description provided for @aboutFeatureSpending.
+  ///
+  /// In en, this message translates to:
+  /// **'Spending'**
+  String get aboutFeatureSpending;
+
+  /// No description provided for @aboutFeatureSpendingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags, a monthly budget, daily totals, charts and CSV export.'**
+  String get aboutFeatureSpendingBody;
 
   /// No description provided for @aboutFeatureDrag.
   ///
@@ -1897,8 +1945,20 @@ abstract class AppLocalizations {
   /// No description provided for @aboutFeatureThemesBody.
   ///
   /// In en, this message translates to:
-  /// **'Warm paper by day. Deep ink by night.'**
+  /// **'Six color themes in light and dark, with your choice of font, text size and layout.'**
   String get aboutFeatureThemesBody;
+
+  /// No description provided for @aboutFeatureLanguages.
+  ///
+  /// In en, this message translates to:
+  /// **'Languages'**
+  String get aboutFeatureLanguages;
+
+  /// No description provided for @aboutFeatureLanguagesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'English, Amharic and Afaan Oromoo, with Ethiopian calendar dates.'**
+  String get aboutFeatureLanguagesBody;
 
   /// No description provided for @aboutFeatureLocal.
   ///
@@ -1909,7 +1969,7 @@ abstract class AppLocalizations {
   /// No description provided for @aboutFeatureLocalBody.
   ///
   /// In en, this message translates to:
-  /// **'No cloud, no sign-in, no telemetry.'**
+  /// **'No cloud, no sign-in, no telemetry. Backups, app lock and privacy mode built in.'**
   String get aboutFeatureLocalBody;
 
   /// No description provided for @aboutCraftedBy.
@@ -1923,6 +1983,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Jiru Gutema, Addis Ababa University. Made with care, in Flutter, on a quiet evening.'**
   String get aboutCraftedByBody;
+
+  /// Copyright line at the bottom of About
+  ///
+  /// In en, this message translates to:
+  /// **'© {years} TOORAN'**
+  String aboutCopyright(String years);
 
   /// No description provided for @aboutRights.
   ///
